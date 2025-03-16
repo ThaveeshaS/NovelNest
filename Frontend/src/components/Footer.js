@@ -45,8 +45,8 @@ const Footer = () => {
             <div className="col-md-3 mb-4">
               <h5>Policies</h5>
               <ul className="list-unstyled">
-                <li><a href="#" className="text-white text-decoration-none">Terms and conditions</a></li>
-                <li><a href="#" className="text-white text-decoration-none">Privacy policy</a></li>
+                <li><a href="/TermsAndConditions" className="text-white text-decoration-none">Terms and conditions</a></li>
+                <li><a href="PrivacyPolicy" className="text-white text-decoration-none">Privacy policy</a></li>
               </ul>
             </div>
 
@@ -54,9 +54,9 @@ const Footer = () => {
             <div className="col-md-3 mb-4">
               <h5>Help & Support</h5>
               <ul className="list-unstyled">
-                <li><a href="#" className="text-white text-decoration-none">Help</a></li>
-                <li><a href="#" className="text-white text-decoration-none">Tips</a></li>
-                <li><a href="#" className="text-white text-decoration-none">Customer service</a></li>
+                <li><a href="Help" className="text-white text-decoration-none">Help</a></li>
+                <li><a href="Tips" className="text-white text-decoration-none">Tips</a></li>
+                <li><a href="CustomerService" className="text-white text-decoration-none">Customer service</a></li>
               </ul>
 
               <h5>Follow Us</h5>
