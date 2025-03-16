@@ -20,14 +20,14 @@ const CustomerDashboard = () => {
           id="carouselExampleAutoplaying"
           className="carousel slide carousel-fade"
           data-bs-ride="carousel"
-          data-bs-interval="1500" // Set interval to 1.5 seconds
+          data-bs-interval="1500" // 1.5 seconds
         >
           <div className="carousel-inner">
             {/* First Slide */}
             <div className="carousel-item active">
               <img
                 src={slide1}
-                className="d-block w-100"
+                className="d-block w-100 rounded-3" // Curved edges added
                 alt="Welcome Slide"
               />
             </div>
@@ -35,7 +35,7 @@ const CustomerDashboard = () => {
             <div className="carousel-item">
               <img
                 src={slide2}
-                className="d-block w-100"
+                className="d-block w-100 rounded-3" // Curved edges added
                 alt="Manage Account Slide"
               />
             </div>
@@ -43,7 +43,7 @@ const CustomerDashboard = () => {
             <div className="carousel-item">
               <img
                 src={slide3}
-                className="d-block w-100"
+                className="d-block w-100 rounded-3" // Curved edges added
                 alt="Explore Services Slide"
               />
             </div>

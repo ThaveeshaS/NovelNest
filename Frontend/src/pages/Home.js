@@ -12,14 +12,14 @@ const Home = () => {
         id="carouselExampleAutoplaying"
         className="carousel slide carousel-fade"
         data-bs-ride="carousel"
-        data-bs-interval="5000" // Set interval to 1 second (5000ms)
+        data-bs-interval="5000" // 5 seconds interval
       >
         <div className="carousel-inner">
           {/* First Slide */}
           <div className="carousel-item active">
             <img
               src={slide1}
-              className="d-block w-100"
+              className="d-block w-100 rounded-3" // Curved edges here
               alt="First slide"
             />
           </div>
@@ -27,7 +27,7 @@ const Home = () => {
           <div className="carousel-item">
             <img
               src={slide2}
-              className="d-block w-100"
+              className="d-block w-100 rounded-3"
               alt="Second slide"
             />
           </div>
@@ -35,7 +35,7 @@ const Home = () => {
           <div className="carousel-item">
             <img
               src={slide3}
-              className="d-block w-100"
+              className="d-block w-100 rounded-3"
               alt="Third slide"
             />
           </div>
