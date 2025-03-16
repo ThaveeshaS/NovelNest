@@ -2,6 +2,9 @@ import React from 'react';
 import 'bootstrap/dist/css/bootstrap.min.css';
 import Header2 from '../../components/Header2'; 
 import Navbar2 from '../../components/Navbar2'; 
+import slide1 from '../../components/images/slide1.jpg';
+import slide2 from '../../components/images/slide2.jpg';
+import slide3 from '../../components/images/slide3.jpg';
 
 const CustomerDashboard = () => {
   return (
@@ -23,7 +26,7 @@ const CustomerDashboard = () => {
             {/* First Slide */}
             <div className="carousel-item active">
               <img
-                src="https://juliaveenstra.com/wp-content/uploads/2025/03/Driftwood-24-by-72-1200x400.jpg"
+                src={slide1}
                 className="d-block w-100"
                 alt="Welcome Slide"
               />
@@ -31,7 +34,7 @@ const CustomerDashboard = () => {
             {/* Second Slide */}
             <div className="carousel-item">
               <img
-                src="https://www.dieboldnixdorf.com/-/media/diebold/images/article/header-image/header-fitbanking-philosophy-1200x400.jpg"
+                src={slide2}
                 className="d-block w-100"
                 alt="Manage Account Slide"
               />
@@ -39,7 +42,7 @@ const CustomerDashboard = () => {
             {/* Third Slide */}
             <div className="carousel-item">
               <img
-                src="https://static.zerochan.net/Aoha.(Twintail).full.2145423.jpg"
+                src={slide3}
                 className="d-block w-100"
                 alt="Explore Services Slide"
               />

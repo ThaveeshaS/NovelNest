@@ -12,7 +12,7 @@ const Home = () => {
         id="carouselExampleAutoplaying"
         className="carousel slide carousel-fade"
         data-bs-ride="carousel"
-        data-bs-interval="1500" // Set interval to 1 second (1000ms)
+        data-bs-interval="5000" // Set interval to 1 second (5000ms)
       >
         <div className="carousel-inner">
           {/* First Slide */}
