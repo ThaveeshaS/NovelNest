@@ -14,6 +14,16 @@ import AdminLogin from "./pages/AdminLogin";
 import AdminDashboard from "./pages/AdminDashboard";
 import ManageCustomers from './pages/Customer/ManageCustomers'; 
 
+
+
+
+import TermsAndConditions from './pages/TandCs';
+import PrivacyPolicy from './pages/PrivacyPolicy';
+import Help from './pages/Help';
+import Tips from './pages/Tips';
+import CustomerService from './pages/CustomerService';
+
+
 function App() {
   const location = useLocation();
 
@@ -38,6 +48,17 @@ function App() {
         <Route path="/adminlogin" element={<AdminLogin />} />
         <Route path="/admindashboard" element={<AdminDashboard />} />
         <Route path="/managecustomers" element={<ManageCustomers />} />
+
+
+
+        <Route path="/TermsAndConditions" element={<TermsAndConditions />} />
+        <Route path="/PrivacyPolicy" element={<PrivacyPolicy />} />
+        <Route path="/Help" element={<Help />} />
+        <Route path="/Tips" element={<Tips />} />
+        <Route path="/CustomerService" element={<CustomerService />} />
+
+
+
       </Routes>
       <Footer />
     </>

@@ -1,5 +1,8 @@
 import React from 'react';
 import 'bootstrap/dist/css/bootstrap.min.css';
+import slide1 from '../components/images/slide1.jpg';
+import slide2 from '../components/images/slide2.jpg';
+import slide3 from '../components/images/slide3.jpg';
 
 const Home = () => {
   return (
@@ -9,30 +12,30 @@ const Home = () => {
         id="carouselExampleAutoplaying"
         className="carousel slide carousel-fade"
         data-bs-ride="carousel"
-        data-bs-interval="1500" // Set interval to 1 second (1000ms)
+        data-bs-interval="5000" // 5 seconds interval
       >
         <div className="carousel-inner">
           {/* First Slide */}
           <div className="carousel-item active">
             <img
-              src="https://juliaveenstra.com/wp-content/uploads/2025/03/Driftwood-24-by-72-1200x400.jpg"
-              className="d-block w-100"
+              src={slide1}
+              className="d-block w-100 rounded-3" // Curved edges here
               alt="First slide"
             />
           </div>
           {/* Second Slide */}
           <div className="carousel-item">
             <img
-              src="https://www.dieboldnixdorf.com/-/media/diebold/images/article/header-image/header-fitbanking-philosophy-1200x400.jpg"
-              className="d-block w-100"
+              src={slide2}
+              className="d-block w-100 rounded-3"
               alt="Second slide"
             />
           </div>
           {/* Third Slide */}
           <div className="carousel-item">
             <img
-              src="https://static.zerochan.net/Aoha.(Twintail).full.2145423.jpg"
-              className="d-block w-100"
+              src={slide3}
+              className="d-block w-100 rounded-3"
               alt="Third slide"
             />
           </div>
