@@ -1,5 +1,5 @@
 import React from 'react';
-import logo from './images/logo.jpg'; // Adjust the path to your logo image
+import logo from './images/logo.png'; // Adjust the path to your logo image
 import { Link } from 'react-router-dom';
 import 'bootstrap/dist/css/bootstrap.min.css';
 import 'bootstrap/dist/js/bootstrap.bundle.min';

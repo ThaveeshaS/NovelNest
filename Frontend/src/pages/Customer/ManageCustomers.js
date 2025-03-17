@@ -3,7 +3,7 @@ import axios from "axios";
 import { jsPDF } from "jspdf";
 import autoTable from "jspdf-autotable";
 import "bootstrap/dist/css/bootstrap.min.css";
-import logo from "../../components/images/logo.jpg"; // Import the logo directly
+import logo from "../../components/images/logo.png"; // Import the logo directly
 import Header2 from "../../components/Header2"; // Import Header2
 import Navbar2 from "../../components/Navbar2"; // Import Navbar2
 
