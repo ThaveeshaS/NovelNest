@@ -88,7 +88,7 @@ router.post("/login", async (req, res) => {
 router.get("/me", authMiddleware, async (req, res) => {
   try {
     // Find the customer using the ID from the verified token
-    const customer = await Customer.findById(req.user.id).select("-password");
+    const customer = await Customer.findById(req.user._id).select("-password");
     if (!customer) {
       return res.status(404).json({ message: "Customer not found." });
     }
@@ -103,7 +103,7 @@ router.get("/me", authMiddleware, async (req, res) => {
 router.put("/me", authMiddleware, async (req, res) => {
   try {
     // Find the customer using the ID from the verified token
-    const customer = await Customer.findById(req.user.id);
+    const customer = await Customer.findById(req.user._id);
     if (!customer) {
       return res.status(404).json({ message: "Customer not found." });
     }
