@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { Container, Row, Col, Form, Nav, Button } from "react-bootstrap";
+import { Container, Row, Col, Form, Nav, Button, Alert } from "react-bootstrap";
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
 import Header2 from "../../components/Header2"; // Import Header2
@@ -9,6 +9,8 @@ export default function CustomerAccount() {
   const [activeTab, setActiveTab] = useState("personal-details");
   const [customerData, setCustomerData] = useState(null);
   const [formData, setFormData] = useState({});
+  const [error, setError] = useState(null);
+  const [success, setSuccess] = useState(null);
   const navigate = useNavigate(); // Hook for navigation
 
   useEffect(() => {
@@ -17,7 +19,7 @@ export default function CustomerAccount() {
       // Fetch customer data
       axios
         .get("http://localhost:5000/api/customer/me", {
-          headers: { authToken: token },
+          headers: { Authorization: `Bearer ${token}` }, // Correct header format
         })
         .then((response) => {
           if (response.data) {
@@ -27,6 +29,7 @@ export default function CustomerAccount() {
         })
         .catch((error) => {
           console.error("There was an error fetching the customer data!", error);
+          setError("Failed to fetch customer data. Please try again.");
         });
     } else {
       console.error("No token found");
@@ -49,15 +52,18 @@ export default function CustomerAccount() {
       // Update customer data
       axios
         .put("http://localhost:5000/api/customer/me", formData, {
-          headers: { authToken: token },
+          headers: { Authorization: `Bearer ${token}` }, // Correct header format
         })
         .then((response) => {
           setCustomerData(response.data);
           setFormData(response.data);
-          alert("Profile updated successfully!");
+          setSuccess("Profile updated successfully!");
+          setError(null);
         })
         .catch((error) => {
           console.error("There was an error updating the customer data!", error);
+          setError("Failed to update profile. Please try again.");
+          setSuccess(null);
         });
     }
   };
@@ -92,6 +98,8 @@ export default function CustomerAccount() {
               </Nav.Item>
             </Nav>
             <div className="card mt-4 p-4" style={{ marginBottom: 90 }}>
+              {error && <Alert variant="danger">{error}</Alert>}
+              {success && <Alert variant="success">{success}</Alert>}
               {activeTab === "personal-details" && customerData && (
                 <>
                   <h3 className="text-center mb-4">Customer Personal Details</h3>
