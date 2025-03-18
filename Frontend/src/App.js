@@ -17,11 +17,14 @@ import ManageCustomers from './pages/Customer/ManageCustomers';
 
 
 
+
 import TermsAndConditions from './pages/TandCs';
 import PrivacyPolicy from './pages/PrivacyPolicy';
 import Help from './pages/Help';
 import Tips from './pages/Tips';
 import CustomerService from './pages/CustomerService';
+import WishlistPage from './pages/Product/Wishlist';
+import AddToCartPage from './pages/Product/AddtoCart';
 
 
 function App() {
@@ -56,6 +59,8 @@ function App() {
         <Route path="/Help" element={<Help />} />
         <Route path="/Tips" element={<Tips />} />
         <Route path="/CustomerService" element={<CustomerService />} />
+        <Route path="/wishlist" element={<WishlistPage />} />
+        <Route path="/cart" element={<AddToCartPage />} />
 
 
 

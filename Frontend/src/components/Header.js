@@ -11,7 +11,7 @@ function Header() {
         {/* Company Logo and Name */}
         <Link className="navbar-brand d-flex align-items-center" to="/">
           <img src={logo} alt="Company Logo" style={{ height: '55px' }} />
-          <span className="ms-2" style={{ fontSize: '1.4rem', fontWeight: 'bold' }}> Navel Nest Book Store</span>
+          <span className="ms-2" style={{ fontSize: '1.4rem', fontWeight: 'bold' }}> NovelNest Book Store</span>
         </Link>
 
         {/* Toggle Button for Mobile */}

@@ -123,7 +123,7 @@ const AdminDashboard = () => {
               <div className="card-body">
                 <h5 className="card-title">Product Handling</h5>
                 <p className="card-text">Add, update, or remove products from your inventory.</p>
-                <Button variant="secondary" onClick={() => navigate("/admin/ProductHandling")}>Manage Products</Button>
+                <Button variant="secondary" onClick={() => navigate("/ProductHandling")}>Manage Products</Button>
               </div>
             </div>
           </div>

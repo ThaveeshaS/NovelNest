@@ -1,8 +1,6 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
 import 'bootstrap/dist/css/bootstrap.min.css'; // Import Bootstrap CSS
-import AddProducts from '../pages/Product/AddProducts';
-import ManageProducts from '../pages/Product/ManageProducts';
 
 const Navbar3 = () => {
   return (
