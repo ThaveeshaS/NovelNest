@@ -10,7 +10,7 @@ const Footer = () => {
           
           {/* Company Description and Newsletter - Left Corner */}
           <div className="col-md-4 mb-4">
-            <h3>Navel Nest Book Store</h3>
+            <h3>NovelNest Book Store</h3>
             <p>Our bookstore system helps customers easily browse, search, and purchase books online with a seamless shopping experience.</p>
             <form>
               <div className="input-group mb-3">

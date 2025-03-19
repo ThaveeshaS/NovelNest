@@ -17,18 +17,22 @@ import ManageCustomers from './pages/Customer/ManageCustomers';
 
 
 
+
 import TermsAndConditions from './pages/TandCs';
 import PrivacyPolicy from './pages/PrivacyPolicy';
 import Help from './pages/Help';
 import Tips from './pages/Tips';
 import CustomerService from './pages/CustomerService';
+import WishlistPage from './pages/Product/Wishlist';
+import AddToCartPage from './pages/Product/AddtoCart';
+import ManageProducts from './pages/Product/ManageProducts';
 
 
 function App() {
   const location = useLocation();
 
   // Define routes where Header, Navbar should not be displayed
-  const excludePaths = ["/customerdashboard", "/admindashboard", "/managecustomers", "/customeraccount"];
+  const excludePaths = ["/customerdashboard", "/admindashboard", "/managecustomers", "/customeraccount", "/wishlist", "/cart", "/manageproducts"];
 
   // Check if the current path is in the exclude list
   const shouldShowHeaderNavbarFooter = !excludePaths.includes(location.pathname);
@@ -56,6 +60,9 @@ function App() {
         <Route path="/Help" element={<Help />} />
         <Route path="/Tips" element={<Tips />} />
         <Route path="/CustomerService" element={<CustomerService />} />
+        <Route path="/wishlist" element={<WishlistPage />} />
+        <Route path="/cart" element={<AddToCartPage />} />
+        <Route path="/manageproducts" element={<ManageProducts/>} />
 
 
 
