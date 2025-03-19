@@ -4,6 +4,7 @@ const dotenv = require("dotenv");
 const cors = require("cors");
 const customerRoutes = require("./routes/customer");
 const adminRoutes = require("./routes/admin");
+const deliveryRoutes = require("./routes/deliveryRoutes");
 
 dotenv.config();
 
@@ -22,6 +23,7 @@ mongoose
 // Routes
 app.use("/api/customer", customerRoutes);
 app.use("/api/admin", adminRoutes);
+app.use("/api/delivery", deliveryRoutes);
 
 // Start the server
 const PORT = process.env.PORT || 5000;
