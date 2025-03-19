@@ -8,7 +8,7 @@ const Navbar2 = () => {
       <div className="container-fluid">
         {/* Center-aligned navigation links */}
         <div className="d-flex justify-content-center w-100">
-          <Link to="/" className="nav-link text-white mx-3">Home</Link>
+          <Link to="/customerdashboard" className="nav-link text-white mx-3">Home</Link>
           <Link to="/books" className="nav-link text-white mx-3">Books</Link>
           <Link to="/author" className="nav-link text-white mx-3">Author</Link>
         </div>

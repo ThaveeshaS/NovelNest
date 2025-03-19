@@ -160,7 +160,6 @@ const Home = () => {
     ]
   };
 
-  // Product card component with uniform size and centered titles
   const ProductCard = ({ product }) => (
     <div className="px-2">
       <div
@@ -177,6 +176,7 @@ const Home = () => {
           transition: 'transform 0.3s ease, box-shadow 0.3s ease',
           position: 'relative', // Important for absolute positioning of hover elements
           overflow: 'hidden', // To contain the hover elements
+          backgroundColor: '#e6f2ff', // Light blue background color
         }}
       >
         {/* Product Image - Centered */}
@@ -197,9 +197,9 @@ const Home = () => {
             className="card-img-top"
             alt={product.title}
             style={{
-              maxHeight: '180px', // Increased size
+              maxHeight: '200px', // Increased size
               width: 'auto',
-              maxWidth: '140px', // Increased size
+              maxWidth: '160px', // Increased size
               objectFit: 'contain',
               borderRadius: '10px 10px 0 0',
               transition: 'transform 0.3s ease',
@@ -231,7 +231,8 @@ const Home = () => {
             display: 'flex',
             flexDirection: 'column',
             justifyContent: 'center',
-            height: '120px'
+            height: '120px',
+            backgroundColor: '#e6f2ff', // Light blue background color
           }}
         >
           <h5
@@ -244,7 +245,8 @@ const Home = () => {
               textOverflow: 'ellipsis',
               display: '-webkit-box',
               WebkitLineClamp: 2,
-              WebkitBoxOrient: 'vertical'
+              WebkitBoxOrient: 'vertical',
+              color: '#0066cc', // Blue text color for title
             }}
           >
             {product.title}
@@ -253,7 +255,7 @@ const Home = () => {
             className="card-text text-center"
             style={{ 
               fontSize: '0.9rem', 
-              color: '#555', 
+              color: '#004080', // Darker blue for author
               marginBottom: '5px',
               overflow: 'hidden',
               textOverflow: 'ellipsis',
@@ -266,7 +268,7 @@ const Home = () => {
           </p>
           <p
             className="card-text text-center"
-            style={{ fontSize: '0.9rem', color: '#333', fontWeight: 'bold' }}
+            style={{ fontSize: '0.9rem', color: '#0066cc', fontWeight: 'bold' }}
           >
             {product.price}
           </p>
@@ -274,7 +276,6 @@ const Home = () => {
       </div>
     </div>
   );
-
   return (
     <div style={{ padding: "20px", textAlign: "center" }}>
       {/* Carousel Section */}

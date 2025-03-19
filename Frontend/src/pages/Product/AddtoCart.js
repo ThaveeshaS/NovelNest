@@ -1,4 +1,6 @@
 import React, { useState } from 'react';
+import Navbar2 from '../../components/Navbar2';
+import Header2 from '../../components/Header2';
 
 const AddToCartPage = () => {
   // Sample cart items data
@@ -18,9 +20,14 @@ const AddToCartPage = () => {
 
   return (
     <div className="cart-container">
+      {/* Including Header2 and Navbar2 */}
+      <Header2 />
+      <Navbar2 />
+
       <header className="cart-header">
         <h1>This is My Add to Cart</h1>
       </header>
+
       {cart.length === 0 ? (
         <p>Your cart is empty.</p>
       ) : (

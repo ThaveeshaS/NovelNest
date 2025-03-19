@@ -31,7 +31,7 @@ function App() {
   const location = useLocation();
 
   // Define routes where Header, Navbar should not be displayed
-  const excludePaths = ["/customerdashboard", "/admindashboard", "/managecustomers", "/customeraccount"];
+  const excludePaths = ["/customerdashboard", "/admindashboard", "/managecustomers", "/customeraccount", "/wishlist", "/cart"];
 
   // Check if the current path is in the exclude list
   const shouldShowHeaderNavbarFooter = !excludePaths.includes(location.pathname);
