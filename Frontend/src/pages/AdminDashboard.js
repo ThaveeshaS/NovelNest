@@ -57,15 +57,14 @@ const AdminDashboard = () => {
       <Navbar2 />
 
       {/* Carousel Section with reduced space */}
-      <div style={{ marginTop: "10px" }}> {/* Adjust the margin-top value as needed */}
+      <div style={{ marginTop: "10px" }}>
         <div
           id="carouselExampleAutoplaying"
           className="carousel slide carousel-fade"
           data-bs-ride="carousel"
-          data-bs-interval="1500" // Set interval to 1.5 seconds
+          data-bs-interval="1500"
         >
           <div className="carousel-inner">
-            {/* First Slide */}
             <div className="carousel-item active">
               <img
                 src="https://juliaveenstra.com/wp-content/uploads/2025/03/Driftwood-24-by-72-1200x400.jpg"
@@ -73,7 +72,6 @@ const AdminDashboard = () => {
                 alt="Welcome Slide"
               />
             </div>
-            {/* Second Slide */}
             <div className="carousel-item">
               <img
                 src="https://www.dieboldnixdorf.com/-/media/diebold/images/article/header-image/header-fitbanking-philosophy-1200x400.jpg"
@@ -81,7 +79,6 @@ const AdminDashboard = () => {
                 alt="Manage System Slide"
               />
             </div>
-            {/* Third Slide */}
             <div className="carousel-item">
               <img
                 src="https://static.zerochan.net/Aoha.(Twintail).full.2145423.jpg"
@@ -90,12 +87,21 @@ const AdminDashboard = () => {
               />
             </div>
           </div>
-          {/* Carousel Controls */}
-          <button className="carousel-control-prev" type="button" data-bs-target="#carouselExampleAutoplaying" data-bs-slide="prev">
+          <button
+            className="carousel-control-prev"
+            type="button"
+            data-bs-target="#carouselExampleAutoplaying"
+            data-bs-slide="prev"
+          >
             <span className="carousel-control-prev-icon" aria-hidden="true"></span>
             <span className="visually-hidden">Previous</span>
           </button>
-          <button className="carousel-control-next" type="button" data-bs-target="#carouselExampleAutoplaying" data-bs-slide="next">
+          <button
+            className="carousel-control-next"
+            type="button"
+            data-bs-target="#carouselExampleAutoplaying"
+            data-bs-slide="next"
+          >
             <span className="carousel-control-next-icon" aria-hidden="true"></span>
             <span className="visually-hidden">Next</span>
           </button>
@@ -105,48 +111,82 @@ const AdminDashboard = () => {
       {/* Dashboard Content */}
       <div className="mt-5" style={{ padding: "20px", textAlign: "center" }}>
         <h1>Admin Dashboard</h1>
-        <p>Welcome back, <strong>{admin.username}</strong>! Here's an overview of your system and activities.</p>
+        <p>
+          Welcome back, <strong>{admin.username}</strong>! Here's an overview of your system and activities.
+        </p>
 
-        {/* Placeholder Cards for Dashboard */}
+        {/* First Row of Cards */}
         <div className="row mt-4">
           <div className="col-md-4">
             <div className="card">
               <div className="card-body">
                 <h5 className="card-title">Handling Customer</h5>
                 <p className="card-text">Manage customer accounts and interactions.</p>
-                <Button variant="secondary" onClick={() => navigate("/managecustomers")}>Manage Customers</Button>
+                <Button variant="secondary" onClick={() => navigate("/managecustomers")}>
+                  Manage Customers
+                </Button>
               </div>
             </div>
           </div>
+
           <div className="col-md-4">
             <div className="card">
               <div className="card-body">
                 <h5 className="card-title">Product Handling</h5>
-                <p className="card-text">Add, update, or remove products from your inventory.</p>
-                <Button variant="secondary" onClick={() => navigate("/manageproducts")}>Manage Products</Button>
+                <p className="card-text">Update, or remove products from your inventory.</p>
+                <Button variant="secondary" onClick={() => navigate("/manageproducts")}>
+                  Manage Products
+                </Button>
               </div>
             </div>
           </div>
+
           <div className="col-md-4">
             <div className="card">
               <div className="card-body">
                 <h5 className="card-title">Payment Gateway</h5>
                 <p className="card-text">Monitor and manage payment transactions.</p>
-                <Button variant="secondary" onClick={() => navigate("/admin/PaymentGateway")}>Payment Gateway</Button>
+                <Button variant="secondary" onClick={() => navigate("/admin/PaymentGateway")}>
+                  Payment Gateway
+                </Button>
               </div>
             </div>
           </div>
         </div>
+
+        {/* Second Row of Cards */}
         <div className="row mt-4">
           <div className="col-md-4">
             <div className="card">
               <div className="card-body">
                 <h5 className="card-title">Delivery Handling</h5>
                 <p className="card-text">Track and manage delivery statuses.</p>
-                <Button variant="secondary" onClick={() => navigate("/admin/DeliveryHandling")}>Manage Deliveries</Button>
+                <Button variant="secondary" onClick={() => navigate("/admin/DeliveryHandling")}>
+                  Manage Deliveries
+                </Button>
               </div>
             </div>
           </div>
+
+          {/* New Add Product Card */}
+          <div className="col-md-4">
+            <div className="card">
+              <div className="card-body">
+                <h5 className="card-title">Add Product</h5>
+                <p className="card-text">Create and add new products to your inventory.</p>
+                <Button variant="secondary" onClick={() => navigate("/addproducts")}>
+                  Add Product
+                </Button>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* Optional: Logout Button */}
+        <div className="mt-5">
+          <Button variant="danger" onClick={handleLogout}>
+            Logout
+          </Button>
         </div>
       </div>
     </div>
