@@ -5,7 +5,7 @@ import autoTable from "jspdf-autotable";
 import "bootstrap/dist/css/bootstrap.min.css";
 import Header2 from "../../components/Header2"; // Import Header2
 import Navbar2 from "../../components/Navbar2"; // Import Navbar2
-import { Button, Container, Alert, Spinner, Form, Row, Col } from "react-bootstrap"; // Using React Bootstrap for UI
+import { Button, Container, Alert, Spinner, Form, Row, Col, Modal } from "react-bootstrap"; // Added Modal component
 
 export default function DeliveryDetails() {
   const [deliveries, setDeliveries] = useState([]);
@@ -17,6 +17,9 @@ export default function DeliveryDetails() {
   const [captcha, setCaptcha] = useState("");
   const [userCaptchaInput, setUserCaptchaInput] = useState("");
   const [captchaVerified, setCaptchaVerified] = useState(false);
+  // New state variables for edit functionality
+  const [showEditModal, setShowEditModal] = useState(false);
+  const [editDelivery, setEditDelivery] = useState(null);
 
   useEffect(() => {
     const fetchDeliveries = async () => {
@@ -142,6 +145,49 @@ export default function DeliveryDetails() {
     }
   };
 
+  // Handle edit button click
+  const handleEditClick = (delivery) => {
+    setEditDelivery(delivery);
+    setShowEditModal(true);
+  };
+
+  // Handle delete button click
+  const handleDeleteClick = async (deliveryId) => {
+    if (window.confirm("Are you sure you want to delete this delivery?")) {
+      try {
+        await axios.delete(`http://localhost:5000/api/deliveries/${deliveryId}`);
+        setDeliveries(deliveries.filter((delivery) => delivery._id !== deliveryId));
+        alert("Delivery deleted successfully");
+      } catch (error) {
+        console.error("Error deleting delivery:", error);
+        alert("Failed to delete delivery. Please try again.");
+      }
+    }
+  };
+
+  // Handle save changes in edit modal
+  const handleSaveChanges = async () => {
+    try {
+      await axios.put(`http://localhost:5000/api/deliveries/${editDelivery._id}`, editDelivery);
+      setDeliveries(
+        deliveries.map((delivery) =>
+          delivery._id === editDelivery._id ? editDelivery : delivery
+        )
+      );
+      setShowEditModal(false);
+      alert("Delivery updated successfully");
+    } catch (error) {
+      console.error("Error updating delivery:", error);
+      alert("Failed to update delivery. Please try again.");
+    }
+  };
+
+  // Handle input change in edit modal
+  const handleEditInputChange = (e) => {
+    const { name, value } = e.target;
+    setEditDelivery({ ...editDelivery, [name]: value });
+  };
+
   return (
     <div>
       {/* Add Header2 and Navbar2 */}
@@ -186,6 +232,7 @@ export default function DeliveryDetails() {
                   <th>Email</th>
                   <th>Estimated Delivery Date</th>
                   <th>Delivery Fee</th>
+                  <th>Actions</th> {/* New column for actions */}
                 </tr>
               </thead>
               <tbody>
@@ -200,11 +247,28 @@ export default function DeliveryDetails() {
                       <td>{delivery.email}</td>
                       <td>{delivery.estimatedDeliveryDate}</td>
                       <td>${delivery.deliveryFee}</td>
+                      <td>
+                        <Button 
+                          variant="outline-primary" 
+                          size="sm" 
+                          className="me-2"
+                          onClick={() => handleEditClick(delivery)}
+                        >
+                          <i className="fas fa-edit"></i> Edit
+                        </Button>
+                        <Button 
+                          variant="outline-danger" 
+                          size="sm"
+                          onClick={() => handleDeleteClick(delivery._id)}
+                        >
+                          <i className="fas fa-trash"></i> Delete
+                        </Button>
+                      </td>
                     </tr>
                   ))
                 ) : (
                   <tr>
-                    <td colSpan="8" className="text-center text-danger">
+                    <td colSpan="9" className="text-center text-danger">
                       No matching deliveries found.
                     </td>
                   </tr>
@@ -308,6 +372,102 @@ export default function DeliveryDetails() {
           </Form>
         </div>
       </Container>
+
+      {/* Edit Delivery Modal */}
+      <Modal show={showEditModal} onHide={() => setShowEditModal(false)}>
+        <Modal.Header closeButton>
+          <Modal.Title>Edit Delivery</Modal.Title>
+        </Modal.Header>
+        <Modal.Body>
+          {editDelivery && (
+            <Form>
+              <Form.Group className="mb-3">
+                <Form.Label>Delivery ID</Form.Label>
+                <Form.Control
+                  type="text"
+                  name="deliveryId"
+                  value={editDelivery.deliveryId}
+                  onChange={handleEditInputChange}
+                  disabled
+                />
+              </Form.Group>
+              <Form.Group className="mb-3">
+                <Form.Label>Order ID</Form.Label>
+                <Form.Control
+                  type="text"
+                  name="orderId"
+                  value={editDelivery.orderId}
+                  onChange={handleEditInputChange}
+                  disabled
+                />
+              </Form.Group>
+              <Form.Group className="mb-3">
+                <Form.Label>Customer Name</Form.Label>
+                <Form.Control
+                  type="text"
+                  name="customerName"
+                  value={editDelivery.customerName}
+                  onChange={handleEditInputChange}
+                />
+              </Form.Group>
+              <Form.Group className="mb-3">
+                <Form.Label>Delivery Address</Form.Label>
+                <Form.Control
+                  as="textarea"
+                  rows={3}
+                  name="deliveryAddress"
+                  value={editDelivery.deliveryAddress}
+                  onChange={handleEditInputChange}
+                />
+              </Form.Group>
+              <Form.Group className="mb-3">
+                <Form.Label>Phone Number</Form.Label>
+                <Form.Control
+                  type="text"
+                  name="contactNumber"
+                  value={editDelivery.contactNumber}
+                  onChange={handleEditInputChange}
+                />
+              </Form.Group>
+              <Form.Group className="mb-3">
+                <Form.Label>Email</Form.Label>
+                <Form.Control
+                  type="email"
+                  name="email"
+                  value={editDelivery.email}
+                  onChange={handleEditInputChange}
+                />
+              </Form.Group>
+              <Form.Group className="mb-3">
+                <Form.Label>Estimated Delivery Date</Form.Label>
+                <Form.Control
+                  type="text"
+                  name="estimatedDeliveryDate"
+                  value={editDelivery.estimatedDeliveryDate}
+                  onChange={handleEditInputChange}
+                />
+              </Form.Group>
+              <Form.Group className="mb-3">
+                <Form.Label>Delivery Fee</Form.Label>
+                <Form.Control
+                  type="number"
+                  name="deliveryFee"
+                  value={editDelivery.deliveryFee}
+                  onChange={handleEditInputChange}
+                />
+              </Form.Group>
+            </Form>
+          )}
+        </Modal.Body>
+        <Modal.Footer>
+          <Button variant="secondary" onClick={() => setShowEditModal(false)}>
+            Close
+          </Button>
+          <Button variant="primary" onClick={handleSaveChanges}>
+            Save Changes
+          </Button>
+        </Modal.Footer>
+      </Modal>
     </div>
   );
 }

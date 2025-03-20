@@ -25,34 +25,6 @@ app.use("/api/customer", customerRoutes);
 app.use("/api/admin", adminRoutes);
 app.use("/api/deliveries", deliveryRoute);
 
-// // Define Schema
-// const deliverySchema = new mongoose.Schema({
-//   deliveryId: String,
-//   orderId: String,
-//   customerName: String,
-//   deliveryAddress: String,
-//   contactNumber: String,
-//   email: String,
-//   deliveryStatus: String,
-//   estimatedDeliveryDate: String,
-//   deliveryFee: Number
-// });
-
-
-// // Create Model
-// const Delivery = mongoose.model('Delivery', deliverySchema);
-
-// ✅ FIXED: Ensure this route exists
-// app.post('/api/deliveries', async (req, res) => {
-//   try {
-//     const newDelivery = new Delivery(req.body);
-//     await newDelivery.save();
-//     res.status(201).json(newDelivery);
-//   } catch (error) {
-//     console.error('Error saving delivery:', error);
-//     res.status(500).json({ message: 'Error saving delivery' });
-//   }
-// });
 
 // Start Server
 const port = process.env.PORT || 5000;
