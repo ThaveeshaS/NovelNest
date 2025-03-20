@@ -1,4 +1,5 @@
 import React from 'react';
+import { Link } from 'react-router-dom'; // Import Link from react-router-dom
 import 'bootstrap/dist/css/bootstrap.min.css'; // Ensure Bootstrap CSS is imported
 import '@fortawesome/fontawesome-free/css/all.min.css'; // Import Font Awesome
 
@@ -34,19 +35,22 @@ const Footer = () => {
             <div className="col-md-3 mb-4">
               <h5>Quick Links</h5>
               <ul className="list-unstyled">
-                <li><a href="/" className="text-white text-decoration-none">Home</a></li>
-                <li><a href="#" className="text-white text-decoration-none">Product</a></li>
-                <li><a href="/aboutus" className="text-white text-decoration-none">About us</a></li>
-                <li><a href="/contactus" className="text-white text-decoration-none">Contact us</a></li>
+                <li><Link to="/" className="text-white text-decoration-none">Home</Link></li>
+                <li><Link to="#" className="text-white text-decoration-none">Product</Link></li>
+                <li><Link to="/aboutus" className="text-white text-decoration-none">About us</Link></li>
+                <li><Link to="/contactus" className="text-white text-decoration-none">Contact us</Link></li>
               </ul>
+              <Link to="/customerfeedback" className="text-white text-decoration-none">
+                <h5>Customer Feedback</h5>
+              </Link>
             </div>
 
             {/* Policies */}
             <div className="col-md-3 mb-4">
               <h5>Policies</h5>
               <ul className="list-unstyled">
-                <li><a href="/TermsAndConditions" className="text-white text-decoration-none">Terms and conditions</a></li>
-                <li><a href="PrivacyPolicy" className="text-white text-decoration-none">Privacy policy</a></li>
+                <li><Link to="/TermsAndConditions" className="text-white text-decoration-none">Terms and conditions</Link></li>
+                <li><Link to="/PrivacyPolicy" className="text-white text-decoration-none">Privacy policy</Link></li>
               </ul>
             </div>
 
@@ -54,9 +58,9 @@ const Footer = () => {
             <div className="col-md-3 mb-4">
               <h5>Help & Support</h5>
               <ul className="list-unstyled">
-                <li><a href="Help" className="text-white text-decoration-none">Help</a></li>
-                <li><a href="Tips" className="text-white text-decoration-none">Tips</a></li>
-                <li><a href="CustomerService" className="text-white text-decoration-none">Customer service</a></li>
+                <li><Link to="/Help" className="text-white text-decoration-none">Help</Link></li>
+                <li><Link to="/Tips" className="text-white text-decoration-none">Tips</Link></li>
+                <li><Link to="/CustomerService" className="text-white text-decoration-none">Customer service</Link></li>
               </ul>
 
               <h5>Follow Us</h5>
@@ -74,7 +78,7 @@ const Footer = () => {
         {/* Copyright Section */}
         <div className="row mt-4">
           <div className="col-12 text-center">
-            <p className="mb-0">© 2025 Navel Nest Book Store.</p>
+            <p className="mb-0">© 2025 Novel Nest Book Store.</p>
           </div>
         </div>
       </div>
