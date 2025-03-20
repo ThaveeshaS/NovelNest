@@ -176,7 +176,6 @@ const Home = () => {
           transition: 'transform 0.3s ease, box-shadow 0.3s ease',
           position: 'relative', // Important for absolute positioning of hover elements
           overflow: 'hidden', // To contain the hover elements
-          backgroundColor: '#e6f2ff', // Light blue background color
         }}
       >
         {/* Product Image - Centered */}
@@ -232,7 +231,6 @@ const Home = () => {
             flexDirection: 'column',
             justifyContent: 'center',
             height: '120px',
-            backgroundColor: '#e6f2ff', // Light blue background color
           }}
         >
           <h5
@@ -373,7 +371,7 @@ const Home = () => {
         /* Add hover effect for product cards */
         .card:hover {
           transform: translateY(-5px);
-          box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1) !important;
+          box-shadow: 0 10px 20px rgba(0, 102, 204, 0.37) !important;
           cursor: pointer;
         }
         
