@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import axios from 'axios';
-import { TextField, Button, Container, Box, Typography } from '@mui/material';
+import { TextField, Button, Container, Box } from '@mui/material';
 import { useNavigate } from 'react-router-dom';
 import PhoneInput from 'react-phone-input-2';
 import 'react-phone-input-2/lib/style.css';
@@ -18,75 +18,51 @@ const AddDelivery = () => {
     deliveryFee: 0,
   });
 
-  const [error, setError] = useState('');
   const navigate = useNavigate();
 
   const handleSubmit = async (e) => {
     e.preventDefault();
 
-    // Basic email validation
     if (!/\S+@\S+\.\S+/.test(formData.email)) {
-      setError('Please enter a valid email address.');
+      alert('Please enter a valid email address.');
       return;
     }
 
+    console.log("Submitting data:", formData); // ✅ Debugging step
+
     try {
-      // Get the token from local storage
-      const token = localStorage.getItem('token');
-      if (!token) {
-        setError('You are not authorized. Please log in.');
-        return;
-      }
+      const response = await axios.post('http://localhost:5000/api/deliveries', formData);
 
-      // Log the data being sent
-      console.log('Sending delivery data:', formData);
+      console.log("Server Response:", response.data);
+      alert('Delivery added successfully!');
+      setFormData({
+        deliveryId: '',
+        orderId: '',
+        customerName: '',
+        deliveryAddress: '',
+        contactNumber: '',
+        email: '',
+        deliveryStatus: 'Pending',
+        estimatedDeliveryDate: '',
+        deliveryFee: 0,
+      });
 
-      // Send the delivery data to the backend
-      const response = await axios.post(
-        'http://localhost:5000/api/delivery/add',
-        formData,
-        {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        }
-      );
+      navigate('/admin/DeliveryDetails');
 
-      // Log the response
-      console.log('Response from backend:', response.data);
-
-      if (response.status === 201) {
-        alert('Delivery added successfully!');
-
-        // Reset form after submission
-        setFormData({
-          deliveryId: '',
-          orderId: '',
-          customerName: '',
-          deliveryAddress: '',
-          contactNumber: '',
-          email: '',
-          deliveryStatus: 'Pending',
-          estimatedDeliveryDate: '',
-          deliveryFee: 0,
-        });
-
-        // Redirect to delivery management page
-        navigate('/admin/DeliveryHandling');
-      }
-    } catch (err) {
-      console.error('Error adding delivery:', err.response?.data || err.message);
-      setError(err.response?.data?.message || 'Failed to add delivery. Please try again.');
+    } catch (error) {
+      console.error('Error adding delivery:', error.response ? error.response.data : error.message);
+      alert('Failed to add delivery. Please check console for more details.');
     }
   };
 
   return (
-    <Container>
-      <Typography variant="h4" gutterBottom>
-        Add New Delivery
-      </Typography>
-      {error && <Typography color="error">{error}</Typography>}
-      <form onSubmit={handleSubmit}>
+    <Container className="my-5">
+      <h2 className="text-center mb-4">Billing Details</h2>
+      <form
+        onSubmit={handleSubmit}
+        className="p-4 shadow-lg rounded" // Adding Bootstrap classes for padding, shadow, and rounded corners
+        style={{ backgroundColor: '#f8f9fa' }} // Light background color for the form
+      >
         <TextField
           label="Delivery ID"
           value={formData.deliveryId}
@@ -94,6 +70,8 @@ const AddDelivery = () => {
           fullWidth
           margin="normal"
           required
+          variant="outlined"
+          className="mb-3"
         />
         <TextField
           label="Order ID"
@@ -102,6 +80,8 @@ const AddDelivery = () => {
           fullWidth
           margin="normal"
           required
+          variant="outlined"
+          className="mb-3"
         />
         <TextField
           label="Customer Name"
@@ -110,6 +90,8 @@ const AddDelivery = () => {
           fullWidth
           margin="normal"
           required
+          variant="outlined"
+          className="mb-3"
         />
         <TextField
           label="Delivery Address"
@@ -118,12 +100,14 @@ const AddDelivery = () => {
           fullWidth
           margin="normal"
           required
+          variant="outlined"
+          className="mb-3"
         />
 
-        {/* Country Code Phone Input */}
+        {/* Phone Number Input */}
         <Box mt={2} mb={2}>
           <PhoneInput
-            country={'us'} // Default country
+            country={'us'}
             value={formData.contactNumber}
             onChange={(phone) => setFormData({ ...formData, contactNumber: phone })}
             inputStyle={{ width: '100%', height: '56px' }}
@@ -143,9 +127,11 @@ const AddDelivery = () => {
           margin="normal"
           InputLabelProps={{ shrink: true }}
           required
+          variant="outlined"
+          className="mb-3"
         />
 
-        {/* Enter Email */}
+        {/* Email Input */}
         <TextField
           label="Email"
           type="email"
@@ -154,9 +140,11 @@ const AddDelivery = () => {
           fullWidth
           margin="normal"
           required
+          variant="outlined"
+          className="mb-3"
         />
 
-        {/* Delivery Fee */}
+        {/* Delivery Fee Input */}
         <TextField
           label="Delivery Fee"
           type="number"
@@ -165,9 +153,11 @@ const AddDelivery = () => {
           fullWidth
           margin="normal"
           required
+          variant="outlined"
+          className="mb-3"
         />
 
-        {/* Centering the Button with spacing */}
+        {/* Submit Button */}
         <Box display="flex" justifyContent="center" mt={3} mb={3}>
           <Button type="submit" variant="contained" color="primary">
             Add Delivery
