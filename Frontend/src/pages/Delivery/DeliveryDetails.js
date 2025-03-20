@@ -247,22 +247,35 @@ export default function DeliveryDetails() {
                       <td>{delivery.email}</td>
                       <td>{delivery.estimatedDeliveryDate}</td>
                       <td>${delivery.deliveryFee}</td>
-                      <td>
-                        <Button 
-                          variant="outline-primary" 
-                          size="sm" 
-                          className="me-2"
-                          onClick={() => handleEditClick(delivery)}
-                        >
-                          <i className="fas fa-edit"></i> Edit
-                        </Button>
-                        <Button 
-                          variant="outline-danger" 
-                          size="sm"
-                          onClick={() => handleDeleteClick(delivery._id)}
-                        >
-                          <i className="fas fa-trash"></i> Delete
-                        </Button>
+                      <td className="text-center">
+                        <div className="d-flex justify-content-center gap-2">
+                          <Button 
+                            variant="success" 
+                            size="sm" 
+                            className="rounded-pill shadow-sm"
+                            style={{
+                              minWidth: '80px',
+                              transition: 'all 0.3s ease',
+                              fontWeight: '500'
+                            }}
+                            onClick={() => handleEditClick(delivery)}
+                          >
+                            <i className="fas fa-edit me-1"></i> Edit
+                          </Button>
+                          <Button 
+                            variant="danger" 
+                            size="sm"
+                            className="rounded-pill shadow-sm"
+                            style={{
+                              minWidth: '80px',
+                              transition: 'all 0.3s ease',
+                              fontWeight: '500'
+                            }}
+                            onClick={() => handleDeleteClick(delivery._id)}
+                          >
+                            <i className="fas fa-trash-alt me-1"></i> Delete
+                          </Button>
+                        </div>
                       </td>
                     </tr>
                   ))
