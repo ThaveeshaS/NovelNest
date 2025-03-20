@@ -14,32 +14,37 @@ const WishlistPage = () => {
   };
 
   return (
-    <div className="wishlist-page">
+    <div className="min-h-screen bg-gray-50">
       {/* Header at the top */}
       <Header2 />
-
+      
       {/* Navbar below the header */}
       <Navbar2 />
-
-      <div className="wishlist-container">
-        <header className="wishlist-header">
-          <h1>This is My Wishlist</h1>
-        </header>
-
+      
+      <div className="container mx-auto px-4 py-8">
+        <h1 className="text-3xl font-bold text-center mb-8 text-gray-800">My Wishlist</h1>
+        
         {wishlist.length === 0 ? (
-          <p>Your wishlist is empty.</p>
+          <div className="text-center p-8 bg-white rounded-lg shadow">
+            <p className="text-xl text-gray-500">Your wishlist is empty.</p>
+          </div>
         ) : (
-          <ul className="wishlist-items">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {wishlist.map(item => (
-              <li key={item.id} className="wishlist-item">
-                <h2>{item.name}</h2>
-                <p>{item.description}</p>
-                <button onClick={() => removeFromWishlist(item.id)}>
-                  Remove from Wishlist
-                </button>
-              </li>
+              <div key={item.id} className="bg-white rounded-lg shadow-md overflow-hidden hover:shadow-lg transition-shadow duration-300">
+                <div className="p-6">
+                  <h2 className="text-xl font-semibold mb-2 text-gray-800">{item.name}</h2>
+                  <p className="text-gray-600 mb-4">{item.description}</p>
+                  <button 
+                    onClick={() => removeFromWishlist(item.id)}
+                    className="w-full bg-red-500 hover:bg-red-600 text-white py-2 px-4 rounded-md transition-colors duration-300"
+                  >
+                    Remove from Wishlist
+                  </button>
+                </div>
+              </div>
             ))}
-          </ul>
+          </div>
         )}
       </div>
     </div>

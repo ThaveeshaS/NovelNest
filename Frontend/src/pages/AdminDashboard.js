@@ -2,9 +2,9 @@ import React, { useEffect, useState } from "react";
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
 import { Container, Row, Col, Card, Button, Alert } from "react-bootstrap";
-import 'bootstrap/dist/css/bootstrap.min.css';
-import Header2 from '../components/Header2'; // Import Header2
-import Navbar2 from '../components/Navbar2'; // Import Navbar2
+import "bootstrap/dist/css/bootstrap.min.css";
+import Header2 from "../components/Header2";
+import Navbar2 from "../components/Navbar2";
 
 const AdminDashboard = () => {
   const [admin, setAdmin] = useState(null);
@@ -21,11 +21,14 @@ const AdminDashboard = () => {
       }
 
       try {
-        const response = await axios.get("http://localhost:5000/api/admin/protected", {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        });
+        const response = await axios.get(
+          "http://localhost:5000/api/admin/protected",
+          {
+            headers: {
+              Authorization: `Bearer ${token}`,
+            },
+          }
+        );
 
         setAdmin(response.data.admin);
       } catch (err) {
@@ -45,110 +48,316 @@ const AdminDashboard = () => {
   };
 
   if (!admin) {
-    return <div>Loading...</div>;
+    return (
+      <div
+        className="d-flex justify-content-center align-items-center"
+        style={{ height: "100vh" }}
+      >
+        <div className="spinner-border text-primary" role="status">
+          <span className="visually-hidden">Loading...</span>
+        </div>
+      </div>
+    );
   }
 
   return (
-    <div>
+    <div className="admin-dashboard">
       {/* Header2 Component */}
       <Header2 />
 
       {/* Navbar2 Component */}
       <Navbar2 />
 
-      {/* Carousel Section with reduced space */}
-      <div style={{ marginTop: "10px" }}> {/* Adjust the margin-top value as needed */}
-        <div
-          id="carouselExampleAutoplaying"
-          className="carousel slide carousel-fade"
-          data-bs-ride="carousel"
-          data-bs-interval="1500" // Set interval to 1.5 seconds
-        >
-          <div className="carousel-inner">
-            {/* First Slide */}
-            <div className="carousel-item active">
-              <img
-                src="https://juliaveenstra.com/wp-content/uploads/2025/03/Driftwood-24-by-72-1200x400.jpg"
-                className="d-block w-100"
-                alt="Welcome Slide"
-              />
-            </div>
-            {/* Second Slide */}
-            <div className="carousel-item">
-              <img
-                src="https://www.dieboldnixdorf.com/-/media/diebold/images/article/header-image/header-fitbanking-philosophy-1200x400.jpg"
-                className="d-block w-100"
-                alt="Manage System Slide"
-              />
-            </div>
-            {/* Third Slide */}
-            <div className="carousel-item">
-              <img
-                src="https://static.zerochan.net/Aoha.(Twintail).full.2145423.jpg"
-                className="d-block w-100"
-                alt="Monitor Activities Slide"
-              />
-            </div>
-          </div>
-          {/* Carousel Controls */}
-          <button className="carousel-control-prev" type="button" data-bs-target="#carouselExampleAutoplaying" data-bs-slide="prev">
-            <span className="carousel-control-prev-icon" aria-hidden="true"></span>
-            <span className="visually-hidden">Previous</span>
-          </button>
-          <button className="carousel-control-next" type="button" data-bs-target="#carouselExampleAutoplaying" data-bs-slide="next">
-            <span className="carousel-control-next-icon" aria-hidden="true"></span>
-            <span className="visually-hidden">Next</span>
-          </button>
-        </div>
-      </div>
-
       {/* Dashboard Content */}
-      <div className="mt-5" style={{ padding: "20px", textAlign: "center" }}>
-        <h1>Admin Dashboard</h1>
-        <p>Welcome back, <strong>{admin.username}</strong>! Here's an overview of your system and activities.</p>
+      <Container fluid className="dashboard-container py-5">
+        {/* Hero Banner */}
+        <Row className="mb-5">
+          <Col>
+            <div className="hero-banner text-center p-5 rounded shadow-sm">
+              <div className="overlay"></div>
+              <div className="banner-content position-relative">
+                <h1 className="display-4 mb-3 text-white">
+                  Bookstore Admin Dashboard
+                </h1>
+                <div className="welcome-message">
+                  <p className="lead text-white">
+                    Welcome back, <strong>{admin.username}</strong>!
+                  </p>
+                  <p className="text-white">
+                    Manage your bookstore operations from this central hub.
+                  </p>
+                </div>
+              </div>
+            </div>
+          </Col>
+        </Row>
 
-        {/* Placeholder Cards for Dashboard */}
-        <div className="row mt-4">
-          <div className="col-md-4">
-            <div className="card">
-              <div className="card-body">
-                <h5 className="card-title">Handling Customer</h5>
-                <p className="card-text">Manage customer accounts and interactions.</p>
-                <Button variant="secondary" onClick={() => navigate("/managecustomers")}>Manage Customers</Button>
-              </div>
-            </div>
-          </div>
-          <div className="col-md-4">
-            <div className="card">
-              <div className="card-body">
-                <h5 className="card-title">Product Handling</h5>
-                <p className="card-text">Add, update, or remove products from your inventory.</p>
-                <Button variant="secondary" onClick={() => navigate("/manageproducts")}>Manage Products</Button>
-              </div>
-            </div>
-          </div>
-          <div className="col-md-4">
-            <div className="card">
-              <div className="card-body">
-                <h5 className="card-title">Payment Gateway</h5>
-                <p className="card-text">Monitor and manage payment transactions.</p>
-                <Button variant="secondary" onClick={() => navigate("/admin/PaymentGateway")}>Payment Gateway</Button>
-              </div>
-            </div>
-          </div>
-        </div>
-        <div className="row mt-4">
-          <div className="col-md-4">
-            <div className="card">
-              <div className="card-body">
-                <h5 className="card-title">Delivery Handling</h5>
-                <p className="card-text">Track and manage delivery statuses.</p>
-                <Button variant="secondary" onClick={() => navigate("/admin/DeliveryHandling")}>Manage Deliveries</Button>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
+        {/* Dashboard Cards */}
+        <Row className="g-4 mb-4">
+          <Col lg={4} md={6}>
+            <Card className="dashboard-card h-100 shadow-sm">
+              <div className="card-image-top customer-management"></div>
+              <Card.Body className="d-flex flex-column">
+                <div className="card-icon mb-3">
+                  <i className="fas fa-users fa-2x text-primary"></i>
+                </div>
+                <Card.Title>Customer Management</Card.Title>
+                <Card.Text className="flex-grow-1">
+                  View and manage customer accounts, review reading habits, and
+                  handle customer inquiries.
+                </Card.Text>
+                <Button
+                  variant="primary"
+                  className="mt-auto"
+                  onClick={() => navigate("/managecustomers")}
+                >
+                  Manage Customers
+                </Button>
+              </Card.Body>
+            </Card>
+          </Col>
+
+          <Col lg={4} md={6}>
+            <Card className="dashboard-card h-100 shadow-sm">
+              <div className="card-image-top book-management"></div>
+              <Card.Body className="d-flex flex-column">
+                <div className="card-icon mb-3">
+                  <i className="fas fa-book fa-2x text-success"></i>
+                </div>
+                <Card.Title>Book Management</Card.Title>
+                <Card.Text className="flex-grow-1">
+                  Update inventory, manage book details, categories, and handle
+                  book availability.
+                </Card.Text>
+                <Button
+                  variant="success"
+                  className="mt-auto"
+                  onClick={() => navigate("/manageproducts")}
+                >
+                  Manage Books
+                </Button>
+              </Card.Body>
+            </Card>
+          </Col>
+
+          <Col lg={4} md={6}>
+            <Card className="dashboard-card h-100 shadow-sm">
+              <div className="card-image-top payment-gateway"></div>
+              <Card.Body className="d-flex flex-column">
+                <div className="card-icon mb-3">
+                  <i className="fas fa-credit-card fa-2x text-info"></i>
+                </div>
+                <Card.Title>Payment Gateway</Card.Title>
+                <Card.Text className="flex-grow-1">
+                  Track book sales, process refunds, and review payment
+                  analytics for your bookstore.
+                </Card.Text>
+                <Button
+                  variant="info"
+                  className="mt-auto text-white"
+                  onClick={() => navigate("/admin/PaymentGateway")}
+                >
+                  Payment Gateway
+                </Button>
+              </Card.Body>
+            </Card>
+          </Col>
+
+          <Col lg={4} md={6}>
+            <Card className="dashboard-card h-100 shadow-sm">
+              <div className="card-image-top delivery-management"></div>
+              <Card.Body className="d-flex flex-column">
+                <div className="card-icon mb-3">
+                  <i className="fas fa-truck fa-2x text-warning"></i>
+                </div>
+                <Card.Title>Delivery Management</Card.Title>
+                <Card.Text className="flex-grow-1">
+                  Track book shipments, manage delivery partners, and monitor
+                  delivery statuses.
+                </Card.Text>
+                <Button
+                  variant="warning"
+                  className="mt-auto"
+                  onClick={() => navigate("/admin/DeliveryHandling")}
+                >
+                  Manage Deliveries
+                </Button>
+              </Card.Body>
+            </Card>
+          </Col>
+
+          <Col lg={4} md={6}>
+            <Card className="dashboard-card h-100 shadow-sm">
+              <div className="card-image-top add-book"></div>
+              <Card.Body className="d-flex flex-column">
+                <div className="card-icon mb-3">
+                  <i className="fas fa-plus-circle fa-2x text-danger"></i>
+                </div>
+                <Card.Title>Add New Book</Card.Title>
+                <Card.Text className="flex-grow-1">
+                  Add new books to your inventory, upload cover images, and set
+                  pricing details.
+                </Card.Text>
+                <Button
+                  variant="danger"
+                  className="mt-auto"
+                  onClick={() => navigate("/addproducts")}
+                >
+                  Add Book
+                </Button>
+              </Card.Body>
+            </Card>
+          </Col>
+
+          <Col lg={4} md={6}>
+            <Card className="dashboard-card h-100 shadow-sm">
+              <div className="card-image-top analytics"></div>
+              <Card.Body className="d-flex flex-column">
+                <div className="card-icon mb-3">
+                  <i className="fas fa-chart-line fa-2x text-secondary"></i>
+                </div>
+                <Card.Title>Book Sales Analytics</Card.Title>
+                <Card.Text className="flex-grow-1">
+                  View book sales reports, popular genres, bestsellers, and
+                  other key performance metrics.
+                </Card.Text>
+                <Button
+                  variant="secondary"
+                  className="mt-auto"
+                  onClick={() => navigate("/admin/analytics")}
+                >
+                  View Analytics
+                </Button>
+              </Card.Body>
+            </Card>
+          </Col>
+        </Row>
+
+        {/* Account Section */}
+        <Row className="mt-5">
+          <Col md={6} className="mx-auto">
+            <Card className="text-center border-0 shadow-sm">
+              <Card.Body>
+                <div className="admin-account-section">
+                  <h3 className="mb-3">Account Settings</h3>
+                  <div className="d-grid gap-2 d-md-flex justify-content-md-center">
+                    <Button variant="outline-danger" onClick={handleLogout}>
+                      Logout
+                    </Button>
+                  </div>
+                </div>
+              </Card.Body>
+            </Card>
+          </Col>
+        </Row>
+      </Container>
+
+      {/* Add CSS for styling */}
+      <style jsx>{`
+        .admin-dashboard {
+          background-color: #f8f9fa;
+          min-height: 100vh;
+        }
+
+        .dashboard-container {
+          padding-top: 2rem;
+          padding-bottom: 3rem;
+        }
+
+        .hero-banner {
+          background-image: url("/api/placeholder/1200/400");
+          background-size: cover;
+          background-position: center;
+          position: relative;
+          color: white;
+          margin-bottom: 2rem;
+          overflow: hidden;
+        }
+
+        .hero-banner .overlay {
+          position: absolute;
+          top: 0;
+          left: 0;
+          right: 0;
+          bottom: 0;
+          background: linear-gradient(
+            45deg,
+            rgba(25, 55, 109, 0.9),
+            rgba(25, 110, 130, 0.9)
+          );
+          z-index: 1;
+        }
+
+        .banner-content {
+          position: relative;
+          z-index: 2;
+        }
+
+        .welcome-message {
+          max-width: 700px;
+          margin: 0 auto;
+        }
+
+        .dashboard-card {
+          border: none;
+          border-radius: 0.5rem;
+          transition: transform 0.3s ease, box-shadow 0.3s ease;
+          overflow: hidden;
+        }
+
+        .dashboard-card:hover {
+          transform: translateY(-5px);
+          box-shadow: 0 10px 20px rgba(0, 123, 255, 0.15) !important;
+        }
+
+        .card-image-top {
+          height: 140px;
+          background-size: cover;
+          background-position: center;
+          border-bottom: 1px solid rgba(0, 0, 0, 0.1);
+        }
+
+        .customer-management {
+          background-image: url("/api/placeholder/400/200");
+          background-color: #e3f2fd;
+        }
+
+        .book-management {
+          background-image: url("/api/placeholder/400/200");
+          background-color: #e8f5e9;
+        }
+
+        .payment-gateway {
+          background-image: url("/api/placeholder/400/200");
+          background-color: #e0f7fa;
+        }
+
+        .delivery-management {
+          background-image: url("/api/placeholder/400/200");
+          background-color: #fff8e1;
+        }
+
+        .add-book {
+          background-image: url("/api/placeholder/400/200");
+          background-color: #ffebee;
+        }
+
+        .analytics {
+          background-image: url("/api/placeholder/400/200");
+          background-color: #f5f5f5;
+        }
+
+        .card-icon {
+          display: flex;
+          justify-content: center;
+          align-items: center;
+          height: 60px;
+        }
+
+        .admin-account-section {
+          padding: 1.5rem;
+        }
+      `}</style>
     </div>
   );
 };
