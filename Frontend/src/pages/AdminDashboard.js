@@ -119,6 +119,28 @@ const AdminDashboard = () => {
 
           <Col lg={4} md={6}>
             <Card className="dashboard-card h-100 shadow-sm">
+              <div className="card-image-top customer-management"></div>
+              <Card.Body className="d-flex flex-column">
+                <div className="card-icon mb-3">
+                  <i className="fas fa-users fa-2x text-primary"></i>
+                </div>
+                <Card.Title>Customer Feedback Management</Card.Title>
+                <Card.Text className="flex-grow-1">
+                  View and manage customer feedbacks.
+                </Card.Text>
+                <Button
+                  variant="primary"
+                  className="mt-auto"
+                  onClick={() => navigate("/managefeedback")}
+                >
+                  Manage Customer Feedbacks
+                </Button>
+              </Card.Body>
+            </Card>
+          </Col>
+
+          <Col lg={4} md={6}>
+            <Card className="dashboard-card h-100 shadow-sm">
               <div className="card-image-top book-management"></div>
               <Card.Body className="d-flex flex-column">
                 <div className="card-icon mb-3">

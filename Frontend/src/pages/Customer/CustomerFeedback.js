@@ -21,17 +21,34 @@ const CustomerFeedbackPage = () => {
   };
 
   // Handle form submission
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    // You can add your logic here to handle the form submission
-    console.log('Form Data Submitted:', formData);
-    alert('Thank you for your feedback!');
-    // Clear the form after submission
-    setFormData({
-      name: '',
-      email: '',
-      message: '',
-    });
+
+    try {
+      // Send form data to the backend
+      const response = await fetch('http://localhost:5000/api/feedback/submit-feedback', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(formData),
+      });
+
+      if (response.ok) {
+        alert('Thank you for your feedback!');
+        // Clear the form after submission
+        setFormData({
+          name: '',
+          email: '',
+          message: '',
+        });
+      } else {
+        alert('Failed to submit feedback. Please try again.');
+      }
+    } catch (error) {
+      console.error('Error submitting feedback:', error);
+      alert('An error occurred. Please try again.');
+    }
   };
 
   return (
