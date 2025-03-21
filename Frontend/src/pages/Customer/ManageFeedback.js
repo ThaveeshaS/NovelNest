@@ -3,17 +3,19 @@ import axios from "axios";
 import { jsPDF } from "jspdf";
 import autoTable from "jspdf-autotable";
 import "bootstrap/dist/css/bootstrap.min.css";
-import logo from "../../components/images/logo.jpg"; // Import the logo directly
-import Header2 from "../../components/Header2"; // Import Header2
-import Navbar2 from "../../components/Navbar2"; // Import Navbar2
+import logo from "../../components/images/logo.jpg";
+import Header2 from "../../components/Header2";
+import Navbar2 from "../../components/Navbar2";
+import { FaSearch, FaFilePdf, FaEdit, FaSave, FaTrashAlt, FaSpinner } from "react-icons/fa";
 
 export default function ManageFeedback() {
   const [feedback, setFeedback] = useState([]);
   const [searchTerm, setSearchTerm] = useState("");
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
-  const [editingId, setEditingId] = useState(null); // Track which feedback is being edited
-  const [editedMessage, setEditedMessage] = useState(""); // Track the edited message
+  const [editingId, setEditingId] = useState(null);
+  const [editedMessage, setEditedMessage] = useState("");
+  const [sortConfig, setSortConfig] = useState({ key: 'createdAt', direction: 'desc' });
 
   // Fetch feedback data
   useEffect(() => {
@@ -56,7 +58,7 @@ export default function ManageFeedback() {
           item._id === id ? { ...item, message: editedMessage } : item
         )
       );
-      setEditingId(null); // Exit edit mode
+      setEditingId(null);
     } catch (error) {
       console.error("Error updating feedback:", error);
       setError("Failed to update feedback. Please try again later.");
@@ -81,7 +83,7 @@ export default function ManageFeedback() {
 
     // Add company logo
     if (logo) {
-      doc.addImage(logo, "JPEG", 80, 10, 40, 40); // Adjust position and size as needed
+      doc.addImage(logo, "JPEG", 80, 10, 40, 40);
     }
 
     // Add company details
@@ -115,112 +117,211 @@ export default function ManageFeedback() {
     return date.toLocaleDateString();
   };
 
-  // Filter feedback based on search term
-  const filteredFeedback = feedback.filter(
-    (item) =>
-      item.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      item.email.toLowerCase().includes(searchTerm.toLowerCase())
-  );
+  // Sort function
+  const requestSort = (key) => {
+    let direction = 'asc';
+    if (sortConfig.key === key && sortConfig.direction === 'asc') {
+      direction = 'desc';
+    }
+    setSortConfig({ key, direction });
+  };
+
+  // Get sorted data
+  const getSortedData = () => {
+    const sortableItems = [...feedback];
+    
+    if (sortConfig.key) {
+      sortableItems.sort((a, b) => {
+        if (a[sortConfig.key] < b[sortConfig.key]) {
+          return sortConfig.direction === 'asc' ? -1 : 1;
+        }
+        if (a[sortConfig.key] > b[sortConfig.key]) {
+          return sortConfig.direction === 'asc' ? 1 : -1;
+        }
+        return 0;
+      });
+    }
+    
+    return sortableItems.filter(
+      (item) =>
+        item.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        item.email.toLowerCase().includes(searchTerm.toLowerCase())
+    );
+  };
+
+  // Get sort indicator
+  const getSortIndicator = (key) => {
+    if (sortConfig.key !== key) return null;
+    return sortConfig.direction === 'asc' ? ' ▲' : ' ▼';
+  };
+
+  const filteredFeedback = getSortedData();
 
   return (
-    <div>
-      {/* Add Header2 and Navbar2 */}
+    <div className="bg-light min-vh-100">
       <Header2 />
       <Navbar2 />
 
-      <div className="container mt-5">
-        <h1 className="mb-4 text-center">Manage Feedback</h1>
-        {/* Search and Generate Report */}
-        <div className="mb-4">
-          <div className="input-group">
-            <input
-              type="text"
-              placeholder="Search by name or email..."
-              className="form-control"
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
-            />
-            <button className="btn btn-primary" onClick={generateReport}>
-              <i className="fas fa-file-pdf"></i> Generate Report
-            </button>
+      <div className="container py-5">
+        <div className="card shadow-sm">
+          <div className="card-header bg-primary text-white">
+            <h2 className="mb-0 text-center">Manage Customer Feedback</h2>
+          </div>
+          <div className="card-body">
+            {/* Search and Generate Report */}
+            <div className="row mb-4">
+              <div className="col-md-8 mb-3 mb-md-0">
+                <div className="input-group">
+                  <span className="input-group-text bg-white">
+                    <FaSearch className="text-primary" />
+                  </span>
+                  <input
+                    type="text"
+                    placeholder="Search by name or email..."
+                    className="form-control"
+                    value={searchTerm}
+                    onChange={(e) => setSearchTerm(e.target.value)}
+                  />
+                </div>
+              </div>
+              <div className="col-md-4 d-flex justify-content-md-end">
+                <button 
+                  className="btn btn-primary w-100 w-md-auto" 
+                  onClick={generateReport}
+                  disabled={filteredFeedback.length === 0}
+                >
+                  <FaFilePdf className="me-2" /> Generate Report
+                </button>
+              </div>
+            </div>
+
+            {error && (
+              <div className="alert alert-danger d-flex align-items-center" role="alert">
+                <div>{error}</div>
+              </div>
+            )}
+
+            {loading ? (
+              <div className="text-center py-5">
+                <FaSpinner className="fa-spin text-primary mb-3" size={40} />
+                <p className="text-muted">Loading feedback data...</p>
+              </div>
+            ) : (
+              <>
+                <div className="table-responsive">
+                  <table className="table table-hover align-middle">
+                    <thead className="table-light">
+                      <tr>
+                        <th onClick={() => requestSort('name')} className="cursor-pointer">
+                          Name {getSortIndicator('name')}
+                        </th>
+                        <th onClick={() => requestSort('email')} className="cursor-pointer">
+                          Email {getSortIndicator('email')}
+                        </th>
+                        <th>Message</th>
+                        <th onClick={() => requestSort('createdAt')} className="cursor-pointer">
+                          Date {getSortIndicator('createdAt')}
+                        </th>
+                        <th className="text-center">Actions</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {filteredFeedback.length > 0 ? (
+                        filteredFeedback.map((item) => (
+                          <tr key={item._id}>
+                            <td className="fw-medium">{item.name}</td>
+                            <td>{item.email}</td>
+                            <td>
+                              {editingId === item._id ? (
+                                <textarea
+                                  className="form-control"
+                                  value={editedMessage}
+                                  onChange={(e) => setEditedMessage(e.target.value)}
+                                  rows="3"
+                                />
+                              ) : (
+                                <div className="message-cell">{item.message}</div>
+                              )}
+                            </td>
+                            <td>{formatDate(item.createdAt)}</td>
+                            <td className="text-center">
+                              <div className="btn-group">
+                                {editingId === item._id ? (
+                                  <button
+                                    className="btn btn-success btn-sm"
+                                    onClick={() => handleUpdate(item._id)}
+                                    title="Save changes"
+                                  >
+                                    <FaSave />
+                                  </button>
+                                ) : (
+                                  <button
+                                    className="btn btn-outline-primary btn-sm"
+                                    onClick={() => enableEditing(item._id, item.message)}
+                                    title="Edit feedback"
+                                  >
+                                    <FaEdit />
+                                  </button>
+                                )}
+                                <button
+                                  className="btn btn-outline-danger btn-sm ms-2"
+                                  onClick={() => handleDelete(item._id)}
+                                  title="Delete feedback"
+                                >
+                                  <FaTrashAlt />
+                                </button>
+                              </div>
+                            </td>
+                          </tr>
+                        ))
+                      ) : (
+                        <tr>
+                          <td colSpan="5" className="text-center py-4">
+                            <div className="text-muted">
+                              <p className="mb-0">No matching feedback found.</p>
+                              {searchTerm && (
+                                <small>Try adjusting your search criteria.</small>
+                              )}
+                            </div>
+                          </td>
+                        </tr>
+                      )}
+                    </tbody>
+                  </table>
+                </div>
+                <div className="d-flex justify-content-between align-items-center mt-3">
+                  <small className="text-muted">
+                    Showing {filteredFeedback.length} of {feedback.length} entries
+                  </small>
+                </div>
+              </>
+            )}
           </div>
         </div>
-
-        {error && <div className="alert alert-danger">{error}</div>}
-
-        {loading ? (
-          <div className="text-center">
-            <div className="spinner-border text-primary" role="status">
-              <span className="visually-hidden">Loading...</span>
-            </div>
-          </div>
-        ) : (
-          <div className="table-responsive">
-            <table className="table table-striped table-hover table-bordered">
-              <thead className="thead-dark">
-                <tr>
-                  <th>Name</th>
-                  <th>Email</th>
-                  <th>Message</th>
-                  <th>Date</th>
-                  <th>Actions</th>
-                </tr>
-              </thead>
-              <tbody>
-                {filteredFeedback.length > 0 ? (
-                  filteredFeedback.map((item) => (
-                    <tr key={item._id}>
-                      <td>{item.name}</td>
-                      <td>{item.email}</td>
-                      <td>
-                        {editingId === item._id ? (
-                          <textarea
-                            className="form-control"
-                            value={editedMessage}
-                            onChange={(e) => setEditedMessage(e.target.value)}
-                          />
-                        ) : (
-                          item.message
-                        )}
-                      </td>
-                      <td>{formatDate(item.createdAt)}</td>
-                      <td>
-                        {editingId === item._id ? (
-                          <button
-                            className="btn btn-success btn-sm me-2"
-                            onClick={() => handleUpdate(item._id)}
-                          >
-                            <i className="fas fa-save"></i> Save
-                          </button>
-                        ) : (
-                          <button
-                            className="btn btn-warning btn-sm me-2"
-                            onClick={() => enableEditing(item._id, item.message)}
-                          >
-                            <i className="fas fa-edit"></i> Edit
-                          </button>
-                        )}
-                        <button
-                          className="btn btn-danger btn-sm"
-                          onClick={() => handleDelete(item._id)}
-                        >
-                          <i className="fas fa-trash-alt"></i> Delete
-                        </button>
-                      </td>
-                    </tr>
-                  ))
-                ) : (
-                  <tr>
-                    <td colSpan="5" className="text-center text-danger">
-                      No matching feedback found.
-                    </td>
-                  </tr>
-                )}
-              </tbody>
-            </table>
-          </div>
-        )}
       </div>
+
+      <style jsx>{`
+        .cursor-pointer {
+          cursor: pointer;
+        }
+        .message-cell {
+          max-width: 300px;
+          white-space: nowrap;
+          overflow: hidden;
+          text-overflow: ellipsis;
+        }
+        .fa-spin {
+          animation: fa-spin 2s infinite linear;
+        }
+        @keyframes fa-spin {
+          0% {
+            transform: rotate(0deg);
+          }
+          100% {
+            transform: rotate(360deg);
+          }
+        }
+      `}</style>
     </div>
   );
 }
