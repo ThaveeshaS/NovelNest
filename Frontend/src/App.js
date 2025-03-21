@@ -14,6 +14,7 @@ import AdminLogin from "./pages/AdminLogin";
 import AdminDashboard from "./pages/AdminDashboard";
 import ManageCustomers from './pages/Customer/ManageCustomers'; 
 import CustomerFeedback from './pages/Customer/CustomerFeedback'; 
+import ManageFeedback from './pages/Customer/ManageFeedback';
 
 
 
@@ -33,7 +34,7 @@ function App() {
   const location = useLocation();
 
   // Define routes where Header, Navbar should not be displayed
-  const excludePaths = ["/customerdashboard", "/admindashboard", "/managecustomers", "/customeraccount", "/wishlist", "/cart", "/manageproducts", "/addproducts", "/customerfeedback"];
+  const excludePaths = ["/customerdashboard", "/admindashboard", "/managecustomers", "/customeraccount", "/wishlist", "/cart", "/manageproducts", "/addproducts", "/customerfeedback", "/managefeedback"];
 
   // Check if the current path is in the exclude list
   const shouldShowHeaderNavbarFooter = !excludePaths.includes(location.pathname);
@@ -54,6 +55,7 @@ function App() {
         <Route path="/admindashboard" element={<AdminDashboard />} />
         <Route path="/managecustomers" element={<ManageCustomers />} />
         <Route path="/customerfeedback" element={<CustomerFeedback />} />
+        <Route path="/managefeedback" element={<ManageFeedback />} />
 
 
 
