@@ -29,6 +29,16 @@ import ManageProducts from './pages/Product/ManageProducts';
 import AddProducts from './pages/Product/AddProducts';
 
 
+
+
+
+import AdminTransactionsPanel from './pages/VoicePayment/AdminTransactionsPanel'; 
+import Home1 from './pages/VoicePayment/Home1'; 
+import AdminBooksPanel from './pages/VoicePayment/AdminBooksPanel';
+import PaymentForm from './pages/VoicePayment/PaymentForm';
+import SuccessPage from './pages/VoicePayment/SuccessPage';
+
+
 function App() {
   const location = useLocation();
 
@@ -67,6 +77,14 @@ function App() {
         <Route path="/manageproducts" element={<ManageProducts/>} />
         <Route path="/addproducts" element={<AddProducts/>} />
 
+
+
+
+        <Route path="/admin/transactions" element={<AdminTransactionsPanel/>} />
+        <Route path="/home1" element={<Home1/>} />
+        <Route path="/admin/books" element={<AdminBooksPanel/>} />
+        <Route path="/payment" element={<PaymentForm/>} />
+        <Route path="/success" element={<SuccessPage/>} />
 
 
 
