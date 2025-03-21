@@ -5,7 +5,7 @@ import autoTable from "jspdf-autotable";
 import "bootstrap/dist/css/bootstrap.min.css";
 import Header2 from "../../components/Header2"; // Import Header2
 import Navbar2 from "../../components/Navbar2"; // Import Navbar2
-import { Button, Container, Alert, Spinner, Form, Row, Col, Modal } from "react-bootstrap"; // Added Modal component
+import { Button, Container, Alert, Spinner, Form, Row, Col, Modal, Card } from "react-bootstrap"; // Added Card component
 
 export default function DeliveryDetails() {
   const [deliveries, setDeliveries] = useState([]);
@@ -291,97 +291,297 @@ export default function DeliveryDetails() {
           </div>
         )}
 
-        {/* Payment Method Section */}
-        <div className="mt-5">
-          <h3 className="mb-3">Select Payment Method</h3>
+        {/* Enhanced Payment Method Section */}
+        <div className="mt-5 py-4 px-3 bg-light rounded shadow-sm">
+          <h3 className="mb-4 text-center position-relative">
+            <span className="bg-primary px-4 py-2 rounded-pill text-white shadow">Select Payment Method</span>
+          </h3>
+          
           <Form onSubmit={handlePaymentSubmit}>
-            <Form.Group>
-              <Form.Check
-                type="radio"
-                label="Commercial Bank"
-                name="paymentMethod"
-                value="Commercial Bank"
-                onChange={handlePaymentMethodChange}
-              />
-              <Form.Check
-                type="radio"
-                label="MasterCard"
-                name="paymentMethod"
-                value="MasterCard"
-                onChange={handlePaymentMethodChange}
-              />
-              <Form.Check
-                type="radio"
-                label="Visa"
-                name="paymentMethod"
-                value="Visa"
-                onChange={handlePaymentMethodChange}
-              />
-              <Form.Check
-                type="radio"
-                label="Cash on Delivery"
-                name="paymentMethod"
-                value="Cash on Delivery"
-                onChange={handlePaymentMethodChange}
-              />
-            </Form.Group>
+            <Row className="justify-content-center mb-4">
+              <Col md={10} lg={8}>
+                <div className="payment-options">
+                  <Row>
+                    {/* Commercial Bank Payment Option */}
+                    <Col md={6} className="mb-3">
+                      <Card 
+                        className={`h-100 payment-card ${selectedPaymentMethod === "Commercial Bank" ? "border-primary" : ""}`}
+                        style={{ 
+                          cursor: 'pointer',
+                          transition: 'all 0.3s ease',
+                          transform: selectedPaymentMethod === "Commercial Bank" ? 'translateY(-5px)' : 'none',
+                          boxShadow: selectedPaymentMethod === "Commercial Bank" ? '0 10px 20px rgba(0,0,0,0.1)' : '0 4px 8px rgba(0,0,0,0.05)'
+                        }}
+                        onClick={() => setSelectedPaymentMethod("Commercial Bank")}
+                      >
+                        <Card.Body className="d-flex flex-column align-items-center justify-content-center p-4">
+                          <div 
+                            className="payment-icon mb-3 rounded-circle bg-light d-flex align-items-center justify-content-center"
+                            style={{ width: '70px', height: '70px' }}
+                          >
+                            <i className="fas fa-university fs-2 text-primary"></i>
+                          </div>
+                          <Card.Title className="text-center mb-3">Commercial Bank</Card.Title>
+                          <Form.Check
+                            type="radio"
+                            name="paymentMethod"
+                            value="Commercial Bank"
+                            checked={selectedPaymentMethod === "Commercial Bank"}
+                            onChange={handlePaymentMethodChange}
+                            className="visually-hidden"
+                            id="commercial-bank"
+                          />
+                          <label 
+                            htmlFor="commercial-bank" 
+                            className={`btn ${selectedPaymentMethod === "Commercial Bank" ? "btn-primary" : "btn-outline-primary"} w-100`}
+                          >
+                            {selectedPaymentMethod === "Commercial Bank" ? <><i className="fas fa-check-circle me-2"></i>Selected</> : "Select"}
+                          </label>
+                        </Card.Body>
+                      </Card>
+                    </Col>
 
-            {/* Terms and Conditions */}
-            <Form.Group className="mt-3">
-              <Form.Check
-                type="checkbox"
-                label={
-                  <>
-                    I have read and agree to the{" "}
-                    <a href="/terms" target="_blank" rel="noopener noreferrer">
-                      website terms and conditions
-                    </a>{" "}
-                    *
-                  </>
-                }
-                required
-                checked={agreeToTerms}
-                onChange={handleAgreeToTermsChange}
-              />
-            </Form.Group>
+                    {/* MasterCard Payment Option */}
+                    <Col md={6} className="mb-3">
+                      <Card 
+                        className={`h-100 payment-card ${selectedPaymentMethod === "MasterCard" ? "border-primary" : ""}`}
+                        style={{ 
+                          cursor: 'pointer',
+                          transition: 'all 0.3s ease',
+                          transform: selectedPaymentMethod === "MasterCard" ? 'translateY(-5px)' : 'none',
+                          boxShadow: selectedPaymentMethod === "MasterCard" ? '0 10px 20px rgba(0,0,0,0.1)' : '0 4px 8px rgba(0,0,0,0.05)'
+                        }}
+                        onClick={() => setSelectedPaymentMethod("MasterCard")}
+                      >
+                        <Card.Body className="d-flex flex-column align-items-center justify-content-center p-4">
+                          <div 
+                            className="payment-icon mb-3 rounded-circle bg-light d-flex align-items-center justify-content-center"
+                            style={{ width: '70px', height: '70px' }}
+                          >
+                            <i className="fab fa-cc-mastercard fs-2 text-danger"></i>
+                          </div>
+                          <Card.Title className="text-center mb-3">MasterCard</Card.Title>
+                          <Form.Check
+                            type="radio"
+                            name="paymentMethod"
+                            value="MasterCard"
+                            checked={selectedPaymentMethod === "MasterCard"}
+                            onChange={handlePaymentMethodChange}
+                            className="visually-hidden"
+                            id="mastercard"
+                          />
+                          <label 
+                            htmlFor="mastercard" 
+                            className={`btn ${selectedPaymentMethod === "MasterCard" ? "btn-primary" : "btn-outline-primary"} w-100`}
+                          >
+                            {selectedPaymentMethod === "MasterCard" ? <><i className="fas fa-check-circle me-2"></i>Selected</> : "Select"}
+                          </label>
+                        </Card.Body>
+                      </Card>
+                    </Col>
 
-            {/* Privacy Policy Notice */}
-            <p className="mt-2">
-              Your personal data will be used to process your order, support your experience throughout this website, and
-              for other purposes described in our{" "}
-              <a href="/privacy-policy" target="_blank" rel="noopener noreferrer">
-                Privacy Policy
-              </a>
-              .
-            </p>
+                    {/* Visa Payment Option */}
+                    <Col md={6} className="mb-3">
+                      <Card 
+                        className={`h-100 payment-card ${selectedPaymentMethod === "Visa" ? "border-primary" : ""}`}
+                        style={{ 
+                          cursor: 'pointer',
+                          transition: 'all 0.3s ease',
+                          transform: selectedPaymentMethod === "Visa" ? 'translateY(-5px)' : 'none',
+                          boxShadow: selectedPaymentMethod === "Visa" ? '0 10px 20px rgba(0,0,0,0.1)' : '0 4px 8px rgba(0,0,0,0.05)'
+                        }}
+                        onClick={() => setSelectedPaymentMethod("Visa")}
+                      >
+                        <Card.Body className="d-flex flex-column align-items-center justify-content-center p-4">
+                          <div 
+                            className="payment-icon mb-3 rounded-circle bg-light d-flex align-items-center justify-content-center"
+                            style={{ width: '70px', height: '70px' }}
+                          >
+                            <i className="fab fa-cc-visa fs-2 text-primary"></i>
+                          </div>
+                          <Card.Title className="text-center mb-3">Visa</Card.Title>
+                          <Form.Check
+                            type="radio"
+                            name="paymentMethod"
+                            value="Visa"
+                            checked={selectedPaymentMethod === "Visa"}
+                            onChange={handlePaymentMethodChange}
+                            className="visually-hidden"
+                            id="visa"
+                          />
+                          <label 
+                            htmlFor="visa" 
+                            className={`btn ${selectedPaymentMethod === "Visa" ? "btn-primary" : "btn-outline-primary"} w-100`}
+                          >
+                            {selectedPaymentMethod === "Visa" ? <><i className="fas fa-check-circle me-2"></i>Selected</> : "Select"}
+                          </label>
+                        </Card.Body>
+                      </Card>
+                    </Col>
 
-            {/* Captcha Verification */}
-            <Row className="mt-3">
-              <Col md={6}>
-                <Form.Group>
-                  <Form.Label>Captcha: {captcha}</Form.Label>
-                  <Form.Control
-                    type="text"
-                    placeholder="Enter captcha"
-                    value={userCaptchaInput}
-                    onChange={(e) => setUserCaptchaInput(e.target.value)}
-                  />
-                </Form.Group>
-              </Col>
-              <Col md={6} className="d-flex align-items-end">
-                <Button variant="secondary" onClick={generateCaptcha} className="me-2">
-                  Refresh Captcha
-                </Button>
-                <Button variant="primary" onClick={verifyCaptcha}>
-                  Verify Captcha
-                </Button>
+                    {/* Cash on Delivery Payment Option */}
+                    <Col md={6} className="mb-3">
+                      <Card 
+                        className={`h-100 payment-card ${selectedPaymentMethod === "Cash on Delivery" ? "border-primary" : ""}`}
+                        style={{ 
+                          cursor: 'pointer',
+                          transition: 'all 0.3s ease',
+                          transform: selectedPaymentMethod === "Cash on Delivery" ? 'translateY(-5px)' : 'none',
+                          boxShadow: selectedPaymentMethod === "Cash on Delivery" ? '0 10px 20px rgba(0,0,0,0.1)' : '0 4px 8px rgba(0,0,0,0.05)'
+                        }}
+                        onClick={() => setSelectedPaymentMethod("Cash on Delivery")}
+                      >
+                        <Card.Body className="d-flex flex-column align-items-center justify-content-center p-4">
+                          <div 
+                            className="payment-icon mb-3 rounded-circle bg-light d-flex align-items-center justify-content-center"
+                            style={{ width: '70px', height: '70px' }}
+                          >
+                            <i className="fas fa-money-bill-wave fs-2 text-success"></i>
+                          </div>
+                          <Card.Title className="text-center mb-3">Cash on Delivery</Card.Title>
+                          <Form.Check
+                            type="radio"
+                            name="paymentMethod"
+                            value="Cash on Delivery"
+                            checked={selectedPaymentMethod === "Cash on Delivery"}
+                            onChange={handlePaymentMethodChange}
+                            className="visually-hidden"
+                            id="cod"
+                          />
+                          <label 
+                            htmlFor="cod" 
+                            className={`btn ${selectedPaymentMethod === "Cash on Delivery" ? "btn-primary" : "btn-outline-primary"} w-100`}
+                          >
+                            {selectedPaymentMethod === "Cash on Delivery" ? <><i className="fas fa-check-circle me-2"></i>Selected</> : "Select"}
+                          </label>
+                        </Card.Body>
+                      </Card>
+                    </Col>
+                  </Row>
+                </div>
               </Col>
             </Row>
 
-            {/* Submit Button */}
-            <Button variant="primary" type="submit" className="mt-3">
-              Proceed to Payment
-            </Button>
+            {/* Terms and Captcha Section */}
+            <div className="bg-white p-4 rounded shadow-sm mt-3">
+              <Row className="justify-content-center">
+                <Col md={10}>
+                  {/* Selected Payment Method Summary */}
+                  {selectedPaymentMethod && (
+                    <Alert variant="info" className="d-flex align-items-center">
+                      <i className="fas fa-info-circle fs-4 me-3"></i>
+                      <div>
+                        <strong>Selected Payment Method:</strong> {selectedPaymentMethod}
+                      </div>
+                    </Alert>
+                  )}
+                  
+                  {/* Terms and Conditions */}
+                  <div className="border-top pt-4 mt-3">
+                    <h5 className="mb-3"><i className="fas fa-file-contract me-2 text-primary"></i>Terms & Privacy</h5>
+                    
+                    <Form.Group className="mb-3">
+                      <div className="d-flex align-items-center">
+                        <Form.Check
+                          type="checkbox"
+                          id="terms-checkbox"
+                          className="me-2"
+                          required
+                          checked={agreeToTerms}
+                          onChange={handleAgreeToTermsChange}
+                        />
+                        <label htmlFor="terms-checkbox" className="mb-0">
+                          I have read and agree to the{" "}
+                          <a href="/terms" target="_blank" rel="noopener noreferrer" className="text-decoration-none fw-bold">
+                            website terms and conditions
+                          </a>{" "}
+                          <span className="text-danger">*</span>
+                        </label>
+                      </div>
+                    </Form.Group>
+
+                    {/* Privacy Policy Notice */}
+                    <p className="small text-muted mt-2 fst-italic">
+                      <i className="fas fa-shield-alt me-1"></i> Your personal data will be used to process your order, support your experience throughout this website, and
+                      for other purposes described in our{" "}
+                      <a href="/privacy-policy" target="_blank" rel="noopener noreferrer" className="text-decoration-none">
+                        Privacy Policy
+                      </a>.
+                    </p>
+                  </div>
+
+                  {/* Captcha Verification - Styled */}
+                  <div className="border-top pt-4 mt-3">
+                    <h5 className="mb-3"><i className="fas fa-robot me-2 text-primary"></i>Security Verification</h5>
+                    
+                    <Row className="align-items-center">
+                      <Col md={6} className="mb-3 mb-md-0">
+                        <div className="captcha-container p-3 bg-light rounded text-center" style={{ letterSpacing: '3px', fontFamily: 'monospace', fontSize: '24px', fontWeight: 'bold' }}>
+                          {captcha.split('').map((char, index) => (
+                            <span key={index} style={{ 
+                              display: 'inline-block', 
+                              transform: `rotate(${Math.random() * 20 - 10}deg)`,
+                              color: `hsl(${Math.random() * 360}, 70%, 50%)`
+                            }}>
+                              {char}
+                            </span>
+                          ))}
+                        </div>
+                      </Col>
+                      <Col md={6}>
+                        <Form.Group>
+                          <Form.Control
+                            type="text"
+                            placeholder="Enter captcha code"
+                            value={userCaptchaInput}
+                            onChange={(e) => setUserCaptchaInput(e.target.value)}
+                            className="mb-2"
+                          />
+                          
+                          <div className="d-flex gap-2">
+                            <Button 
+                              variant="outline-secondary" 
+                              onClick={generateCaptcha} 
+                              className="flex-grow-1"
+                              size="sm"
+                            >
+                              <i className="fas fa-sync-alt me-1"></i> Refresh
+                            </Button>
+                            <Button 
+                              variant={captchaVerified ? "success" : "primary"} 
+                              onClick={verifyCaptcha} 
+                              className="flex-grow-1"
+                              size="sm"
+                            >
+                              {captchaVerified ? <><i className="fas fa-check me-1"></i> Verified</> : <><i className="fas fa-shield-alt me-1"></i> Verify</>}
+                            </Button>
+                          </div>
+                        </Form.Group>
+                      </Col>
+                    </Row>
+                  </div>
+
+                  {/* Submit Button */}
+                  <div className="text-center mt-4">
+                    <Button 
+                      variant="primary" 
+                      type="submit" 
+                      size="lg"
+                      className="px-5 py-2 shadow-sm"
+                      disabled={!selectedPaymentMethod || !agreeToTerms || !captchaVerified}
+                    >
+                      <i className="fas fa-lock me-2"></i> Proceed to Payment
+                    </Button>
+                    
+                    {(!selectedPaymentMethod || !agreeToTerms || !captchaVerified) && (
+                      <div className="text-danger small mt-2">
+                        <i className="fas fa-exclamation-circle"></i> Please complete all required fields to proceed
+                      </div>
+                    )}
+                  </div>
+                </Col>
+              </Row>
+            </div>
           </Form>
         </div>
       </Container>
