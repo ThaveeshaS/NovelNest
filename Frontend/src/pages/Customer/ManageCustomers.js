@@ -3,15 +3,18 @@ import axios from "axios";
 import { jsPDF } from "jspdf";
 import autoTable from "jspdf-autotable";
 import "bootstrap/dist/css/bootstrap.min.css";
-import logo from "../../components/images/logo.jpg"; // Import the logo directly
-import Header2 from "../../components/Header2"; // Import Header2
-import Navbar2 from "../../components/Navbar2"; // Import Navbar2
+import logo from "../../components/images/logo.jpg";
+import Header2 from "../../components/Header2";
+import Navbar2 from "../../components/Navbar2";
+import { useNavigate } from "react-router-dom"; // Import useNavigate
 
 export default function ManageCustomers() {
     const [customers, setCustomers] = useState([]);
     const [searchTerm, setSearchTerm] = useState("");
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState("");
+    const [sortConfig, setSortConfig] = useState({ key: 'firstName', direction: 'asc' });
+    const navigate = useNavigate(); // Initialize navigate
 
     useEffect(() => {
         const fetchCustomers = async () => {
@@ -42,18 +45,13 @@ export default function ManageCustomers() {
     };
 
     const generateReport = () => {
-        const filteredCustomers = customers.filter(
-            (customer) =>
-                customer.firstName.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                customer.lastName.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                customer.email.toLowerCase().includes(searchTerm.toLowerCase())
-        );
+        const filteredCustomers = getSortedData();
 
         const doc = new jsPDF();
 
         // Add company logo
         if (logo) {
-            doc.addImage(logo, "JPEG", 80, 10, 40, 40); // Adjust position and size as needed
+            doc.addImage(logo, "JPEG", 80, 10, 40, 40);
         }
 
         // Add company details
@@ -88,91 +86,205 @@ export default function ManageCustomers() {
         return date.toLocaleDateString();
     };
 
-    const filteredCustomers = customers.filter(
-        (customer) =>
-            customer.firstName.toLowerCase().includes(searchTerm.toLowerCase()) ||
-            customer.lastName.toLowerCase().includes(searchTerm.toLowerCase()) ||
-            customer.email.toLowerCase().includes(searchTerm.toLowerCase())
-    );
+    // Sort function
+    const requestSort = (key) => {
+        let direction = 'asc';
+        if (sortConfig.key === key && sortConfig.direction === 'asc') {
+            direction = 'desc';
+        }
+        setSortConfig({ key, direction });
+    };
+
+    // Get sorted data
+    const getSortedData = () => {
+        const sortableItems = [...customers];
+        
+        if (sortConfig.key) {
+            sortableItems.sort((a, b) => {
+                const valueA = a[sortConfig.key]?.toLowerCase?.() || '';
+                const valueB = b[sortConfig.key]?.toLowerCase?.() || '';
+                
+                if (valueA < valueB) {
+                    return sortConfig.direction === 'asc' ? -1 : 1;
+                }
+                if (valueA > valueB) {
+                    return sortConfig.direction === 'asc' ? 1 : -1;
+                }
+                return 0;
+            });
+        }
+        
+        return sortableItems.filter(
+            (customer) =>
+                customer.firstName.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                customer.lastName.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                customer.email.toLowerCase().includes(searchTerm.toLowerCase())
+        );
+    };
+
+    // Get sort indicator
+    const getSortIndicator = (key) => {
+        if (sortConfig.key !== key) return null;
+        return sortConfig.direction === 'asc' ? ' ↑' : ' ↓';
+    };
+
+    const filteredCustomers = getSortedData();
 
     return (
-        <div>
+        <div className="bg-light min-vh-100">
             {/* Add Header2 and Navbar2 */}
             <Header2 />
             <Navbar2 />
 
-            <div className="container mt-5">
-                <h1 className="mb-4 text-center">Manage Customers</h1>
-                {/* Search and Generate Report */}
-                <div className="mb-4">
-                    <div className="input-group">
-                        <input
-                            type="text"
-                            placeholder="Search by name or email..."
-                            className="form-control"
-                            value={searchTerm}
-                            onChange={(e) => setSearchTerm(e.target.value)}
-                        />
-                        <button className="btn btn-primary" onClick={generateReport}>
-                            <i className="fas fa-file-pdf"></i> Generate Report
-                        </button>
+            <div className="container py-5">
+                <div className="card shadow">
+                    <div className="card-header bg-primary text-white py-3">
+                        <h2 className="mb-0 text-center">Manage Customers</h2>
+                    </div>
+                    <div className="card-body">
+                        {/* Search and Generate Report */}
+                        <div className="row mb-4">
+                            <div className="col-md-8 mb-3 mb-md-0">
+                                <div className="input-group">
+                                    <span className="input-group-text bg-white">
+                                        <i className="fas fa-search text-primary"></i>
+                                    </span>
+                                    <input
+                                        type="text"
+                                        placeholder="Search by name or email..."
+                                        className="form-control"
+                                        value={searchTerm}
+                                        onChange={(e) => setSearchTerm(e.target.value)}
+                                    />
+                                </div>
+                            </div>
+                            <div className="col-md-4 d-flex justify-content-md-end">
+                                <button 
+                                    className="btn btn-primary w-100 w-md-auto" 
+                                    onClick={generateReport}
+                                    disabled={filteredCustomers.length === 0}
+                                >
+                                    <i className="fas fa-file-pdf me-2"></i> Generate Report
+                                </button>
+                            </div>
+                        </div>
+
+                        {error && (
+                            <div className="alert alert-danger d-flex align-items-center" role="alert">
+                                <i className="fas fa-exclamation-circle me-2"></i>
+                                <div>{error}</div>
+                            </div>
+                        )}
+
+                        {loading ? (
+                            <div className="text-center py-5">
+                                <div className="spinner-border text-primary mb-3" style={{ width: "3rem", height: "3rem" }} role="status">
+                                    <span className="visually-hidden">Loading...</span>
+                                </div>
+                                <p className="text-muted">Loading customer data...</p>
+                            </div>
+                        ) : (
+                            <>
+                                <div className="table-responsive">
+                                    <table className="table table-hover align-middle">
+                                        <thead className="table-light">
+                                            <tr>
+                                                <th className="cursor-pointer" onClick={() => requestSort('firstName')}>
+                                                    First Name {getSortIndicator('firstName')}
+                                                </th>
+                                                <th className="cursor-pointer" onClick={() => requestSort('lastName')}>
+                                                    Last Name {getSortIndicator('lastName')}
+                                                </th>
+                                                <th className="cursor-pointer" onClick={() => requestSort('email')}>
+                                                    Email {getSortIndicator('email')}
+                                                </th>
+                                                <th>Address</th>
+                                                <th>Contact Info</th>
+                                                <th className="cursor-pointer" onClick={() => requestSort('birthday')}>
+                                                    Birthday {getSortIndicator('birthday')}
+                                                </th>
+                                                <th className="text-center">Actions</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            {filteredCustomers.length > 0 ? (
+                                                filteredCustomers.map((customer) => (
+                                                    <tr key={customer._id}>
+                                                        <td className="fw-medium">{customer.firstName}</td>
+                                                        <td>{customer.lastName}</td>
+                                                        <td>
+                                                            <a href={`mailto:${customer.email}`} className="text-decoration-none">
+                                                                {customer.email}
+                                                            </a>
+                                                        </td>
+                                                        <td>
+                                                            <div className="text-cell" title={customer.address}>
+                                                                {customer.address}
+                                                            </div>
+                                                        </td>
+                                                        <td>{customer.contactInfo}</td>
+                                                        <td>{formatDate(customer.birthday)}</td>
+                                                        <td className="text-center">
+                                                            <button
+                                                                className="btn btn-outline-danger btn-sm"
+                                                                onClick={() => handleDelete(customer._id)}
+                                                                title="Delete customer"
+                                                            >
+                                                                <i className="fas fa-trash-alt"></i> Delete
+                                                            </button>
+                                                        </td>
+                                                    </tr>
+                                                ))
+                                            ) : (
+                                                <tr>
+                                                    <td colSpan="7" className="text-center py-5">
+                                                        <div className="text-muted">
+                                                            <i className="fas fa-user-slash fs-1 d-block mb-3"></i>
+                                                            <p className="mb-1">No matching customers found.</p>
+                                                            {searchTerm && (
+                                                                <small>Try adjusting your search criteria.</small>
+                                                            )}
+                                                        </div>
+                                                    </td>
+                                                </tr>
+                                            )}
+                                        </tbody>
+                                    </table>
+                                </div>
+                                <div className="d-flex justify-content-between align-items-center mt-3">
+                                    <small className="text-muted">
+                                        Showing {filteredCustomers.length} of {customers.length} customers
+                                    </small>
+                                    {/* Add Back to Dashboard Button */}
+                                    <button 
+                                        className="btn btn-outline-secondary" 
+                                        onClick={() => navigate("/admindashboard")}
+                                    >
+                                        <i className="fas fa-arrow-left me-2"></i> Back to Dashboard
+                                    </button>
+                                </div>
+                            </>
+                        )}
                     </div>
                 </div>
-
-                {error && <div className="alert alert-danger">{error}</div>}
-
-                {loading ? (
-                    <div className="text-center">
-                        <div className="spinner-border text-primary" role="status">
-                            <span className="visually-hidden">Loading...</span>
-                        </div>
-                    </div>
-                ) : (
-                    <div className="table-responsive">
-                        <table className="table table-striped table-hover table-bordered">
-                            <thead className="thead-dark">
-                                <tr>
-                                    <th>First Name</th>
-                                    <th>Last Name</th>
-                                    <th>Email</th>
-                                    <th>Address</th>
-                                    <th>Contact Info</th>
-                                    <th>Birthday</th>
-                                    <th>Actions</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                {filteredCustomers.length > 0 ? (
-                                    filteredCustomers.map((customer) => (
-                                        <tr key={customer._id}>
-                                            <td>{customer.firstName}</td>
-                                            <td>{customer.lastName}</td>
-                                            <td>{customer.email}</td>
-                                            <td>{customer.address}</td>
-                                            <td>{customer.contactInfo}</td>
-                                            <td>{formatDate(customer.birthday)}</td>
-                                            <td>
-                                                <button
-                                                    className="btn btn-danger btn-sm"
-                                                    onClick={() => handleDelete(customer._id)}
-                                                >
-                                                    <i className="fas fa-trash-alt"></i> Delete
-                                                </button>
-                                            </td>
-                                        </tr>
-                                    ))
-                                ) : (
-                                    <tr>
-                                        <td colSpan="7" className="text-center text-danger">
-                                            No matching customers found.
-                                        </td>
-                                    </tr>
-                                )}
-                            </tbody>
-                        </table>
-                    </div>
-                )}
             </div>
+
+            <style jsx>{`
+                .cursor-pointer {
+                    cursor: pointer;
+                }
+                .text-cell {
+                    max-width: 200px;
+                    white-space: nowrap;
+                    overflow: hidden;
+                    text-overflow: ellipsis;
+                }
+                @media (max-width: 768px) {
+                    .w-md-auto {
+                        width: 100% !important;
+                    }
+                }
+            `}</style>
         </div>
     );
 }

@@ -6,7 +6,8 @@ import "bootstrap/dist/css/bootstrap.min.css";
 import logo from "../../components/images/logo.jpg";
 import Header2 from "../../components/Header2";
 import Navbar2 from "../../components/Navbar2";
-import { FaSearch, FaFilePdf, FaEdit, FaSave, FaTrashAlt, FaSpinner } from "react-icons/fa";
+import { FaSearch, FaFilePdf, FaEdit, FaSave, FaTrashAlt, FaSpinner, FaArrowLeft } from "react-icons/fa";
+import { useNavigate } from "react-router-dom";
 
 export default function ManageFeedback() {
   const [feedback, setFeedback] = useState([]);
@@ -16,6 +17,7 @@ export default function ManageFeedback() {
   const [editingId, setEditingId] = useState(null);
   const [editedMessage, setEditedMessage] = useState("");
   const [sortConfig, setSortConfig] = useState({ key: 'createdAt', direction: 'desc' });
+  const navigate = useNavigate();
 
   // Fetch feedback data
   useEffect(() => {
@@ -293,6 +295,12 @@ export default function ManageFeedback() {
                   <small className="text-muted">
                     Showing {filteredFeedback.length} of {feedback.length} entries
                   </small>
+                  <button 
+                    className="btn btn-outline-secondary" 
+                    onClick={() => navigate("/admindashboard")}
+                  >
+                    <FaArrowLeft className="me-2" /> Back to Dashboard
+                  </button>
                 </div>
               </>
             )}
