@@ -5,6 +5,7 @@ const cors = require('cors');
 const customerRoutes = require('./routes/customer');
 const adminRoutes = require('./routes/admin');
 const customerFeedbackRoutes = require('./routes/feedback'); // Import the feedback route
+const productRoutes = require('./routes/product');
 
 dotenv.config();
 
@@ -24,6 +25,7 @@ mongoose
 app.use('/api/customer', customerRoutes);
 app.use('/api/admin', adminRoutes);
 app.use('/api/feedback', customerFeedbackRoutes); // Use the feedback route
+app.use('/api/product', productRoutes);
 
 // Start the server
 const PORT = process.env.PORT || 5000;

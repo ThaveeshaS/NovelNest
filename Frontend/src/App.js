@@ -28,6 +28,7 @@ import WishlistPage from './pages/Product/Wishlist';
 import AddToCartPage from './pages/Product/AddtoCart';
 import ManageProducts from './pages/Product/ManageProducts';
 import AddProducts from './pages/Product/AddProducts';
+import EditProduct from './pages/Product/EditProduct';
 
 
 function App() {
@@ -68,6 +69,7 @@ function App() {
         <Route path="/cart" element={<AddToCartPage />} />
         <Route path="/manageproducts" element={<ManageProducts/>} />
         <Route path="/addproducts" element={<AddProducts/>} />
+        <Route path="/edit-product/:id" element={<EditProduct/>} />
 
 
 
