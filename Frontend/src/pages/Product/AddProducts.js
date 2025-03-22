@@ -136,7 +136,7 @@ export default function AddProducts() {
       })
       .then((response) => {
         alert("Product Added Successfully!");
-        navigate("/products");
+        navigate("/manageproducts"); // Redirect to manageproducts page
       })
       .catch((error) => {
         console.error("There was an error adding the product!", error);
@@ -226,7 +226,7 @@ export default function AddProducts() {
                                   boxShadow: "0 2px 4px rgba(0,0,0,0.1)",
                                 }}
                               />
-                              <label htmlFor="price">Price (LKR)</label>
+                              <label htmlFor="price">Price ($)</label>
                               {errors.price && (
                                 <div className="invalid-feedback">
                                   {errors.price}
