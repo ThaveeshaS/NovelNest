@@ -12,7 +12,6 @@ router.use('/uploads', express.static('uploads'));
 router.get('/all', async (req, res) => {
   try {
     const products = await Product.find().sort({ createdAt: -1 });
-    console.log('Fetched products:', products); // Debugging log
     res.json(products);
   } catch (error) {
     console.error('Error fetching products:', error);
@@ -38,12 +37,10 @@ router.get('/:id', async (req, res) => {
 router.post('/add', (req, res) => {
   upload(req, res, async (err) => {
     if (err) {
-      console.error('Upload error:', err); // Debugging log
       return res.status(400).json({ message: err });
     }
 
     if (!req.file) {
-      console.error('No file uploaded'); // Debugging log
       return res.status(400).json({ message: 'Please upload a cover image' });
     }
 
@@ -59,17 +56,6 @@ router.post('/add', (req, res) => {
         language,
       } = req.body;
 
-      console.log('Received product data:', { // Debugging log
-        bookTitle,
-        price,
-        bookDescription,
-        bookQuantity,
-        category,
-        authorName,
-        isbnNumber,
-        language,
-      });
-
       const newProduct = new Product({
         coverPage: `/uploads/${req.file.filename}`,
         bookTitle,
@@ -83,10 +69,9 @@ router.post('/add', (req, res) => {
       });
 
       const savedProduct = await newProduct.save();
-      console.log('Product saved successfully:', savedProduct); // Debugging log
       res.status(201).json(savedProduct);
     } catch (error) {
-      console.error('Error saving product:', error); // Debugging log
+      console.error('Error saving product:', error);
       res.status(500).json({ message: 'Server error' });
     }
   });
