@@ -48,25 +48,60 @@ export default function ManageCustomers() {
         const filteredCustomers = getSortedData();
 
         const doc = new jsPDF();
+        const pageWidth = doc.internal.pageSize.width;
+        const pageHeight = doc.internal.pageSize.height;
+        const margin = 15;
 
+        // Set background color
+        doc.setFillColor(255, 252, 255); // Set RGB color
+        doc.rect(0, 0, pageWidth, pageHeight, 'F');
+        
+        // Add borders to the entire page
+        doc.setDrawColor(0, 71, 171); // Company blue color
+        doc.setLineWidth(1);
+        doc.rect(margin, margin, pageWidth - 2 * margin, pageHeight - 2 * margin);
+        
+        // Add decorative header bar
+        doc.setFillColor(0, 71, 171);
+        doc.rect(margin, margin, pageWidth - 2 * margin, 12, 'F');
+        
         // Add company logo
         if (logo) {
-            doc.addImage(logo, "JPEG", 80, 10, 40, 40);
+            doc.addImage(logo, "JPEG", pageWidth / 2 - 20, margin + 18, 40, 40);
         }
-
+        
+        // Add Company Name
+        doc.setFontSize(20);
+        doc.setFont("helvetica", "bold");
+        doc.setTextColor(0, 71, 171);
+        doc.text("NOVEL NEST BOOK STORE", pageWidth / 2, margin + 70, { align: "center" });
+        
         // Add company details
         doc.setFontSize(10);
-        doc.text("Call us : +94 123 456 789", 15, 60);
-        doc.text("Mail us : info@bookstore.com", 15, 68);
-        doc.text("Find us : 123 Book Street, Colombo, Sri Lanka", 15, 76);
-
-        // Add a title
+        doc.setFont("helvetica", "normal");
+        doc.setTextColor(0, 0, 0);
+        doc.text("123 Book Street, Colombo, Sri Lanka", pageWidth / 2, margin + 80, { align: "center" });
+        doc.text("Phone: +94 123 456 789 | Email: info@bookstore.com", pageWidth / 2, margin + 88, { align: "center" });
+        doc.text("www.novelnest.com", pageWidth / 2, margin + 96, { align: "center" });
+        
+        // Add horizontal separator
+        doc.setDrawColor(0, 71, 171);
+        doc.setLineWidth(0.5);
+        doc.line(margin + 10, margin + 105, pageWidth - margin - 10, margin + 105);
+        
+        // Add report title and date
         doc.setFontSize(16);
-        doc.text("Customers Report", 14, 92);
-
-        // Add table
+        doc.setFont("helvetica", "bold");
+        doc.text("CUSTOMERS REPORT", pageWidth / 2, margin + 120, { align: "center" });
+        
+        const today = new Date();
+        doc.setFontSize(10);
+        doc.setFont("helvetica", "normal");
+        doc.text(`Report Generated: ${today.toLocaleDateString()} at ${today.toLocaleTimeString()}`, pageWidth / 2, margin + 130, { align: "center" });
+        
+        // Add table with styling
         autoTable(doc, {
-            startY: 97,
+            startY: margin + 140,
             head: [["First Name", "Last Name", "Email", "Address", "Contact Info", "Birthday"]],
             body: filteredCustomers.map((customer) => [
                 customer.firstName,
@@ -76,9 +111,65 @@ export default function ManageCustomers() {
                 customer.contactInfo,
                 formatDate(customer.birthday),
             ]),
+            headStyles: {
+                fillColor: [0, 71, 171],
+                textColor: [255, 255, 255],
+                fontStyle: 'bold',
+            },
+            alternateRowStyles: {
+                fillColor: [240, 240, 240],
+            },
+            margin: { top: margin, right: margin + 5, bottom: margin + 40, left: margin + 5 },
+            styles: {
+                cellPadding: 3,
+                fontSize: 9,
+                overflow: 'linebreak',
+                lineWidth: 0.1,
+            },
+            columnStyles: {
+                2: { cellWidth: 'auto' }, // Give email column more space
+            },
         });
+        
+        // Add summary section
+        const finalY = doc.lastAutoTable.finalY + 10;
+        doc.setFontSize(11);
+        doc.setFont("helvetica", "bold");
+        doc.text("Summary:", margin + 5, finalY);
+        
+        doc.setFont("helvetica", "normal");
+        doc.setFontSize(10);
+        doc.text(`• Total Customers: ${customers.length}`, margin + 10, finalY + 8);
+        doc.text(`• Filtered Customers: ${filteredCustomers.length}`, margin + 10, finalY + 13);
+        
+        // Add signature section with dotted lines
+        const signY = pageHeight - margin - 22; // Position the signature section near the bottom
+        doc.setDrawColor(0); // Set line color to black
+        doc.setLineWidth(0.5); // Set line thickness
 
-        doc.save("Customers Report.pdf");
+        // Draw dotted lines for signatures
+        doc.setLineDash([1, 1]); // Set dotted line pattern (1 units on, 1 units off)
+        doc.line(margin + 10, signY, margin + 60, signY); // Left dotted line
+        doc.line(pageWidth - margin - 60, signY, pageWidth - margin - 10, signY); // Right dotted line
+
+        // Reset line dash to solid for other elements (if needed)
+        doc.setLineDash([]); // Reset to solid line
+
+        // Add labels for the signature section
+        doc.setFontSize(9);
+        doc.text("Prepared By", margin + 10, signY + 5); // Left label
+        doc.text("Customer Manager Signature", pageWidth - margin - 60, signY + 5); // Right label
+        
+        // Add footer
+        doc.setFontSize(8);
+        doc.setTextColor(100, 100, 100);
+        doc.text(`© ${today.getFullYear()} Novel Nest Book Store. All Rights Reserved.`, pageWidth / 2, pageHeight - margin - 5, { align: "center" });
+        
+        // Add page number
+        doc.text(`Page ${doc.getCurrentPageInfo().pageNumber} of ${doc.getNumberOfPages()}`, pageWidth - margin - 5, pageHeight - margin - 5, { align: "right" });
+        
+        // Save the document
+        doc.save("Novel Nest Customers Report.pdf");
     };
 
     const formatDate = (dateString) => {
