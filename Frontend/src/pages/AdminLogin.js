@@ -45,7 +45,7 @@ const AdminLogin = () => {
         <div className="row justify-content-center">
           <div className="col-md-6 col-lg-5">
             <div className="card shadow-lg border-0" style={{ borderRadius: "16px", overflow: "hidden", backgroundColor: "rgba(255, 255, 255, 0.92)" }}>
-              <div className="card-header text-center py-4" style={{ background: "linear-gradient(to right,rgba(141, 45, 226, 0.8),rgba(75, 0, 224, 0.8))", color: "white" }}>
+              <div className="card-header text-center py-4" style={{ background: "linear-gradient(to right,rgba(45, 184, 226, 0.64), rgba(0, 86, 199, 0.85))", color: "white" }}>
                 <h2 className="mb-0">Admin Login</h2>
                 <p className="mb-0">Welcome back! Please login to your account</p>
               </div>
@@ -104,7 +104,7 @@ const AdminLogin = () => {
                       className="btn btn-primary btn-lg"
                       type="submit"
                       disabled={isLoading}
-                      style={{ background: "linear-gradient(to right,rgba(141, 45, 226, 0.8),rgba(75, 0, 224, 0.8))", border: "none" }}
+                      style={{ background: "linear-gradient(to right,rgba(45, 184, 226, 0.64), rgba(0, 86, 199, 0.85))", border: "none" }}
                     >
                       {isLoading ? (
                         <>
