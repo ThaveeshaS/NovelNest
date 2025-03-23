@@ -8,6 +8,7 @@ import Navbar2 from "../../components/Navbar2";
 export default function EditProduct() {
   const navigate = useNavigate();
   const { id } = useParams();
+  const [originalData, setOriginalData] = useState(null); // Store original data
   const [formData, setFormData] = useState({
     coverPage: null,
     bookTitle: "",
@@ -24,12 +25,25 @@ export default function EditProduct() {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [coverPreview, setCoverPreview] = useState(null);
 
+  // Check if the form has been edited
+  const isFormEdited = () => {
+    if (!originalData) return false; // If original data is not loaded yet, return false
+    return Object.keys(formData).some((key) => {
+      if (key === "coverPage") {
+        // Handle file comparison separately
+        return formData[key] !== originalData[key];
+      }
+      return formData[key] !== originalData[key];
+    });
+  };
+
   useEffect(() => {
     const fetchProduct = async () => {
       try {
         const response = await axios.get(`http://localhost:5000/api/product/${id}`);
-        setFormData(response.data);
-        setCoverPreview(response.data.coverPage);
+        setOriginalData(response.data); // Store original data
+        setFormData(response.data); // Set form data
+        setCoverPreview(response.data.coverPage); // Set cover preview
       } catch (error) {
         console.error("Error fetching product:", error);
       }
@@ -109,7 +123,7 @@ export default function EditProduct() {
     validateField("bookQuantity", newQuantity);
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
 
     if (Object.values(errors).some((error) => error !== "")) {
@@ -117,10 +131,18 @@ export default function EditProduct() {
       return;
     }
 
+    if (!isFormEdited()) {
+      alert("No changes detected. Please edit the form before submitting.");
+      return;
+    }
+
     setIsSubmitting(true);
 
     const data = new FormData();
-    data.append("coverPage", formData.coverPage);
+    // Append coverPage only if a new file is selected
+    if (formData.coverPage instanceof File) {
+      data.append("coverPage", formData.coverPage);
+    }
     data.append("bookTitle", formData.bookTitle);
     data.append("price", formData.price);
     data.append("bookDescription", formData.bookDescription);
@@ -130,25 +152,25 @@ export default function EditProduct() {
     data.append("isbnNumber", formData.isbnNumber);
     data.append("language", formData.language);
 
-    axios
-      .put(`http://localhost:5000/api/product/update/${id}`, data, {
+    try {
+      const response = await axios.put(`http://localhost:5000/api/product/update/${id}`, data, {
         headers: {
           "Content-Type": "multipart/form-data",
         },
-      })
-      .then((response) => {
-        alert("Product Updated Successfully!");
-        navigate("/products");
-      })
-      .catch((error) => {
-        console.error("There was an error updating the product!", error);
-        alert(
-          "Error: " + error.response?.data?.message || "Something went wrong"
-        );
-      })
-      .finally(() => {
-        setIsSubmitting(false);
       });
+
+      if (response.status === 200) {
+        alert("Product Updated Successfully!");
+        navigate("/manageproducts");
+      } else {
+        alert("Failed to update product. Please try again.");
+      }
+    } catch (error) {
+      console.error("There was an error updating the product!", error);
+      alert("Error: " + (error.response?.data?.message || "Something went wrong"));
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   return (
@@ -228,7 +250,7 @@ export default function EditProduct() {
                                   boxShadow: "0 2px 4px rgba(0,0,0,0.1)",
                                 }}
                               />
-                              <label htmlFor="price">Price ($)</label>
+                              <label htmlFor="price">Price (RS)</label>
                               {errors.price && (
                                 <div className="invalid-feedback">
                                   {errors.price}
@@ -551,7 +573,6 @@ export default function EditProduct() {
                               id="coverPage"
                               name="coverPage"
                               onChange={handleFileChange}
-                              required
                             />
                             {errors.coverPage && (
                               <div className="text-danger mt-2">
@@ -578,7 +599,7 @@ export default function EditProduct() {
                       <button
                         type="submit"
                         className="btn btn-success btn-lg px-5 py-2"
-                        disabled={isSubmitting}
+                        disabled={!isFormEdited() || isSubmitting}
                         style={{
                           borderRadius: "0.5rem",
                           boxShadow: "0 2px 8px rgba(0,0,0,0.2)",

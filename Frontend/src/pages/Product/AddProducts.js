@@ -226,7 +226,7 @@ export default function AddProducts() {
                                   boxShadow: "0 2px 4px rgba(0,0,0,0.1)",
                                 }}
                               />
-                              <label htmlFor="price">Price ($)</label>
+                              <label htmlFor="price">Price (RS)</label>
                               {errors.price && (
                                 <div className="invalid-feedback">
                                   {errors.price}
