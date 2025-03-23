@@ -1,6 +1,7 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
 import 'bootstrap/dist/css/bootstrap.min.css'; // Import Bootstrap CSS
+import 'bootstrap-icons/font/bootstrap-icons.css'; // Import Bootstrap Icons CSS
 
 const Navbar2 = () => {
   return (
@@ -11,6 +12,11 @@ const Navbar2 = () => {
           <Link to="/customerdashboard" className="nav-link text-white mx-3">Home</Link>
           <Link to="/books" className="nav-link text-white mx-3">Books</Link>
           <Link to="/author" className="nav-link text-white mx-3">Author</Link>
+          
+          {/* Voice Mic Icon */}
+          <Link to="/voice" className="nav-link text-white mx-3">
+            <i className="bi bi-mic"></i>
+          </Link>
         </div>
 
         {/* Right-aligned icons */}

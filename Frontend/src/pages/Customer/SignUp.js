@@ -150,7 +150,7 @@ export default function CustomerSignUp() {
                 {/* Left side decorative panel */}
                 <div className="col-lg-4 d-none d-lg-block" 
                   style={{
-                    background: "linear-gradient(to bottom, rgba(142, 45, 226, 0.8), rgba(74, 0, 224, 0.8))",
+                    background: "linear-gradient(to bottom, rgba(45, 184, 226, 0.64), rgba(0, 86, 199, 0.85))",
                     padding: "2rem",
                     display: "flex",
                     flexDirection: "column",
@@ -169,7 +169,10 @@ export default function CustomerSignUp() {
                 {/* Right side form */}
                 <div className="col-lg-8" style={{ backdropFilter: "blur(5px)" }}>
                   <div className="card-body p-4 p-lg-5">
-                    <h2 className="text-center fw-bold mb-4" style={{ color: "#4A00E0" }}>Create Account</h2>
+                    <h2 className="text-center fw-bold mb-4" 
+                      style={{ color: 'rgb(9, 165, 255)'}}>
+                        Create Account
+                    </h2>
                     
                     <form onSubmit={handleSubmit}>
                       <div className="row">
@@ -351,7 +354,7 @@ export default function CustomerSignUp() {
                           type="submit" 
                           className="btn py-3 mt-3"
                           style={{
-                            background: "linear-gradient(to right, rgba(142, 45, 226, 0.9), rgba(74, 0, 224, 0.9))",
+                            background: "linear-gradient(to right, rgba(45, 184, 226, 0.64), rgba(0, 86, 199, 0.85))",
                             color: "white",
                             fontSize: "1.1rem",
                             fontWeight: "600",

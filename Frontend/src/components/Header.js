@@ -38,6 +38,7 @@ function Header() {
                 type="search"
                 placeholder="Search"
                 aria-label="Search"
+                style={{ width: '320px' }} // Adjust the width here
               />
               <button className="btn btn-outline-light" type="submit">Search</button>
             </form>
