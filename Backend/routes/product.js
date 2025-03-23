@@ -6,7 +6,7 @@ const path = require('path');
 const fs = require('fs');
 
 // Serve static files from the uploads directory
-router.use('/uploads', express.static('uploads'));
+router.use('/uploads', express.static(path.join(__dirname, '..', 'uploads')));
 
 // GET all products
 router.get('/all', async (req, res) => {
@@ -109,11 +109,13 @@ router.put('/update/:id', (req, res) => {
           const oldImagePath = path.join(__dirname, '..', product.coverPage);
           if (fs.existsSync(oldImagePath)) {
             fs.unlinkSync(oldImagePath);
+            console.log('Old image deleted:', oldImagePath);
           }
         }
 
         // Update with new image path
         updateData.coverPage = `/uploads/${req.file.filename}`;
+        console.log('New image path:', updateData.coverPage);
       }
 
       const updatedProduct = await Product.findByIdAndUpdate(
@@ -144,6 +146,7 @@ router.delete('/delete/:id', async (req, res) => {
       const imagePath = path.join(__dirname, '..', product.coverPage);
       if (fs.existsSync(imagePath)) {
         fs.unlinkSync(imagePath);
+        console.log('Image deleted:', imagePath);
       }
     }
 

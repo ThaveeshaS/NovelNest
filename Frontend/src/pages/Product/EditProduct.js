@@ -43,7 +43,21 @@ export default function EditProduct() {
         const response = await axios.get(`http://localhost:5000/api/product/${id}`);
         setOriginalData(response.data); // Store original data
         setFormData(response.data); // Set form data
-        setCoverPreview(response.data.coverPage); // Set cover preview
+
+        // Handle coverPage preview
+        if (response.data.coverPage) {
+          if (typeof response.data.coverPage === "string") {
+            // If coverPage is a URL (string), set it directly as the preview
+            setCoverPreview(response.data.coverPage);
+          } else {
+            // If coverPage is a file object, create a preview URL
+            const reader = new FileReader();
+            reader.onloadend = () => {
+              setCoverPreview(reader.result);
+            };
+            reader.readAsDataURL(response.data.coverPage);
+          }
+        }
       } catch (error) {
         console.error("Error fetching product:", error);
       }

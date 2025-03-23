@@ -242,7 +242,7 @@ export default function ManageProducts() {
                               </span>
                             </td>
                             <td className="text-primary fw-bold">
-                              ${product.price}
+                              RS.{product.price}
                             </td>
                             <td>
                               <span
