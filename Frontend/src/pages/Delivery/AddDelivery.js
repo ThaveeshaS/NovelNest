@@ -14,8 +14,7 @@ import {
   LocalShipping as LocalShippingIcon, ArrowBack as ArrowBackIcon, 
   Save as SaveIcon, LocationOn as LocationOnIcon, Person as PersonIcon, 
   Email as EmailIcon, Phone as PhoneIcon, CalendarToday as CalendarTodayIcon, 
-  AttachMoney as AttachMoneyIcon, CheckCircle as CheckCircleIcon,
-  Timeline as TimelineIcon
+  AttachMoney as AttachMoneyIcon, CheckCircle as CheckCircleIcon 
 } from '@mui/icons-material';
 
 const AddDelivery = () => {
@@ -55,8 +54,7 @@ const AddDelivery = () => {
     email: '',
     deliveryStatus: 'Pending',
     estimatedDeliveryDate: '',
-    deliveryFee: 0,
-    trackingEvents: []
+    deliveryFee: 0
   };
 
   const [formData, setFormData] = useState(initialFormState);
@@ -64,7 +62,6 @@ const AddDelivery = () => {
   const [notification, setNotification] = useState({ open: false, message: '', severity: 'success' });
   const [formErrors, setFormErrors] = useState({});
   const [activeStep, setActiveStep] = useState(0);
-  const [isSubmitted, setIsSubmitted] = useState(false);
   
   useEffect(() => {
     const prefix = 'DEL';
@@ -111,10 +108,6 @@ const AddDelivery = () => {
     return Object.keys(errors).length === 0;
   };
 
-  const handleTrackDelivery = () => {
-    navigate(`/track-delivery/${formData.deliveryId}`);
-  };
-
   const handleSubmit = async (e) => {
     e.preventDefault();
     if (!validateForm()) {
@@ -123,25 +116,10 @@ const AddDelivery = () => {
     }
     setLoading(true);
     try {
-      // Initialize tracking events with the creation event
-      const deliveryData = {
-        ...formData,
-        trackingEvents: [
-          {
-            status: 'Order Created',
-            timestamp: new Date(),
-            description: 'Your delivery order has been created and is being processed.',
-            location: 'System'
-          }
-        ]
-      };
-      
-      const response = await axios.post('http://localhost:5000/api/deliveries', deliveryData);
+      await axios.post('http://localhost:5000/api/deliveries', formData);
       setNotification({ open: true, message: 'Delivery scheduled successfully!', severity: 'success' });
-      setIsSubmitted(true);
-      
-      // Store the response data (which includes the created delivery)
-      setFormData(response.data);
+      setFormData(initialFormState);
+      setTimeout(() => navigate('/admin/DeliveryDetails'), 1500);
     } catch (error) {
       setNotification({ open: true, message: 'Failed to schedule delivery. Please try again.', severity: 'error' });
     } finally {
@@ -149,118 +127,10 @@ const AddDelivery = () => {
     }
   };
 
-  const handleReset = () => {
-    setFormData(initialFormState);
-    setIsSubmitted(false);
-    setActiveStep(0);
-    // Generate a new delivery ID
-    const prefix = 'DEL';
-    const timestamp = new Date().getTime().toString().slice(-6);
-    const random = Math.floor(Math.random() * 1000).toString().padStart(3, '0');
-    setFormData(prev => ({ ...prev, deliveryId: `${prefix}-${timestamp}-${random}` }));
-  };
-
   const buttonSx = { '& .MuiButton-root': {
     transition: 'all 0.3s ease',
     '&:hover': { transform: 'translateY(-2px)', boxShadow: '0 4px 8px rgba(0,0,0,0.1)' }
   }};
-
-  const renderSuccessScreen = () => (
-    <Box sx={{ 
-      display: 'flex', 
-      flexDirection: 'column', 
-      alignItems: 'center', 
-      justifyContent: 'center',
-      py: 4
-    }}>
-      <Box sx={{
-        width: 80,
-        height: 80,
-        borderRadius: '50%',
-        backgroundColor: alpha('#4caf50', 0.1),
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'center',
-        mb: 3
-      }}>
-        <CheckCircleIcon sx={{ fontSize: 50, color: '#4caf50' }} />
-      </Box>
-      <Typography variant="h5" fontWeight="600" sx={{ mb: 2 }}>
-        Delivery Created Successfully!
-      </Typography>
-      <Typography variant="body1" textAlign="center" sx={{ mb: 4, maxWidth: '80%' }}>
-        The delivery has been scheduled and the customer will be notified. You can track the delivery status using the tracking ID.
-      </Typography>
-      <Paper elevation={2} sx={{ p: 3, mb: 4, width: '100%', borderRadius: 2, backgroundColor: alpha(theme.palette.primary.light, 0.05) }}>
-        <Typography variant="subtitle2" color="text.secondary" gutterBottom>
-          Tracking ID
-        </Typography>
-        <Typography variant="h6" fontWeight="600" sx={{ mb: 1 }}>
-          {formData.deliveryId}
-        </Typography>
-        <Divider sx={{ my: 2 }} />
-        <Box sx={{ display: 'flex', justifyContent: 'space-between', flexWrap: 'wrap', gap: 2 }}>
-          <Box>
-            <Typography variant="subtitle2" color="text.secondary" gutterBottom>
-              Customer
-            </Typography>
-            <Typography variant="body1" fontWeight="500">
-              {formData.customerName}
-            </Typography>
-          </Box>
-          <Box>
-            <Typography variant="subtitle2" color="text.secondary" gutterBottom>
-              Status
-            </Typography>
-            <Box sx={{ display: 'flex', alignItems: 'center' }}>
-              <Box component="span" sx={{ 
-                display: 'inline-block', width: 10, height: 10, borderRadius: '50%', 
-                backgroundColor: getStatusColor(formData.deliveryStatus), mr: 1
-              }}/>
-              <Typography variant="body1" fontWeight="500">
-                {formData.deliveryStatus}
-              </Typography>
-            </Box>
-          </Box>
-          <Box>
-            <Typography variant="subtitle2" color="text.secondary" gutterBottom>
-              Expected Delivery
-            </Typography>
-            <Typography variant="body1" fontWeight="500">
-              {formData.estimatedDeliveryDate ? 
-                new Date(formData.estimatedDeliveryDate).toLocaleDateString('en-US', {
-                  weekday: 'short', year: 'numeric', month: 'short', day: 'numeric'
-                }) : '—'}
-            </Typography>
-          </Box>
-        </Box>
-      </Paper>
-      <Box sx={{ display: 'flex', gap: 2, justifyContent: 'center', width: '100%' }}>
-        <Button
-          variant="outlined"
-          color="primary"
-          size="large"
-          onClick={handleReset}
-          startIcon={<ArrowBackIcon />}
-        >
-          Create New
-        </Button>
-        <Button
-          variant="contained"
-          color="primary"
-          size="large"
-          onClick={handleTrackDelivery}
-          startIcon={<TimelineIcon />}
-          sx={{ 
-            backgroundColor: theme.palette.primary.main,
-            '&:hover': { backgroundColor: theme.palette.primary.dark }
-          }}
-        >
-          Track Delivery
-        </Button>
-      </Box>
-    </Box>
-  );
 
   const renderStepContent = (step) => {
     switch (step) {
@@ -494,35 +364,28 @@ const AddDelivery = () => {
               Delivery Management
             </Typography>
           </Box>
-          
-          {isSubmitted ? (
-            renderSuccessScreen()
-          ) : (
-            <>
-              <Stepper activeStep={activeStep} alternativeLabel={!isMobile} 
-                orientation={isMobile ? 'vertical' : 'horizontal'} sx={{ 
-                  mb: 4, '& .MuiStepLabel-label': { mt: 1 },
-                  '& .MuiStepLabel-iconContainer': {
-                    '& .MuiStepIcon-root': {
-                      color: 'primary.light',
-                      '&.Mui-active': { color: 'primary.main' },
-                      '&.Mui-completed': { color: 'success.main' },
-                    },
-                  },
-                }}>
-                {steps.map((label) => (
-                  <Step key={label}>
-                    <StepLabel>{label}</StepLabel>
-                  </Step>
-                ))}
-              </Stepper>
-              <form onSubmit={handleSubmit}>
-                <Box sx={{ minHeight: '350px', p: { xs: 1, sm: 2 } }}>
-                  {renderStepContent(activeStep)}
-                </Box>
-              </form>
-            </>
-          )}
+          <Stepper activeStep={activeStep} alternativeLabel={!isMobile} 
+            orientation={isMobile ? 'vertical' : 'horizontal'} sx={{ 
+              mb: 4, '& .MuiStepLabel-label': { mt: 1 },
+              '& .MuiStepLabel-iconContainer': {
+                '& .MuiStepIcon-root': {
+                  color: 'primary.light',
+                  '&.Mui-active': { color: 'primary.main' },
+                  '&.Mui-completed': { color: 'success.main' },
+                },
+              },
+            }}>
+            {steps.map((label) => (
+              <Step key={label}>
+                <StepLabel>{label}</StepLabel>
+              </Step>
+            ))}
+          </Stepper>
+          <form onSubmit={handleSubmit}>
+            <Box sx={{ minHeight: '350px', p: { xs: 1, sm: 2 } }}>
+              {renderStepContent(activeStep)}
+            </Box>
+          </form>
         </Paper>
       </Container>
       <Snackbar open={notification.open} autoHideDuration={6000} 
