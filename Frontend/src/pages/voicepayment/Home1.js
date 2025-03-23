@@ -86,7 +86,7 @@ const Home = () => {
         )}
       </div>
       <div className="mt-3">
-        <button className="btn btn-secondary" onClick={() => navigate('/admin/books')}>
+        <button className="btn btn-secondary" onClick={() => navigate('/adminbookspanel')}>
           Manage Books
         </button>
         <button className="btn btn-secondary ms-2" onClick={() => navigate('/admin/transactions')}>
