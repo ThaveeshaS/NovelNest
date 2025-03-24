@@ -19,6 +19,18 @@ router.get('/all', async (req, res) => {
   }
 });
 
+// GET products by category
+router.get('/category/:category', async (req, res) => {
+  try {
+    const category = req.params.category; // Extract category from the URL
+    const products = await Product.find({ category }).sort({ createdAt: -1 }); // Fetch products by category
+    res.json(products);
+  } catch (error) {
+    console.error('Error fetching products by category:', error);
+    res.status(500).json({ message: 'Server error' });
+  }
+});
+
 // GET a single product by ID
 router.get('/:id', async (req, res) => {
   try {
@@ -108,14 +120,12 @@ router.put('/update/:id', (req, res) => {
         if (product.coverPage) {
           const oldImagePath = path.join(__dirname, '..', product.coverPage);
           if (fs.existsSync(oldImagePath)) {
-            fs.unlinkSync(oldImagePath);
-            console.log('Old image deleted:', oldImagePath);
+            fs.unlinkSync(oldImagePath); // Old image deleted, but no log message
           }
         }
 
         // Update with new image path
         updateData.coverPage = `/uploads/${req.file.filename}`;
-        console.log('New image path:', updateData.coverPage);
       }
 
       const updatedProduct = await Product.findByIdAndUpdate(
@@ -145,8 +155,7 @@ router.delete('/delete/:id', async (req, res) => {
     if (product.coverPage) {
       const imagePath = path.join(__dirname, '..', product.coverPage);
       if (fs.existsSync(imagePath)) {
-        fs.unlinkSync(imagePath);
-        console.log('Image deleted:', imagePath);
+        fs.unlinkSync(imagePath); // Image deleted, but no log message
       }
     }
 

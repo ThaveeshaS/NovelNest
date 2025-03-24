@@ -363,9 +363,7 @@ export default function AddProducts() {
                                 </option>
                                 <option value="Fiction">Fiction</option>
                                 <option value="Non-Fiction">Non-Fiction</option>
-                                <option value="Children's & Young Adult">
-                                  Children's & Young Adult
-                                </option>
+                                <option value="Children's & Young Adult">Children's & Young Adult </option>
                               </select>
                               {errors.category && (
                                 <div className="invalid-feedback d-block mt-1">
