@@ -17,6 +17,8 @@
     "jsonwebtoken": "^9.0.2",
     "mongoose": "^8.12.1",
     "nodemailer": "^6.10.0",
+    "pdfkit": "^0.16.0",
+    "tslib": "^2.8.1",
     "twilio": "^5.5.0"
   },
   "devDependencies": {
