@@ -13,6 +13,8 @@ import CustomerAccount from './pages/Customer/CustomerAccount';
 import AdminLogin from "./pages/AdminLogin";
 import AdminDashboard from "./pages/AdminDashboard";
 import ManageCustomers from './pages/Customer/ManageCustomers'; 
+import CustomerFeedback from './pages/Customer/CustomerFeedback'; 
+import ManageFeedback from './pages/Customer/ManageFeedback';
 
 
 import AddDelivery from './pages/Delivery/AddDelivery'; // Corrected path

@@ -11,7 +11,7 @@ function Header2() {
         {/* Company Logo and Name */}
         <Link className="navbar-brand d-flex align-items-center" to="/">
           <img src={logo} alt="Company Logo" style={{ height: '55px' }} />
-          <span className="ms-2" style={{ fontSize: '1.4rem', fontWeight: 'bold' }}> Navel Nest Book Store</span>
+          <span className="ms-2" style={{ fontSize: '1.4rem', fontWeight: 'bold' }}> NovelNest Book Store</span>
         </Link>
 
         {/* Toggle Button for Mobile */}
@@ -37,6 +37,7 @@ function Header2() {
                 type="search"
                 placeholder="Search"
                 aria-label="Search"
+                style={{ width: '320px' }}
               />
               <button className="btn btn-outline-light" type="submit">Search</button>
             </form>

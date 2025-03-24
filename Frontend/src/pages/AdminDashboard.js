@@ -22,11 +22,14 @@ const AdminDashboard = () => {
       }
 
       try {
-        const response = await axios.get("http://localhost:5000/api/admin/protected", {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        });
+        const response = await axios.get(
+          "http://localhost:5000/api/admin/protected",
+          {
+            headers: {
+              Authorization: `Bearer ${token}`,
+            },
+          }
+        );
 
         setAdmin(response.data.admin);
       } catch (err) {
@@ -46,7 +49,16 @@ const AdminDashboard = () => {
   };
 
   if (!admin) {
-    return <div>Loading...</div>;
+    return (
+      <div
+        className="d-flex justify-content-center align-items-center"
+        style={{ height: "100vh" }}
+      >
+        <div className="spinner-border text-primary" role="status">
+          <span className="visually-hidden">Loading...</span>
+        </div>
+      </div>
+    );
   }
 
   return (
@@ -107,3 +119,4 @@ const AdminDashboard = () => {
 };
 
 export default AdminDashboard;
+
