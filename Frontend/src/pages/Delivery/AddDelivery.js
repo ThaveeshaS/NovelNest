@@ -48,15 +48,8 @@ const AddDelivery = () => {
   };
   
   const initialFormState = {
-    deliveryId: '',
-    orderId: '',
-    customerName: '',
-    deliveryAddress: '',
-    contactNumber: '',
-    email: '',
-    deliveryStatus: 'Pending',
-    estimatedDeliveryDate: '',
-    deliveryFee: 0
+    deliveryId: '', orderId: '', customerName: '', deliveryAddress: '', contactNumber: '',
+    email: '', deliveryStatus: 'Pending', estimatedDeliveryDate: '', deliveryFee: 0
   };
 
   const [formData, setFormData] = useState(initialFormState);
@@ -71,12 +64,14 @@ const AddDelivery = () => {
   const rowsPerPage = 5;
   
   useEffect(() => {
-    const prefix = 'DEL';
-    const timestamp = new Date().getTime().toString().slice(-6);
-    const random = Math.floor(Math.random() * 1000).toString().padStart(3, '0');
-    setFormData(prev => ({ ...prev, deliveryId: `${prefix}-${timestamp}-${random}` }));
+    const generateDeliveryId = () => {
+      const prefix = 'DEL';
+      const timestamp = new Date().getTime().toString().slice(-6);
+      const random = Math.floor(Math.random() * 1000).toString().padStart(3, '0');
+      return `${prefix}-${timestamp}-${random}`;
+    };
     
-    // Fetch all deliveries when component mounts
+    setFormData(prev => ({ ...prev, deliveryId: generateDeliveryId() }));
     fetchDeliveries();
   }, []);
 
@@ -87,11 +82,7 @@ const AddDelivery = () => {
       setAllDeliveries(response.data);
     } catch (error) {
       console.error('Error fetching deliveries:', error);
-      setNotification({ 
-        open: true, 
-        message: 'Failed to fetch delivery details. Please try again.', 
-        severity: 'error' 
-      });
+      setNotification({ open: true, message: 'Failed to fetch delivery details.', severity: 'error' });
     } finally {
       setDeliveriesLoading(false);
     }
@@ -102,11 +93,7 @@ const AddDelivery = () => {
   const handleBack = () => setActiveStep(prevStep => prevStep - 1);
   const getStatusColor = (status) => statusColors[status] || '#95a5a6';
   const handleChangePage = (event, newPage) => setPage(newPage);
-  
-  const handleSearchChange = (e) => {
-    setSearchTerm(e.target.value);
-    setPage(1); // Reset to first page when searching
-  };
+  const handleSearchChange = (e) => { setSearchTerm(e.target.value); setPage(1); };
 
   const filteredDeliveries = allDeliveries.filter(delivery => 
     delivery.customerName?.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -115,19 +102,14 @@ const AddDelivery = () => {
   );
 
   const paginatedDeliveries = filteredDeliveries.slice(
-    (page - 1) * rowsPerPage,
-    (page - 1) * rowsPerPage + rowsPerPage
+    (page - 1) * rowsPerPage, (page - 1) * rowsPerPage + rowsPerPage
   );
 
-  // Calculate total fee of the current page
-  const currentPageTotalFee = paginatedDeliveries.reduce((total, delivery) => {
-    return total + (parseFloat(delivery.deliveryFee) || 0);
-  }, 0);
-
-  // Calculate total fee of all filtered deliveries
-  const allFilteredTotalFee = filteredDeliveries.reduce((total, delivery) => {
-    return total + (parseFloat(delivery.deliveryFee) || 0);
-  }, 0);
+  const currentPageTotalFee = paginatedDeliveries.reduce((total, delivery) => 
+    total + (parseFloat(delivery.deliveryFee) || 0), 0);
+    
+  const allFilteredTotalFee = filteredDeliveries.reduce((total, delivery) => 
+    total + (parseFloat(delivery.deliveryFee) || 0), 0);
 
   const validateStep = (step) => {
     const errors = {};
@@ -172,14 +154,8 @@ const AddDelivery = () => {
     try {
       await axios.post('http://localhost:5000/api/deliveries', formData);
       setNotification({ open: true, message: 'Delivery scheduled successfully!', severity: 'success' });
-      // Refresh the delivery list after adding new one
       fetchDeliveries();
-      setFormData(initialFormState);
-      // Generate a new delivery ID after submission
-      const prefix = 'DEL';
-      const timestamp = new Date().getTime().toString().slice(-6);
-      const random = Math.floor(Math.random() * 1000).toString().padStart(3, '0');
-      setFormData(prev => ({ ...prev, deliveryId: `${prefix}-${timestamp}-${random}` }));
+      setFormData({ ...initialFormState, deliveryId: `DEL-${new Date().getTime().toString().slice(-6)}-${Math.floor(Math.random() * 1000).toString().padStart(3, '0')}` });
       setTimeout(() => navigate('/admin/DeliveryDetails'), 1500);
     } catch (error) {
       setNotification({ open: true, message: 'Failed to schedule delivery. Please try again.', severity: 'error' });
@@ -193,41 +169,40 @@ const AddDelivery = () => {
     '&:hover': { transform: 'translateY(-2px)', boxShadow: '0 4px 8px rgba(0,0,0,0.1)' }
   }};
 
+  const InputWithIcon = ({ icon, children }) => (
+    <Box sx={{ display: 'flex', alignItems: 'flex-end', mb: 2 }}>
+      {icon}
+      {children}
+    </Box>
+  );
+
   const renderStepContent = (step) => {
     switch (step) {
       case 0:
         return (
           <Box sx={{ px: 1 }}>
-            <Box sx={{ display: 'flex', alignItems: 'flex-end', mb: 2 }}>
-              <PersonIcon sx={{ color: 'primary.main', mr: 1, my: 0.5 }} />
-              <TextField
-                label="Customer Name" value={formData.customerName}
+            <InputWithIcon icon={<PersonIcon sx={{ color: 'primary.main', mr: 1, my: 0.5 }} />}>
+              <TextField label="Customer Name" value={formData.customerName}
                 onChange={(e) => setFormData({ ...formData, customerName: e.target.value })}
                 fullWidth variant="outlined" required error={!!formErrors.customerName}
-                helperText={formErrors.customerName} sx={{ mb: 0 }}
-              />
-            </Box>
-            <Box sx={{ display: 'flex', alignItems: 'flex-end', mb: 2 }}>
-              <EmailIcon sx={{ color: 'primary.main', mr: 1, my: 0.5 }} />
-              <TextField
-                label="Email" type="email" value={formData.email}
+                helperText={formErrors.customerName} sx={{ mb: 0 }} />
+            </InputWithIcon>
+            <InputWithIcon icon={<EmailIcon sx={{ color: 'primary.main', mr: 1, my: 0.5 }} />}>
+              <TextField label="Email" type="email" value={formData.email}
                 onChange={(e) => setFormData({ ...formData, email: e.target.value })}
                 fullWidth variant="outlined" required error={!!formErrors.email}
-                helperText={formErrors.email} sx={{ mb: 0 }}
-              />
-            </Box>
+                helperText={formErrors.email} sx={{ mb: 0 }} />
+            </InputWithIcon>
             <Box mt={3} mb={3}>
               <Box sx={{ display: 'flex', alignItems: 'center', mb: 1 }}>
                 <PhoneIcon sx={{ color: 'primary.main', mr: 1 }} />
                 <Typography variant="subtitle1">Contact Number *</Typography>
               </Box>
-              <PhoneInput
-                country={'us'} value={formData.contactNumber}
+              <PhoneInput country={'us'} value={formData.contactNumber}
                 onChange={(phone) => setFormData({ ...formData, contactNumber: phone })}
                 inputStyle={{ width: '100%', height: '56px', borderRadius: '8px' }}
                 buttonStyle={{ borderRadius: '8px 0 0 8px' }} enableSearch
-                placeholder="Enter contact number" required
-              />
+                placeholder="Enter contact number" />
               {formErrors.contactNumber && (
                 <Typography color="error" variant="caption" sx={{ ml: 4 }}>
                   {formErrors.contactNumber}
@@ -235,10 +210,8 @@ const AddDelivery = () => {
               )}
             </Box>
             <Box display="flex" justifyContent="flex-end" mt={4} sx={buttonSx}>
-              <Button
-                variant="contained" color="primary" onClick={handleNext}
-                endIcon={<ArrowBackIcon style={{ transform: 'rotate(180deg)' }} />} size="large"
-              >
+              <Button variant="contained" color="primary" onClick={handleNext}
+                endIcon={<ArrowBackIcon style={{ transform: 'rotate(180deg)' }} />} size="large">
                 Next
               </Button>
             </Box>
@@ -247,42 +220,29 @@ const AddDelivery = () => {
       case 1:
         return (
           <Box sx={{ px: 1 }}>
-            <Box sx={{ display: 'flex', alignItems: 'flex-end', mb: 2 }}>
-              <TextField
-                label="Order ID" value={formData.orderId}
-                onChange={(e) => setFormData({ ...formData, orderId: e.target.value })}
-                fullWidth required variant="outlined" error={!!formErrors.orderId}
-                helperText={formErrors.orderId} sx={{ mb: 0 }}
-              />
-            </Box>
-            <TextField
-              label="Delivery ID (Auto-generated)" value={formData.deliveryId}
+            <TextField label="Order ID" value={formData.orderId}
+              onChange={(e) => setFormData({ ...formData, orderId: e.target.value })}
+              fullWidth required variant="outlined" error={!!formErrors.orderId}
+              helperText={formErrors.orderId} sx={{ mb: 2 }} />
+            <TextField label="Delivery ID (Auto-generated)" value={formData.deliveryId}
               InputProps={{ readOnly: true }} fullWidth variant="outlined"
-              sx={{ mb: 2, '& .MuiOutlinedInput-root': { backgroundColor: alpha(theme.palette.primary.light, 0.05) } }}
-            />
-            <Box sx={{ display: 'flex', alignItems: 'flex-start', mb: 2 }}>
-              <LocationOnIcon sx={{ color: 'primary.main', mr: 1, mt: 2 }} />
-              <TextField
-                label="Delivery Address" value={formData.deliveryAddress}
+              sx={{ mb: 2, '& .MuiOutlinedInput-root': { backgroundColor: alpha(theme.palette.primary.light, 0.05) } }} />
+            <InputWithIcon icon={<LocationOnIcon sx={{ color: 'primary.main', mr: 1, mt: 2 }} />}>
+              <TextField label="Delivery Address" value={formData.deliveryAddress}
                 onChange={(e) => setFormData({ ...formData, deliveryAddress: e.target.value })}
                 fullWidth required variant="outlined" multiline rows={3}
-                error={!!formErrors.deliveryAddress} helperText={formErrors.deliveryAddress} sx={{ mb: 0 }}
-              />
-            </Box>
+                error={!!formErrors.deliveryAddress} helperText={formErrors.deliveryAddress} sx={{ mb: 0 }} />
+            </InputWithIcon>
             <FormControl fullWidth variant="outlined" sx={{ mb: 2 }}>
               <InputLabel>Delivery Status</InputLabel>
-              <Select
-                value={formData.deliveryStatus}
+              <Select value={formData.deliveryStatus}
                 onChange={(e) => setFormData({ ...formData, deliveryStatus: e.target.value })}
                 label="Delivery Status"
-                sx={{ '& .MuiSelect-select': { display: 'flex', alignItems: 'center', gap: 1 } }}
-              >
+                sx={{ '& .MuiSelect-select': { display: 'flex', alignItems: 'center', gap: 1 } }}>
                 {statuses.map(status => (
                   <MenuItem key={status} value={status}>
-                    <Box component="span" sx={{ 
-                      display: 'inline-block', width: 12, height: 12, borderRadius: '50%', 
-                      backgroundColor: getStatusColor(status), mr: 1
-                    }}/>
+                    <Box component="span" sx={{ display: 'inline-block', width: 12, height: 12, 
+                      borderRadius: '50%', backgroundColor: getStatusColor(status), mr: 1 }} />
                     {status}
                   </MenuItem>
                 ))}
@@ -290,76 +250,58 @@ const AddDelivery = () => {
             </FormControl>
             <Box display="flex" justifyContent="space-between" mt={4} sx={buttonSx}>
               <Button variant="outlined" color="primary" onClick={handleBack}
-                startIcon={<ArrowBackIcon />} size="large">
-                Back
-              </Button>
+                startIcon={<ArrowBackIcon />} size="large">Back</Button>
               <Button variant="contained" color="primary" onClick={handleNext}
-                endIcon={<ArrowBackIcon style={{ transform: 'rotate(180deg)' }} />} size="large">
-                Next
-              </Button>
+                endIcon={<ArrowBackIcon style={{ transform: 'rotate(180deg)' }} />} size="large">Next</Button>
             </Box>
           </Box>
         );
       case 2:
         return (
           <Box sx={{ px: 1 }}>
-            <Box sx={{ display: 'flex', alignItems: 'flex-end', mb: 2 }}>
-              <CalendarTodayIcon sx={{ color: 'primary.main', mr: 1, my: 0.5 }} />
-              <TextField
-                label="Estimated Delivery Date" type="date"
-                value={formData.estimatedDeliveryDate}
+            <InputWithIcon icon={<CalendarTodayIcon sx={{ color: 'primary.main', mr: 1, my: 0.5 }} />}>
+              <TextField label="Estimated Delivery Date" type="date" value={formData.estimatedDeliveryDate}
                 onChange={(e) => setFormData({ ...formData, estimatedDeliveryDate: e.target.value })}
                 fullWidth InputLabelProps={{ shrink: true }} required variant="outlined"
-                error={!!formErrors.estimatedDeliveryDate}
-                helperText={formErrors.estimatedDeliveryDate} sx={{ mb: 0 }}
-              />
-            </Box>
-            <Box sx={{ display: 'flex', alignItems: 'flex-end', mb: 3 }}>
-              <AttachMoneyIcon sx={{ color: 'primary.main', mr: 1, my: 0.5 }} />
-              <TextField
-                label="Delivery Fee" type="number" value={formData.deliveryFee}
+                error={!!formErrors.estimatedDeliveryDate} helperText={formErrors.estimatedDeliveryDate} sx={{ mb: 0 }} />
+            </InputWithIcon>
+            <InputWithIcon icon={<AttachMoneyIcon sx={{ color: 'primary.main', mr: 1, my: 0.5 }} />}>
+              <TextField label="Delivery Fee" type="number" value={formData.deliveryFee}
                 onChange={(e) => setFormData({ ...formData, deliveryFee: parseFloat(e.target.value) })}
                 fullWidth required variant="outlined" InputProps={{ startAdornment: '$' }}
-                error={!!formErrors.deliveryFee} helperText={formErrors.deliveryFee} sx={{ mb: 0 }}
-              />
-            </Box>
+                error={!!formErrors.deliveryFee} helperText={formErrors.deliveryFee} sx={{ mb: 0 }} />
+            </InputWithIcon>
+            
             <Divider sx={{ my: 3 }} />
+            
+            {/* Order Summary Section */}
             <Box sx={{ mb: 3 }}>
-              <Typography variant="h6" gutterBottom sx={{ 
-                display: 'flex', alignItems: 'center', color: 'primary.main', fontWeight: 600,
-              }}>
+              <Typography variant="h6" gutterBottom sx={{ display: 'flex', alignItems: 'center', 
+                color: 'primary.main', fontWeight: 600 }}>
                 <CheckCircleIcon sx={{ mr: 1 }} />
                 Order Summary
               </Typography>
-              <Paper elevation={0} sx={{ 
-                backgroundColor: alpha(theme.palette.primary.light, 0.05), 
-                p: 3, borderRadius: 2, border: `1px solid ${alpha(theme.palette.primary.main, 0.1)}`,
-              }}>
+              <Paper elevation={0} sx={{ backgroundColor: alpha(theme.palette.primary.light, 0.05), 
+                p: 3, borderRadius: 2, border: `1px solid ${alpha(theme.palette.primary.main, 0.1)}` }}>
                 <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
                   {[
                     { label: 'Customer', value: formData.customerName || '—' },
                     { label: 'Order ID', value: formData.orderId || '—' },
                     { label: 'Delivery Status', value: (
                         <Box sx={{ display: 'flex', alignItems: 'center' }}>
-                          <Box component="span" sx={{ 
-                            display: 'inline-block', width: 10, height: 10, borderRadius: '50%', 
-                            backgroundColor: getStatusColor(formData.deliveryStatus), mr: 1
-                          }}/>
+                          <Box component="span" sx={{ display: 'inline-block', width: 10, height: 10, 
+                            borderRadius: '50%', backgroundColor: getStatusColor(formData.deliveryStatus), mr: 1 }} />
                           <Typography variant="body1" fontWeight="500">{formData.deliveryStatus}</Typography>
                         </Box>
-                      ), isComponent: true 
-                    },
-                    { label: 'Delivery Address', value: formData.deliveryAddress || '—',
-                      style: { maxWidth: '60%', textAlign: 'right' }
-                    },
+                      ), isComponent: true },
+                    { label: 'Delivery Address', value: formData.deliveryAddress || '—', 
+                      style: { maxWidth: '60%', textAlign: 'right' } },
                     { label: 'Expected Delivery', value: formData.estimatedDeliveryDate ? 
                         new Date(formData.estimatedDeliveryDate).toLocaleDateString('en-US', {
                           weekday: 'short', year: 'numeric', month: 'short', day: 'numeric'
-                        }) : '—'
-                    },
+                        }) : '—' },
                     { label: 'Delivery Fee', value: `$${Number(formData.deliveryFee).toFixed(2)}`,
-                      valueStyle: { fontWeight: '700', color: 'primary.main' } 
-                    }
+                      valueStyle: { fontWeight: '700', color: 'primary.main' } }
                   ].map((item, index) => (
                     <React.Fragment key={index}>
                       {index > 0 && <Divider sx={{ opacity: 0.5 }} />}
@@ -367,8 +309,7 @@ const AddDelivery = () => {
                         <Typography variant="body1" color="text.secondary">{item.label}</Typography>
                         {item.isComponent ? item.value : (
                           <Typography variant="body1" fontWeight="500" sx={item.style || {}}
-                            color={item.valueStyle?.color}
-                            style={{ fontWeight: item.valueStyle?.fontWeight }}>
+                            color={item.valueStyle?.color} style={{ fontWeight: item.valueStyle?.fontWeight }}>
                             {item.value}
                           </Typography>
                         )}
@@ -382,52 +323,27 @@ const AddDelivery = () => {
             {/* All Delivery Details Section */}
             <Divider sx={{ my: 3 }} />
             <Box sx={{ mb: 3 }}>
-              <Typography variant="h6" gutterBottom sx={{ 
-                display: 'flex', alignItems: 'center', color: 'primary.main', fontWeight: 600,
-              }}>
+              <Typography variant="h6" gutterBottom sx={{ display: 'flex', alignItems: 'center', 
+                color: 'primary.main', fontWeight: 600 }}>
                 <ListIcon sx={{ mr: 1 }} />
                 All Delivery Details
               </Typography>
               
               <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 2, gap: 2 }}>
-                <Box sx={{ display: 'flex', flexGrow: 1 }}>
-                  <TextField
-                    placeholder="Search by customer, order ID, or delivery ID"
-                    variant="outlined"
-                    fullWidth
-                    value={searchTerm}
-                    onChange={handleSearchChange}
-                    InputProps={{
-                      startAdornment: <SearchIcon color="action" sx={{ mr: 1 }} />,
-                    }}
-                    size="small"
-                  />
-                </Box>
-                <Button
-                  variant="outlined"
-                  color="primary"
-                  startIcon={<RefreshIcon />}
-                  onClick={fetchDeliveries}
-                  size="small"
-                >
-                  Refresh
-                </Button>
+                <TextField placeholder="Search by customer, order ID, or delivery ID" variant="outlined"
+                  fullWidth value={searchTerm} onChange={handleSearchChange} size="small"
+                  InputProps={{ startAdornment: <SearchIcon color="action" sx={{ mr: 1 }} /> }} />
+                <Button variant="outlined" color="primary" startIcon={<RefreshIcon />}
+                  onClick={fetchDeliveries} size="small">Refresh</Button>
               </Box>
               
-              <TableContainer component={Paper} sx={{ 
-                borderRadius: 2, 
-                boxShadow: '0 2px 8px rgba(0,0,0,0.05)', 
-                mb: 2 
-              }}>
+              <TableContainer component={Paper} sx={{ borderRadius: 2, 
+                boxShadow: '0 2px 8px rgba(0,0,0,0.05)', mb: 2 }}>
                 <Table size="small">
                   <TableHead>
                     <TableRow sx={{ backgroundColor: alpha(theme.palette.primary.light, 0.1) }}>
-                      <TableCell sx={{ fontWeight: 600 }}>Delivery ID</TableCell>
-                      <TableCell sx={{ fontWeight: 600 }}>Customer</TableCell>
-                      <TableCell sx={{ fontWeight: 600 }}>Order ID</TableCell>
-                      <TableCell sx={{ fontWeight: 600 }}>Delivery Date</TableCell>
-                      <TableCell sx={{ fontWeight: 600 }}>Status</TableCell>
-                      <TableCell sx={{ fontWeight: 600 }}>Fee</TableCell>
+                      {['Delivery ID', 'Customer', 'Order ID', 'Delivery Date', 'Status', 'Fee']
+                        .map(header => <TableCell key={header} sx={{ fontWeight: 600 }}>{header}</TableCell>)}
                     </TableRow>
                   </TableHead>
                   <TableBody>
@@ -442,44 +358,26 @@ const AddDelivery = () => {
                       <TableRow>
                         <TableCell colSpan={6} align="center" sx={{ py: 3 }}>
                           <Typography variant="body1">No deliveries found</Typography>
-                          {searchTerm && (
-                            <Typography variant="body2" color="text.secondary" sx={{ mt: 1 }}>
-                              Try adjusting your search
-                            </Typography>
-                          )}
+                          {searchTerm && <Typography variant="body2" color="text.secondary" sx={{ mt: 1 }}>
+                            Try adjusting your search</Typography>}
                         </TableCell>
                       </TableRow>
                     ) : (
                       paginatedDeliveries.map((delivery) => (
                         <TableRow key={delivery._id || delivery.deliveryId} hover>
-                          <TableCell 
-                            sx={{ 
-                              color: 'primary.main', 
-                              fontWeight: 500,
-                              cursor: 'pointer',
-                              '&:hover': { textDecoration: 'underline' }
-                            }}
-                          >
+                          <TableCell sx={{ color: 'primary.main', fontWeight: 500, cursor: 'pointer',
+                            '&:hover': { textDecoration: 'underline' } }}>
                             {delivery.deliveryId}
                           </TableCell>
                           <TableCell>{delivery.customerName}</TableCell>
                           <TableCell>{delivery.orderId}</TableCell>
+                          <TableCell>{delivery.estimatedDeliveryDate 
+                            ? new Date(delivery.estimatedDeliveryDate).toLocaleDateString() : '—'}</TableCell>
                           <TableCell>
-                            {delivery.estimatedDeliveryDate 
-                              ? new Date(delivery.estimatedDeliveryDate).toLocaleDateString() 
-                              : '—'}
-                          </TableCell>
-                          <TableCell>
-                            <Chip 
-                              label={delivery.deliveryStatus} 
-                              size="small"
-                              sx={{ 
-                                backgroundColor: alpha(getStatusColor(delivery.deliveryStatus), 0.1),
-                                color: getStatusColor(delivery.deliveryStatus),
-                                fontWeight: 500,
-                                '& .MuiChip-label': { px: 1 }
-                              }}
-                            />
+                            <Chip label={delivery.deliveryStatus} size="small" sx={{ 
+                              backgroundColor: alpha(getStatusColor(delivery.deliveryStatus), 0.1),
+                              color: getStatusColor(delivery.deliveryStatus), fontWeight: 500,
+                              '& .MuiChip-label': { px: 1 } }} />
                           </TableCell>
                           <TableCell>${Number(delivery.deliveryFee).toFixed(2)}</TableCell>
                         </TableRow>
@@ -488,20 +386,13 @@ const AddDelivery = () => {
                     
                     {/* Fee Subtotal Row */}
                     {paginatedDeliveries.length > 0 && (
-                      <TableRow sx={{ 
-                        backgroundColor: alpha(theme.palette.primary.light, 0.05),
-                        '& td': { fontWeight: 600 }
-                      }}>
+                      <TableRow sx={{ backgroundColor: alpha(theme.palette.primary.light, 0.05),
+                        '& td': { fontWeight: 600 } }}>
                         <TableCell colSpan={5} align="right">
-                          <Typography variant="subtitle2">
-                            Subtotal (Current Page):
-                          </Typography>
+                          <Typography variant="subtitle2">Subtotal (Current Page):</Typography>
                         </TableCell>
-                        <TableCell sx={{ 
-                          color: theme.palette.primary.main, 
-                          fontWeight: 700,
-                          borderTop: `2px solid ${alpha(theme.palette.primary.main, 0.2)}`
-                        }}>
+                        <TableCell sx={{ color: theme.palette.primary.main, fontWeight: 700,
+                          borderTop: `2px solid ${alpha(theme.palette.primary.main, 0.2)}` }}>
                           ${currentPageTotalFee.toFixed(2)}
                         </TableCell>
                       </TableRow>
@@ -509,20 +400,15 @@ const AddDelivery = () => {
                     
                     {/* Total Fee Row (if filtered/search is applied) */}
                     {filteredDeliveries.length > rowsPerPage && (
-                      <TableRow sx={{ 
-                        backgroundColor: alpha(theme.palette.secondary.light, 0.05),
-                        '& td': { fontWeight: 600 }
-                      }}>
+                      <TableRow sx={{ backgroundColor: alpha(theme.palette.secondary.light, 0.05),
+                        '& td': { fontWeight: 600 } }}>
                         <TableCell colSpan={5} align="right">
                           <Typography variant="subtitle2">
                             Total (All {filteredDeliveries.length} deliveries):
                           </Typography>
                         </TableCell>
-                        <TableCell sx={{ 
-                          color: theme.palette.secondary.main, 
-                          fontWeight: 700,
-                          borderTop: `2px solid ${alpha(theme.palette.secondary.main, 0.2)}`
-                        }}>
+                        <TableCell sx={{ color: theme.palette.secondary.main, fontWeight: 700,
+                          borderTop: `2px solid ${alpha(theme.palette.secondary.main, 0.2)}` }}>
                           ${allFilteredTotalFee.toFixed(2)}
                         </TableCell>
                       </TableRow>
@@ -533,34 +419,23 @@ const AddDelivery = () => {
               
               {filteredDeliveries.length > rowsPerPage && (
                 <Box sx={{ display: 'flex', justifyContent: 'center', mt: 2 }}>
-                  <Pagination
-                    count={Math.ceil(filteredDeliveries.length / rowsPerPage)}
-                    page={page}
-                    onChange={handleChangePage}
-                    color="primary"
-                    size="small"
-                  />
+                  <Pagination count={Math.ceil(filteredDeliveries.length / rowsPerPage)}
+                    page={page} onChange={handleChangePage} color="primary" size="small" />
                 </Box>
               )}
 
-              <Box sx={{ mt: 2 }}>
-                <Typography variant="body2" color="text.secondary">
-                  Showing {paginatedDeliveries.length} of {filteredDeliveries.length} deliveries
-                </Typography>
-              </Box>
+              <Typography variant="body2" color="text.secondary" sx={{ mt: 2 }}>
+                Showing {paginatedDeliveries.length} of {filteredDeliveries.length} deliveries
+              </Typography>
             </Box>
             
             <Box display="flex" justifyContent="space-between" mt={4} sx={buttonSx}>
               <Button variant="outlined" color="primary" onClick={handleBack}
-                startIcon={<ArrowBackIcon />} size="large">
-                Back
-              </Button>
+                startIcon={<ArrowBackIcon />} size="large">Back</Button>
               <Button variant="contained" color="primary" type="submit" onClick={handleSubmit}
                 disabled={loading} startIcon={loading ? <CircularProgress size={20} /> : <SaveIcon />}
-                size="large" sx={{
-                  backgroundColor: theme.palette.success.main,
-                  '&:hover': { backgroundColor: theme.palette.success.dark }
-                }}>
+                size="large" sx={{ backgroundColor: theme.palette.success.main,
+                  '&:hover': { backgroundColor: theme.palette.success.dark } }}>
                 {loading ? 'Processing...' : 'Confirm & Submit'}
               </Button>
             </Box>
@@ -576,30 +451,20 @@ const AddDelivery = () => {
       <Header2 />
       <Navbar2 />
       <Container maxWidth="md" sx={{ my: 5 }}>
-        <Paper elevation={3} sx={{ 
-          p: { xs: 2, sm: 4 }, borderRadius: 3, overflow: 'hidden', position: 'relative',
-        }}>
-          <Box sx={{ 
-            position: 'absolute', top: 0, left: 0, right: 0, height: 8,
-            background: 'linear-gradient(90deg, #1976d2 0%, #64b5f6 100%)',
-          }}/>
+        <Paper elevation={3} sx={{ p: { xs: 2, sm: 4 }, borderRadius: 3, overflow: 'hidden', position: 'relative' }}>
+          <Box sx={{ position: 'absolute', top: 0, left: 0, right: 0, height: 8,
+            background: 'linear-gradient(90deg, #1976d2 0%, #64b5f6 100%)' }}/>
           <Box display="flex" alignItems="center" mb={4} sx={{ mt: 1 }}>
-            <Box sx={{ 
-              display: 'flex', alignItems: 'center', justifyContent: 'center',
-              p: 1.5, backgroundColor: alpha(theme.palette.primary.main, 0.1),
-              borderRadius: 2, mr: 2
-            }}>
+            <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'center',
+              p: 1.5, backgroundColor: alpha(theme.palette.primary.main, 0.1), borderRadius: 2, mr: 2 }}>
               <LocalShippingIcon sx={{ fontSize: 28, color: 'primary.main' }} />
             </Box>
-            <Typography variant="h4" component="h2" sx={{ 
-              fontSize: { xs: '1.5rem', sm: '2rem' }, fontWeight: 600,
-            }}>
+            <Typography variant="h4" component="h2" sx={{ fontSize: { xs: '1.5rem', sm: '2rem' }, fontWeight: 600 }}>
               Delivery Management
             </Typography>
           </Box>
-          <Stepper activeStep={activeStep} alternativeLabel={!isMobile} 
-            orientation={isMobile ? 'vertical' : 'horizontal'} sx={{ 
-              mb: 4, '& .MuiStepLabel-label': { mt: 1 },
+          <Stepper activeStep={activeStep} alternativeLabel={!isMobile} orientation={isMobile ? 'vertical' : 'horizontal'} 
+            sx={{ mb: 4, '& .MuiStepLabel-label': { mt: 1 },
               '& .MuiStepLabel-iconContainer': {
                 '& .MuiStepIcon-root': {
                   color: 'primary.light',
@@ -609,9 +474,7 @@ const AddDelivery = () => {
               },
             }}>
             {steps.map((label) => (
-              <Step key={label}>
-                <StepLabel>{label}</StepLabel>
-              </Step>
+              <Step key={label}><StepLabel>{label}</StepLabel></Step>
             ))}
           </Stepper>
           <form onSubmit={handleSubmit}>
