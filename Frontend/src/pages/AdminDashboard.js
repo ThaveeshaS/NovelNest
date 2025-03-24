@@ -177,7 +177,7 @@ const AdminDashboard = () => {
                 <Button
                   variant="info"
                   className="mt-auto text-white"
-                  onClick={() => navigate("/admin/PaymentGateway")}
+                  onClick={() => navigate("/admintransactions")}
                 >
                   Payment Gateway
                 </Button>
