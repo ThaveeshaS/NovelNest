@@ -2,6 +2,7 @@ import React, { useEffect, useState } from "react";
 import axios from "axios";
 import { jsPDF } from "jspdf";
 import autoTable from "jspdf-autotable";
+import { useNavigate } from "react-router-dom"; // Import useNavigate
 import "bootstrap/dist/css/bootstrap.min.css";
 import logo from "../../components/images/logo.jpg";
 import Header2 from "../../components/Header2";
@@ -13,6 +14,7 @@ export default function ManageProducts() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
   const [selectedCategory, setSelectedCategory] = useState("All");
+  const navigate = useNavigate(); // Initialize useNavigate
 
   useEffect(() => {
     const fetchProducts = async () => {
@@ -240,7 +242,7 @@ export default function ManageProducts() {
                               </span>
                             </td>
                             <td className="text-primary fw-bold">
-                              ${product.price}
+                              RS.{product.price}
                             </td>
                             <td>
                               <span
@@ -260,6 +262,9 @@ export default function ManageProducts() {
                                 <button
                                   className="btn btn-sm btn-outline-primary"
                                   title="Edit"
+                                  onClick={() =>
+                                    navigate(`/edit-product/${product._id}`)
+                                  }
                                 >
                                   <i className="fas fa-edit"></i>
                                 </button>
