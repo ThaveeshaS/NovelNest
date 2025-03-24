@@ -4,11 +4,13 @@ import { useNavigate, useParams } from "react-router-dom";
 import "bootstrap/dist/css/bootstrap.min.css";
 import Header2 from "../../components/Header2";
 import Navbar2 from "../../components/Navbar2";
+import { storage } from "../Product/firebase";
+import { ref, uploadBytes, getDownloadURL } from "firebase/storage";
 
 export default function EditProduct() {
   const navigate = useNavigate();
   const { id } = useParams();
-  const [originalData, setOriginalData] = useState(null); // Store original data
+  const [originalData, setOriginalData] = useState(null);
   const [formData, setFormData] = useState({
     coverPage: null,
     bookTitle: "",
@@ -27,11 +29,10 @@ export default function EditProduct() {
 
   // Check if the form has been edited
   const isFormEdited = () => {
-    if (!originalData) return false; // If original data is not loaded yet, return false
+    if (!originalData) return false;
     return Object.keys(formData).some((key) => {
       if (key === "coverPage") {
-        // Handle file comparison separately
-        return formData[key] !== originalData[key];
+        return formData[key] !== null && formData[key] !== originalData[key];
       }
       return formData[key] !== originalData[key];
     });
@@ -41,28 +42,19 @@ export default function EditProduct() {
     const fetchProduct = async () => {
       try {
         const response = await axios.get(`http://localhost:5000/api/product/${id}`);
-        setOriginalData(response.data); // Store original data
-        setFormData(response.data); // Set form data
-
-        // Handle coverPage preview
-        if (response.data.coverPage) {
-          if (typeof response.data.coverPage === "string") {
-            // If coverPage is a URL (string), set it directly as the preview
-            setCoverPreview(response.data.coverPage);
-          } else {
-            // If coverPage is a file object, create a preview URL
-            const reader = new FileReader();
-            reader.onloadend = () => {
-              setCoverPreview(reader.result);
-            };
-            reader.readAsDataURL(response.data.coverPage);
-          }
+        const productData = response.data;
+        setOriginalData(productData);
+        setFormData({
+          ...productData,
+          coverPage: null, // Reset to null since we don't store the file, only the URL
+        });
+        if (productData.coverPage) {
+          setCoverPreview(productData.coverPage); // Use Firebase URL directly
         }
       } catch (error) {
         console.error("Error fetching product:", error);
       }
     };
-
     fetchProduct();
   }, [id]);
 
@@ -152,27 +144,27 @@ export default function EditProduct() {
 
     setIsSubmitting(true);
 
-    const data = new FormData();
-    // Append coverPage only if a new file is selected
+    let coverPageUrl = originalData.coverPage;
     if (formData.coverPage instanceof File) {
-      data.append("coverPage", formData.coverPage);
+      const fileRef = ref(storage, `covers/${formData.coverPage.name}-${Date.now()}`);
+      await uploadBytes(fileRef, formData.coverPage);
+      coverPageUrl = await getDownloadURL(fileRef);
     }
-    data.append("bookTitle", formData.bookTitle);
-    data.append("price", formData.price);
-    data.append("bookDescription", formData.bookDescription);
-    data.append("bookQuantity", formData.bookQuantity);
-    data.append("category", formData.category);
-    data.append("authorName", formData.authorName);
-    data.append("isbnNumber", formData.isbnNumber);
-    data.append("language", formData.language);
+
+    const productData = {
+      coverPage: coverPageUrl,
+      bookTitle: formData.bookTitle,
+      price: formData.price,
+      bookDescription: formData.bookDescription,
+      bookQuantity: formData.bookQuantity,
+      category: formData.category,
+      authorName: formData.authorName,
+      isbnNumber: formData.isbnNumber,
+      language: formData.language,
+    };
 
     try {
-      const response = await axios.put(`http://localhost:5000/api/product/update/${id}`, data, {
-        headers: {
-          "Content-Type": "multipart/form-data",
-        },
-      });
-
+      const response = await axios.put(`http://localhost:5000/api/product/update/${id}`, productData);
       if (response.status === 200) {
         alert("Product Updated Successfully!");
         navigate("/manageproducts");

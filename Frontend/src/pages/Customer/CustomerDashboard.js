@@ -6,40 +6,59 @@ import Slider from 'react-slick';
 import 'slick-carousel/slick/slick.css';
 import 'slick-carousel/slick/slick-theme.css';
 import slideVideo1 from '../../components/images/SlideVideo1.mp4';
+import axios from 'axios';
 
 const CustomerDashboard = () => {
-  // State to store books from backend
   const [fictionBooks, setFictionBooks] = useState([]);
   const [nonFictionBooks, setNonFictionBooks] = useState([]);
   const [childrenBooks, setChildrenBooks] = useState([]);
   const [loading, setLoading] = useState(true);
-
-  useEffect(() => {
-    // Fetch data from backend when component mounts
-    fetchBooks();
-  }, []);
+  const [error, setError] = useState(null);
 
   const fetchBooks = async () => {
     try {
-      const fictionResponse = await fetch('/api/books/fiction');
-      const nonFictionResponse = await fetch('/api/books/non-fiction');
-      const childrenResponse = await fetch('/api/books/children');
-  
-      const fictionData = await fictionResponse.json();
-      const nonFictionData = await nonFictionResponse.json();
-      const childrenData = await childrenResponse.json();
-  
-      setFictionBooks(fictionData);
-      setNonFictionBooks(nonFictionData);
-      setChildrenBooks(childrenData);
-      setLoading(false);
+      setLoading(true);
+      setError(null);
+      setFictionBooks([]);
+      setNonFictionBooks([]);
+      setChildrenBooks([]);
+
+      const [fictionResponse, nonFictionResponse, childrenResponse] = await Promise.all([
+        axios.get('http://localhost:5000/api/product/category/Fiction'),
+        axios.get('http://localhost:5000/api/product/category/Non-Fiction'),
+        axios.get('http://localhost:5000/api/product/category/Children\'s & Young Adult'),
+      ]);
+
+      const uniqueFiction = removeDuplicates(fictionResponse.data, 'isbnNumber');
+      const uniqueNonFiction = removeDuplicates(nonFictionResponse.data, 'isbnNumber');
+      const uniqueChildren = removeDuplicates(childrenResponse.data, 'isbnNumber');
+
+      setFictionBooks(uniqueFiction);
+      setNonFictionBooks(uniqueNonFiction);
+      setChildrenBooks(uniqueChildren);
     } catch (error) {
       console.error('Error fetching books:', error);
+      setError('Failed to load books. Please try again later.');
+    } finally {
       setLoading(false);
     }
   };
-  
-  // Slick slider settings with added paddingBottom for spacing
+
+  useEffect(() => {
+    fetchBooks();
+  }, []);
+
+  const removeDuplicates = (array, key) => {
+    if (!Array.isArray(array)) return [];
+    const seen = new Set();
+    return array.filter(item => {
+      const value = item[key]?.toString().trim().toLowerCase();
+      if (!value || seen.has(value)) return false;
+      seen.add(value);
+      return true;
+    });
+  };
+
   const sliderSettings = {
     dots: true,
     infinite: true,
@@ -49,28 +68,10 @@ const CustomerDashboard = () => {
     autoplay: true,
     autoplaySpeed: 2000,
     responsive: [
-      {
-        breakpoint: 1024,
-        settings: {
-          slidesToShow: 3,
-          slidesToScroll: 1
-        }
-      },
-      {
-        breakpoint: 768,
-        settings: {
-          slidesToShow: 2,
-          slidesToScroll: 1
-        }
-      },
-      {
-        breakpoint: 480,
-        settings: {
-          slidesToShow: 1,
-          slidesToScroll: 1
-        }
-      }
-    ]
+      { breakpoint: 1024, settings: { slidesToShow: 3, slidesToScroll: 1 } },
+      { breakpoint: 768, settings: { slidesToShow: 2, slidesToScroll: 1 } },
+      { breakpoint: 480, settings: { slidesToShow: 1, slidesToScroll: 1 } },
+    ],
   };
 
   const ProductCard = ({ product }) => (
@@ -91,11 +92,10 @@ const CustomerDashboard = () => {
           overflow: 'hidden',
         }}
       >
-        {/* Product Image - Centered */}
-        <div 
-          style={{ 
-            padding: '10px', 
-            textAlign: 'center', 
+        <div
+          style={{
+            padding: '10px',
+            textAlign: 'center',
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'center',
@@ -105,9 +105,9 @@ const CustomerDashboard = () => {
           className="product-image-container"
         >
           <img
-            src={product.image}
+            src={product.coverPage} // Direct Firebase Storage URL
             className="card-img-top"
-            alt={product.title}
+            alt={product.bookTitle}
             style={{
               maxHeight: '200px',
               width: 'auto',
@@ -116,9 +116,8 @@ const CustomerDashboard = () => {
               borderRadius: '10px 10px 0 0',
               transition: 'transform 0.3s ease',
             }}
+            onError={(e) => (e.target.src = 'https://via.placeholder.com/160x200?text=No+Image')}
           />
-          
-          {/* Hover overlay with icons - initially hidden */}
           <div className="hover-overlay">
             <div className="add-to-cart-icon">
               <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
@@ -134,11 +133,9 @@ const CustomerDashboard = () => {
             </div>
           </div>
         </div>
-        
-        {/* Product Information - All Text Centered */}
         <div
           className="card-body text-center"
-          style={{ 
+          style={{
             padding: '10px',
             display: 'flex',
             flexDirection: 'column',
@@ -148,9 +145,9 @@ const CustomerDashboard = () => {
         >
           <h5
             className="card-title text-center"
-            style={{ 
-              fontSize: '1rem', 
-              fontWeight: 'bold', 
+            style={{
+              fontSize: '1rem',
+              fontWeight: 'bold',
               marginBottom: '5px',
               overflow: 'hidden',
               textOverflow: 'ellipsis',
@@ -160,28 +157,28 @@ const CustomerDashboard = () => {
               color: '#0066cc',
             }}
           >
-            {product.title}
+            {product.bookTitle}
           </h5>
           <p
             className="card-text text-center"
-            style={{ 
-              fontSize: '0.9rem', 
+            style={{
+              fontSize: '0.9rem',
               color: '#004080',
               marginBottom: '5px',
               overflow: 'hidden',
               textOverflow: 'ellipsis',
               display: '-webkit-box',
               WebkitLineClamp: 1,
-              WebkitBoxOrient: 'vertical'
+              WebkitBoxOrient: 'vertical',
             }}
           >
-            {product.author}
+            {product.authorName}
           </p>
           <p
             className="card-text text-center"
             style={{ fontSize: '0.9rem', color: '#0066cc', fontWeight: 'bold' }}
           >
-            {product.price}
+            RS. {product.price}
           </p>
         </div>
       </div>
@@ -190,13 +187,9 @@ const CustomerDashboard = () => {
 
   return (
     <div>
-      {/* Use Header2 Component */}
       <Header2 />
       <Navbar2 />
-
-      {/* Main Content */}
-      <div style={{ padding: "20px", textAlign: "center" }}>
-        {/* Carousel Section */}
+      <div style={{ padding: '20px', textAlign: 'center' }}>
         <div
           id="carouselExampleAutoplaying"
           className="carousel slide carousel-fade"
@@ -205,7 +198,6 @@ const CustomerDashboard = () => {
           aria-label="Homepage Carousel"
         >
           <div className="carousel-inner">
-            {/* Only Slide - VIDEO */}
             <div className="carousel-item active">
               <video
                 className="d-block w-100 rounded-3"
@@ -218,16 +210,33 @@ const CustomerDashboard = () => {
               >
                 <source src={slideVideo1} type="video/mp4" />
                 Your browser does not support the video tag.
+                <img
+                  src="path/to/fallback-image.jpg"
+                  alt="Fallback Image"
+                  className="d-block w-100"
+                />
               </video>
             </div>
           </div>
         </div>
 
-        {/* Text Below the Carousel */}
         <div className="my-5">
           <h2 className="display-4 fw-bold text-primary mb-3">Welcome to NovelNest</h2>
           <p className="lead text-secondary">Explore Our Book Collection</p>
+          <button
+            className="btn btn-primary mt-3"
+            onClick={fetchBooks}
+            disabled={loading}
+          >
+            {loading ? 'Loading...' : 'Refresh Books'}
+          </button>
         </div>
+
+        {error && (
+          <div className="alert alert-danger" role="alert">
+            {error}
+          </div>
+        )}
 
         {loading ? (
           <div className="d-flex justify-content-center my-5">
@@ -237,37 +246,34 @@ const CustomerDashboard = () => {
           </div>
         ) : (
           <>
-            {/* Fiction Books */}
             <div className="container mt-4">
               <h3 className="text-start mb-3 ps-2">Fiction</h3>
               <div className="slider-container">
                 <Slider {...sliderSettings}>
-                  {fictionBooks.map((product, index) => (
-                    <ProductCard key={`fiction-${index}`} product={product} />
+                  {fictionBooks.map((product) => (
+                    <ProductCard key={`fiction-${product._id}`} product={product} />
                   ))}
                 </Slider>
               </div>
             </div>
 
-            {/* Non-Fiction Books */}
             <div className="container mt-5">
               <h3 className="text-start mb-3 ps-2">Non-Fiction</h3>
               <div className="slider-container">
                 <Slider {...sliderSettings}>
-                  {nonFictionBooks.map((product, index) => (
-                    <ProductCard key={`non-fiction-${index}`} product={product} />
+                  {nonFictionBooks.map((product) => (
+                    <ProductCard key={`non-fiction-${product._id}`} product={product} />
                   ))}
                 </Slider>
               </div>
             </div>
 
-            {/* Children and Young Adult Books */}
             <div className="container mt-5 mb-4">
               <h3 className="text-start mb-3 ps-2">Children and Young Adult</h3>
               <div className="slider-container">
                 <Slider {...sliderSettings}>
-                  {childrenBooks.map((product, index) => (
-                    <ProductCard key={`children-${index}`} product={product} />
+                  {childrenBooks.map((product) => (
+                    <ProductCard key={`children-${product._id}`} product={product} />
                   ))}
                 </Slider>
               </div>
@@ -275,47 +281,36 @@ const CustomerDashboard = () => {
           </>
         )}
 
-        {/* Add some custom CSS to ensure slider uniformity and proper spacing */}
         <style jsx>{`
           .slider-container {
             margin-bottom: 40px;
           }
-          
           .slider-container .slick-track {
             display: flex !important;
           }
-          
           .slider-container .slick-slide {
             height: inherit !important;
             display: flex !important;
             justify-content: center;
             align-items: center;
           }
-          
           .slick-dots {
             bottom: -30px !important;
           }
-          
           .slick-dots li button:before {
             font-size: 12px !important;
           }
-          
           .slick-slider {
             padding-bottom: 40px;
           }
-          
-          /* Add hover effect for product cards */
           .card:hover {
             transform: translateY(-5px);
             box-shadow: 0 10px 20px rgba(0, 102, 204, 0.37) !important;
             cursor: pointer;
           }
-          
-          /* Hover overlay styles */
           .product-image-container {
             position: relative;
           }
-          
           .hover-overlay {
             position: absolute;
             top: 10px;
@@ -325,26 +320,22 @@ const CustomerDashboard = () => {
             gap: 10px;
             opacity: 0;
             transition: opacity 0.3s ease;
-            pointer-events: none; /* Initially non-interactive */
+            pointer-events: none;
           }
-          
           .product-card-container:hover .hover-overlay {
             opacity: 1;
-            pointer-events: auto; /* Make interactive on hover */
+            pointer-events: auto;
           }
-          
           .add-to-cart-icon,
           .wishlist-icon {
             cursor: pointer;
             color: #6c757d;
             transition: color 0.2s;
           }
-          
           .add-to-cart-icon:hover,
           .wishlist-icon:hover {
             color: #007bff;
           }
-          
           .add-to-cart-icon svg,
           .wishlist-icon svg {
             width: 24px;
