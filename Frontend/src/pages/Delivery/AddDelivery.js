@@ -16,7 +16,8 @@ import {
   Save as SaveIcon, LocationOn as LocationOnIcon, Person as PersonIcon, 
   Email as EmailIcon, Phone as PhoneIcon, CalendarToday as CalendarTodayIcon, 
   AttachMoney as AttachMoneyIcon, CheckCircle as CheckCircleIcon,
-  List as ListIcon, Search as SearchIcon, Refresh as RefreshIcon 
+  List as ListIcon, Search as SearchIcon, Refresh as RefreshIcon,
+  DirectionsRun as TrackIcon
 } from '@mui/icons-material';
 
 const AddDelivery = () => {
@@ -94,6 +95,11 @@ const AddDelivery = () => {
   const getStatusColor = (status) => statusColors[status] || '#95a5a6';
   const handleChangePage = (event, newPage) => setPage(newPage);
   const handleSearchChange = (e) => { setSearchTerm(e.target.value); setPage(1); };
+  
+  // New function to handle redirection to TrackDelivery page
+  const handleTrackDelivery = (deliveryId) => {
+    navigate(`/admin/TrackDelivery/${deliveryId}`);
+  };
 
   const filteredDeliveries = allDeliveries.filter(delivery => 
     delivery.customerName?.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -198,21 +204,21 @@ const AddDelivery = () => {
         <Table size="small">
           <TableHead>
             <TableRow sx={{ backgroundColor: alpha(theme.palette.primary.light, 0.1) }}>
-              {['Delivery ID', 'Customer', 'Order ID', 'Delivery Date', 'Status', 'Fee']
+              {['Delivery ID', 'Customer', 'Order ID', 'Delivery Date', 'Status', 'Fee', 'Action']
                 .map(header => <TableCell key={header} sx={{ fontWeight: 600 }}>{header}</TableCell>)}
             </TableRow>
           </TableHead>
           <TableBody>
             {deliveriesLoading ? (
               <TableRow>
-                <TableCell colSpan={6} align="center" sx={{ py: 3 }}>
+                <TableCell colSpan={7} align="center" sx={{ py: 3 }}>
                   <CircularProgress size={30} />
                   <Typography variant="body2" sx={{ mt: 1 }}>Loading delivery data...</Typography>
                 </TableCell>
               </TableRow>
             ) : paginatedDeliveries.length === 0 ? (
               <TableRow>
-                <TableCell colSpan={6} align="center" sx={{ py: 3 }}>
+                <TableCell colSpan={7} align="center" sx={{ py: 3 }}>
                   <Typography variant="body1">No deliveries found</Typography>
                   {searchTerm && <Typography variant="body2" color="text.secondary" sx={{ mt: 1 }}>
                     Try adjusting your search</Typography>}
@@ -236,6 +242,17 @@ const AddDelivery = () => {
                       '& .MuiChip-label': { px: 1 } }} />
                   </TableCell>
                   <TableCell>${Number(delivery.deliveryFee).toFixed(2)}</TableCell>
+                  <TableCell>
+                    <Button
+                      variant="outlined"
+                      size="small"
+                      startIcon={<TrackIcon />}
+                      onClick={() => handleTrackDelivery(delivery.deliveryId)}
+                      sx={{ fontSize: '0.75rem', py: 0.5 }}
+                    >
+                      Track
+                    </Button>
+                  </TableCell>
                 </TableRow>
               ))
             )}
@@ -244,7 +261,7 @@ const AddDelivery = () => {
             {paginatedDeliveries.length > 0 && (
               <TableRow sx={{ backgroundColor: alpha(theme.palette.primary.light, 0.05),
                 '& td': { fontWeight: 600 } }}>
-                <TableCell colSpan={5} align="right">
+                <TableCell colSpan={6} align="right">
                   <Typography variant="subtitle2">Subtotal (Current Page):</Typography>
                 </TableCell>
                 <TableCell sx={{ color: theme.palette.primary.main, fontWeight: 700,
@@ -258,7 +275,7 @@ const AddDelivery = () => {
             {filteredDeliveries.length > rowsPerPage && (
               <TableRow sx={{ backgroundColor: alpha(theme.palette.secondary.light, 0.05),
                 '& td': { fontWeight: 600 } }}>
-                <TableCell colSpan={5} align="right">
+                <TableCell colSpan={6} align="right">
                   <Typography variant="subtitle2">
                     Total (All {filteredDeliveries.length} deliveries):
                   </Typography>
@@ -366,6 +383,29 @@ const AddDelivery = () => {
                   {formErrors.contactNumber}
                 </Typography>
               )}
+            </Box>
+
+            {/* Added main Track Delivery button to Customer Information step */}
+            <Box sx={{ display: 'flex', justifyContent: 'center', mt: 2, mb: 3 }}>
+              <Button
+                variant="contained"
+                color="secondary"
+                startIcon={<TrackIcon />}
+                onClick={() => navigate('/admin/TrackDelivery')}
+                sx={{ 
+                  borderRadius: 4,
+                  px: 4,
+                  py: 1.5,
+                  boxShadow: '0 4px 10px rgba(245, 0, 87, 0.25)',
+                  '&:hover': {
+                    boxShadow: '0 6px 15px rgba(245, 0, 87, 0.35)',
+                    transform: 'translateY(-2px)'
+                  },
+                  transition: 'all 0.3s ease'
+                }}
+              >
+                Track Delivery
+              </Button>
             </Box>
 
             {/* Added Delivery Details Table to Customer Information step */}
