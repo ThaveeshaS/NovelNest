@@ -3,7 +3,8 @@ import axios from 'axios';
 import { 
   TextField, Button, Container, Box, Paper, Typography, Stepper, Step, StepLabel,
   FormControl, InputLabel, Select, MenuItem, CircularProgress, Snackbar, Alert,
-  Divider, ThemeProvider, createTheme, alpha, useMediaQuery
+  Divider, ThemeProvider, createTheme, alpha, useMediaQuery, Table, TableBody,
+  TableCell, TableContainer, TableHead, TableRow, Chip, Pagination
 } from '@mui/material';
 import { useNavigate } from 'react-router-dom';
 import PhoneInput from 'react-phone-input-2';
@@ -14,7 +15,8 @@ import {
   LocalShipping as LocalShippingIcon, ArrowBack as ArrowBackIcon, 
   Save as SaveIcon, LocationOn as LocationOnIcon, Person as PersonIcon, 
   Email as EmailIcon, Phone as PhoneIcon, CalendarToday as CalendarTodayIcon, 
-  AttachMoney as AttachMoneyIcon, CheckCircle as CheckCircleIcon 
+  AttachMoney as AttachMoneyIcon, CheckCircle as CheckCircleIcon,
+  List as ListIcon, Search as SearchIcon, Refresh as RefreshIcon 
 } from '@mui/icons-material';
 
 const AddDelivery = () => {
@@ -62,18 +64,70 @@ const AddDelivery = () => {
   const [notification, setNotification] = useState({ open: false, message: '', severity: 'success' });
   const [formErrors, setFormErrors] = useState({});
   const [activeStep, setActiveStep] = useState(0);
+  const [allDeliveries, setAllDeliveries] = useState([]);
+  const [deliveriesLoading, setDeliveriesLoading] = useState(false);
+  const [page, setPage] = useState(1);
+  const [searchTerm, setSearchTerm] = useState('');
+  const rowsPerPage = 5;
   
   useEffect(() => {
     const prefix = 'DEL';
     const timestamp = new Date().getTime().toString().slice(-6);
     const random = Math.floor(Math.random() * 1000).toString().padStart(3, '0');
     setFormData(prev => ({ ...prev, deliveryId: `${prefix}-${timestamp}-${random}` }));
+    
+    // Fetch all deliveries when component mounts
+    fetchDeliveries();
   }, []);
+
+  const fetchDeliveries = async () => {
+    setDeliveriesLoading(true);
+    try {
+      const response = await axios.get('http://localhost:5000/api/deliveries');
+      setAllDeliveries(response.data);
+    } catch (error) {
+      console.error('Error fetching deliveries:', error);
+      setNotification({ 
+        open: true, 
+        message: 'Failed to fetch delivery details. Please try again.', 
+        severity: 'error' 
+      });
+    } finally {
+      setDeliveriesLoading(false);
+    }
+  };
 
   const handleCloseNotification = () => setNotification({...notification, open: false});
   const handleNext = () => validateStep(activeStep) && setActiveStep(prevStep => prevStep + 1);
   const handleBack = () => setActiveStep(prevStep => prevStep - 1);
   const getStatusColor = (status) => statusColors[status] || '#95a5a6';
+  const handleChangePage = (event, newPage) => setPage(newPage);
+  
+  const handleSearchChange = (e) => {
+    setSearchTerm(e.target.value);
+    setPage(1); // Reset to first page when searching
+  };
+
+  const filteredDeliveries = allDeliveries.filter(delivery => 
+    delivery.customerName?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    delivery.deliveryId?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    delivery.orderId?.toLowerCase().includes(searchTerm.toLowerCase())
+  );
+
+  const paginatedDeliveries = filteredDeliveries.slice(
+    (page - 1) * rowsPerPage,
+    (page - 1) * rowsPerPage + rowsPerPage
+  );
+
+  // Calculate total fee of the current page
+  const currentPageTotalFee = paginatedDeliveries.reduce((total, delivery) => {
+    return total + (parseFloat(delivery.deliveryFee) || 0);
+  }, 0);
+
+  // Calculate total fee of all filtered deliveries
+  const allFilteredTotalFee = filteredDeliveries.reduce((total, delivery) => {
+    return total + (parseFloat(delivery.deliveryFee) || 0);
+  }, 0);
 
   const validateStep = (step) => {
     const errors = {};
@@ -118,7 +172,14 @@ const AddDelivery = () => {
     try {
       await axios.post('http://localhost:5000/api/deliveries', formData);
       setNotification({ open: true, message: 'Delivery scheduled successfully!', severity: 'success' });
+      // Refresh the delivery list after adding new one
+      fetchDeliveries();
       setFormData(initialFormState);
+      // Generate a new delivery ID after submission
+      const prefix = 'DEL';
+      const timestamp = new Date().getTime().toString().slice(-6);
+      const random = Math.floor(Math.random() * 1000).toString().padStart(3, '0');
+      setFormData(prev => ({ ...prev, deliveryId: `${prefix}-${timestamp}-${random}` }));
       setTimeout(() => navigate('/admin/DeliveryDetails'), 1500);
     } catch (error) {
       setNotification({ open: true, message: 'Failed to schedule delivery. Please try again.', severity: 'error' });
@@ -317,6 +378,178 @@ const AddDelivery = () => {
                 </Box>
               </Paper>
             </Box>
+
+            {/* All Delivery Details Section */}
+            <Divider sx={{ my: 3 }} />
+            <Box sx={{ mb: 3 }}>
+              <Typography variant="h6" gutterBottom sx={{ 
+                display: 'flex', alignItems: 'center', color: 'primary.main', fontWeight: 600,
+              }}>
+                <ListIcon sx={{ mr: 1 }} />
+                All Delivery Details
+              </Typography>
+              
+              <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 2, gap: 2 }}>
+                <Box sx={{ display: 'flex', flexGrow: 1 }}>
+                  <TextField
+                    placeholder="Search by customer, order ID, or delivery ID"
+                    variant="outlined"
+                    fullWidth
+                    value={searchTerm}
+                    onChange={handleSearchChange}
+                    InputProps={{
+                      startAdornment: <SearchIcon color="action" sx={{ mr: 1 }} />,
+                    }}
+                    size="small"
+                  />
+                </Box>
+                <Button
+                  variant="outlined"
+                  color="primary"
+                  startIcon={<RefreshIcon />}
+                  onClick={fetchDeliveries}
+                  size="small"
+                >
+                  Refresh
+                </Button>
+              </Box>
+              
+              <TableContainer component={Paper} sx={{ 
+                borderRadius: 2, 
+                boxShadow: '0 2px 8px rgba(0,0,0,0.05)', 
+                mb: 2 
+              }}>
+                <Table size="small">
+                  <TableHead>
+                    <TableRow sx={{ backgroundColor: alpha(theme.palette.primary.light, 0.1) }}>
+                      <TableCell sx={{ fontWeight: 600 }}>Delivery ID</TableCell>
+                      <TableCell sx={{ fontWeight: 600 }}>Customer</TableCell>
+                      <TableCell sx={{ fontWeight: 600 }}>Order ID</TableCell>
+                      <TableCell sx={{ fontWeight: 600 }}>Delivery Date</TableCell>
+                      <TableCell sx={{ fontWeight: 600 }}>Status</TableCell>
+                      <TableCell sx={{ fontWeight: 600 }}>Fee</TableCell>
+                    </TableRow>
+                  </TableHead>
+                  <TableBody>
+                    {deliveriesLoading ? (
+                      <TableRow>
+                        <TableCell colSpan={6} align="center" sx={{ py: 3 }}>
+                          <CircularProgress size={30} />
+                          <Typography variant="body2" sx={{ mt: 1 }}>Loading delivery data...</Typography>
+                        </TableCell>
+                      </TableRow>
+                    ) : paginatedDeliveries.length === 0 ? (
+                      <TableRow>
+                        <TableCell colSpan={6} align="center" sx={{ py: 3 }}>
+                          <Typography variant="body1">No deliveries found</Typography>
+                          {searchTerm && (
+                            <Typography variant="body2" color="text.secondary" sx={{ mt: 1 }}>
+                              Try adjusting your search
+                            </Typography>
+                          )}
+                        </TableCell>
+                      </TableRow>
+                    ) : (
+                      paginatedDeliveries.map((delivery) => (
+                        <TableRow key={delivery._id || delivery.deliveryId} hover>
+                          <TableCell 
+                            sx={{ 
+                              color: 'primary.main', 
+                              fontWeight: 500,
+                              cursor: 'pointer',
+                              '&:hover': { textDecoration: 'underline' }
+                            }}
+                          >
+                            {delivery.deliveryId}
+                          </TableCell>
+                          <TableCell>{delivery.customerName}</TableCell>
+                          <TableCell>{delivery.orderId}</TableCell>
+                          <TableCell>
+                            {delivery.estimatedDeliveryDate 
+                              ? new Date(delivery.estimatedDeliveryDate).toLocaleDateString() 
+                              : '—'}
+                          </TableCell>
+                          <TableCell>
+                            <Chip 
+                              label={delivery.deliveryStatus} 
+                              size="small"
+                              sx={{ 
+                                backgroundColor: alpha(getStatusColor(delivery.deliveryStatus), 0.1),
+                                color: getStatusColor(delivery.deliveryStatus),
+                                fontWeight: 500,
+                                '& .MuiChip-label': { px: 1 }
+                              }}
+                            />
+                          </TableCell>
+                          <TableCell>${Number(delivery.deliveryFee).toFixed(2)}</TableCell>
+                        </TableRow>
+                      ))
+                    )}
+                    
+                    {/* Fee Subtotal Row */}
+                    {paginatedDeliveries.length > 0 && (
+                      <TableRow sx={{ 
+                        backgroundColor: alpha(theme.palette.primary.light, 0.05),
+                        '& td': { fontWeight: 600 }
+                      }}>
+                        <TableCell colSpan={5} align="right">
+                          <Typography variant="subtitle2">
+                            Subtotal (Current Page):
+                          </Typography>
+                        </TableCell>
+                        <TableCell sx={{ 
+                          color: theme.palette.primary.main, 
+                          fontWeight: 700,
+                          borderTop: `2px solid ${alpha(theme.palette.primary.main, 0.2)}`
+                        }}>
+                          ${currentPageTotalFee.toFixed(2)}
+                        </TableCell>
+                      </TableRow>
+                    )}
+                    
+                    {/* Total Fee Row (if filtered/search is applied) */}
+                    {filteredDeliveries.length > rowsPerPage && (
+                      <TableRow sx={{ 
+                        backgroundColor: alpha(theme.palette.secondary.light, 0.05),
+                        '& td': { fontWeight: 600 }
+                      }}>
+                        <TableCell colSpan={5} align="right">
+                          <Typography variant="subtitle2">
+                            Total (All {filteredDeliveries.length} deliveries):
+                          </Typography>
+                        </TableCell>
+                        <TableCell sx={{ 
+                          color: theme.palette.secondary.main, 
+                          fontWeight: 700,
+                          borderTop: `2px solid ${alpha(theme.palette.secondary.main, 0.2)}`
+                        }}>
+                          ${allFilteredTotalFee.toFixed(2)}
+                        </TableCell>
+                      </TableRow>
+                    )}
+                  </TableBody>
+                </Table>
+              </TableContainer>
+              
+              {filteredDeliveries.length > rowsPerPage && (
+                <Box sx={{ display: 'flex', justifyContent: 'center', mt: 2 }}>
+                  <Pagination
+                    count={Math.ceil(filteredDeliveries.length / rowsPerPage)}
+                    page={page}
+                    onChange={handleChangePage}
+                    color="primary"
+                    size="small"
+                  />
+                </Box>
+              )}
+
+              <Box sx={{ mt: 2 }}>
+                <Typography variant="body2" color="text.secondary">
+                  Showing {paginatedDeliveries.length} of {filteredDeliveries.length} deliveries
+                </Typography>
+              </Box>
+            </Box>
+            
             <Box display="flex" justifyContent="space-between" mt={4} sx={buttonSx}>
               <Button variant="outlined" color="primary" onClick={handleBack}
                 startIcon={<ArrowBackIcon />} size="large">
