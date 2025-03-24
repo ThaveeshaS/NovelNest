@@ -1,6 +1,7 @@
+/* eslint-disable react-hooks/exhaustive-deps */
 /* eslint-disable no-unused-vars */
 import React, { useState, useEffect } from 'react';
-import { useParams, useNavigate } from 'react-router-dom';
+import { useParams, useNavigate, useLocation } from 'react-router-dom';
 import axios from 'axios';
 import {
   Container, Box, Paper, Typography, Stepper, Step, StepLabel, StepContent,
@@ -46,7 +47,12 @@ const TrackDelivery = () => {
   
   const { deliveryId } = useParams();
   const navigate = useNavigate();
-  const [searchId, setSearchId] = useState(deliveryId || '');
+  const location = useLocation();
+  
+  // Check if we have a deliveryId from location state (from Add Delivery page)
+  const deliveryIdFromState = location.state?.deliveryId;
+  
+  const [searchId, setSearchId] = useState(deliveryId || deliveryIdFromState || '');
   const [delivery, setDelivery] = useState(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
@@ -74,10 +80,13 @@ const TrackDelivery = () => {
   const handleCloseNotification = () => setNotification({...notification, open: false});
   
   useEffect(() => {
-    if (deliveryId) {
-      fetchDelivery(deliveryId);
+    // Check for deliveryId from URL params or from location state
+    const idToFetch = deliveryId || deliveryIdFromState;
+    if (idToFetch) {
+      setSearchId(idToFetch);
+      fetchDelivery(idToFetch);
     }
-  }, [deliveryId]);
+  }, [deliveryId, deliveryIdFromState]);
   
   const fetchDelivery = async (id) => {
     setLoading(true);
@@ -85,6 +94,10 @@ const TrackDelivery = () => {
     try {
       const response = await axios.get(`http://localhost:5000/api/deliveries/track/${id}`);
       setDelivery(response.data);
+      // Update URL if coming from state and not already in URL
+      if (deliveryIdFromState && !deliveryId) {
+        navigate(`/delivery/track/${id}`, { replace: true });
+      }
     } catch (err) {
       setError('Delivery not found or error fetching delivery information.');
     } finally {
@@ -191,6 +204,11 @@ const TrackDelivery = () => {
       timestamp: event.timestamp
     }));
   };
+
+  // Handle going back to add delivery page
+  const handleBackToAddDelivery = () => {
+    navigate('/delivery/add');
+  };
   
   return (
     <ThemeProvider theme={theme}>
@@ -200,10 +218,21 @@ const TrackDelivery = () => {
         
         <Container maxWidth="lg" sx={{ py: 4 }}>
           <Paper sx={{ p: 3, mb: 4 }}>
-            <Typography variant="h4" gutterBottom sx={{ display: 'flex', alignItems: 'center' }}>
-              <LocalShippingIcon sx={{ mr: 1 }} />
-              Track Delivery
-            </Typography>
+            <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 3 }}>
+              <Typography variant="h4" gutterBottom sx={{ display: 'flex', alignItems: 'center', mb: 0 }}>
+                <LocalShippingIcon sx={{ mr: 1 }} />
+                Track Delivery
+              </Typography>
+              
+              <Button
+                variant="outlined"
+                color="primary"
+                startIcon={<ArrowBackIcon />}
+                onClick={handleBackToAddDelivery}
+              >
+                Back to Add Delivery
+              </Button>
+            </Box>
             
             <Box component="form" onSubmit={handleSearchSubmit} sx={{ display: 'flex', alignItems: 'center', mb: 3 }}>
               <TextField
