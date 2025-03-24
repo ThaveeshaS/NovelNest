@@ -35,9 +35,7 @@ const PaymentForm = () => {
   const [isFlipped, setIsFlipped] = useState(false);
   const [pageLoaded, setPageLoaded] = useState(false);
 
-  // Add keyframes for animations
   useEffect(() => {
-    // Create style element for keyframes
     const styleEl = document.createElement('style');
     styleEl.innerHTML = `
       @keyframes fadeIn {
@@ -78,7 +76,6 @@ const PaymentForm = () => {
     `;
     document.head.appendChild(styleEl);
 
-    // Clean up
     return () => {
       document.head.removeChild(styleEl);
     };
@@ -89,12 +86,10 @@ const PaymentForm = () => {
       navigate('/');
       showNotification('No book selected. Please use voice input on the home page.', 'error');
     } else {
-      // Set page as loaded after a small delay for animation
       setTimeout(() => setPageLoaded(true), 100);
     }
   }, [book, navigate]);
 
-  // Detect card type based on first digits
   useEffect(() => {
     const cardNumber = formData.cardNumber.replace(/\s/g, '');
     
@@ -111,7 +106,6 @@ const PaymentForm = () => {
     }
   }, [formData.cardNumber]);
 
-  // Format card number with spaces
   const formatCardNumber = (value) => {
     const v = value.replace(/\s+/g, '').replace(/[^0-9]/gi, '');
     const matches = v.match(/\d{4,16}/g);
@@ -129,7 +123,6 @@ const PaymentForm = () => {
     }
   };
 
-  // Format expiry date
   const formatExpiry = (value) => {
     const v = value.replace(/\s+/g, '').replace(/[^0-9]/gi, '');
     
@@ -140,7 +133,6 @@ const PaymentForm = () => {
     return v;
   };
 
-  // Validate form fields
   const validateField = (name, value) => {
     let errorMessage = '';
     
@@ -203,7 +195,6 @@ const PaymentForm = () => {
   const handleChange = (e) => {
     let { name, value } = e.target;
     
-    // Format input values
     if (name === 'cardNumber') {
       value = formatCardNumber(value);
     } else if (name === 'expiry') {
@@ -214,16 +205,13 @@ const PaymentForm = () => {
     
     setFormData({ ...formData, [name]: value });
     
-    // Mark field as touched
     if (!formTouched[name]) {
       setFormTouched({ ...formTouched, [name]: true });
     }
     
-    // Validate field
     const errorMessage = validateField(name, value);
     setErrors({ ...errors, [name]: errorMessage });
     
-    // Flip card when focusing on CVV
     if (name === 'cvv') {
       setIsFlipped(true);
     } else {
@@ -263,7 +251,6 @@ const PaymentForm = () => {
     e.preventDefault();
     
     if (!validateForm()) {
-      // Shake the form to indicate validation errors
       const formElement = document.getElementById('payment-form');
       formElement.style.animation = 'shake 0.5s';
       setTimeout(() => {
@@ -322,7 +309,6 @@ const PaymentForm = () => {
     }
   };
 
-  // Custom notification function
   const showNotification = (message, type = 'success') => {
     const notificationEl = document.createElement('div');
     notificationEl.style.position = 'fixed';
@@ -355,7 +341,6 @@ const PaymentForm = () => {
     }, 3000);
   };
 
-  // Get card logo based on card type
   const getCardLogo = () => {
     switch (cardType) {
       case 'visa':
@@ -371,7 +356,6 @@ const PaymentForm = () => {
     }
   };
 
-  // Styles
   const styles = {
     container: {
       maxWidth: '900px',
@@ -412,6 +396,33 @@ const PaymentForm = () => {
       fontWeight: '700',
       margin: '0',
       textAlign: 'center',
+    },
+    paymentIconsContainer: {
+      display: 'flex',
+      justifyContent: 'center',
+      gap: '1rem',
+      marginTop: '1rem',
+      flexWrap: 'wrap',
+    },
+    paymentIcon: {
+      display: 'flex',
+      alignItems: 'center',
+      justifyContent: 'center',
+      width: '60px',
+      height: '40px',
+      backgroundColor: 'rgba(255, 255, 255, 0.1)',
+      borderRadius: '6px',
+      transition: 'transform 0.3s ease, box-shadow 0.3s ease',
+      cursor: 'default',
+      boxShadow: '0 2px 4px rgba(0, 0, 0, 0.1)',
+    },
+    paymentIconHover: {
+      transform: 'scale(1.05)',
+      boxShadow: '0 4px 8px rgba(0, 0, 0, 0.2)',
+    },
+    paymentIconImage: {
+      width: '40px',
+      height: 'auto',
     },
     cardBody: {
       padding: '2rem',
@@ -639,7 +650,6 @@ const PaymentForm = () => {
       marginBottom: '5px',
       textAlign: 'right',
     },
-    // Responsive styles
     responsiveContainer: {
       padding: '1rem',
     },
@@ -653,7 +663,6 @@ const PaymentForm = () => {
     },
   };
 
-  // Check if screen is mobile
   const isMobile = window.innerWidth <= 768;
 
   if (!book) return null;
@@ -665,6 +674,63 @@ const PaymentForm = () => {
       <div style={styles.card}>
         <div style={styles.cardHeader}>
           <h3 style={styles.cardTitle}>Secure Payment</h3>
+          <div style={styles.paymentIconsContainer}>
+            <div 
+              style={styles.paymentIcon}
+              onMouseEnter={(e) => e.currentTarget.style.transform = styles.paymentIconHover.transform}
+              onMouseLeave={(e) => e.currentTarget.style.transform = 'scale(1)'}
+            >
+              <img 
+                src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTFnGOEHtcSLfoHPNHYQG_-ULsnOj-AVveJOg&s" 
+                alt="" 
+                style={styles.paymentIconImage}
+              />
+            </div>
+            <div 
+              style={styles.paymentIcon}
+              onMouseEnter={(e) => e.currentTarget.style.transform = styles.paymentIconHover.transform}
+              onMouseLeave={(e) => e.currentTarget.style.transform = 'scale(1)'}
+            >
+              <img 
+                src="https://img.icons8.com/color/512/visa.png" 
+                alt="" 
+                style={styles.paymentIconImage}
+              />
+            </div>
+            <div 
+              style={styles.paymentIcon}
+              onMouseEnter={(e) => e.currentTarget.style.transform = styles.paymentIconHover.transform}
+              onMouseLeave={(e) => e.currentTarget.style.transform = 'scale(1)'}
+            >
+              <img 
+                src="https://cdn4.iconfinder.com/data/icons/payment-method/160/payment_method_master_card-512.png" 
+                alt="" 
+                style={styles.paymentIconImage}
+              />
+            </div>
+            <div 
+              style={styles.paymentIcon}
+              onMouseEnter={(e) => e.currentTarget.style.transform = styles.paymentIconHover.transform}
+              onMouseLeave={(e) => e.currentTarget.style.transform = 'scale(1)'}
+            >
+              <img 
+                src="https://cdn2.iconfinder.com/data/icons/credit-cards-6/156/american_express-512.png" 
+                alt="" 
+                style={styles.paymentIconImage}
+              />
+            </div>
+            <div 
+              style={styles.paymentIcon}
+              onMouseEnter={(e) => e.currentTarget.style.transform = styles.paymentIconHover.transform}
+              onMouseLeave={(e) => e.currentTarget.style.transform = 'scale(1)'}
+            >
+              <img 
+                src="https://cdn3.iconfinder.com/data/icons/payment-method/480/jcb_card_payment-512.png" 
+                alt="" 
+                style={styles.paymentIconImage}
+              />
+            </div>
+          </div>
         </div>
         
         <div style={styles.cardBody}>
@@ -703,6 +769,8 @@ const PaymentForm = () => {
                   <div style={styles.creditCardBack}>
                     <div style={styles.creditCardStrip}></div>
                     <div style={styles.creditCardCvvLabel}>CVV</div>
+ ABOVE CODE IS TRUNCATED FOR BREVITY - FULL CODE CONTINUES BELOW IN THE RETURN STATEMENT
+
                     <div style={styles.creditCardCvv}>
                       {formData.cvv || '•••'}
                     </div>
