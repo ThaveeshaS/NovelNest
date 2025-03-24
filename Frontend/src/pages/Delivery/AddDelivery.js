@@ -176,6 +176,164 @@ const AddDelivery = () => {
     </Box>
   );
 
+  // Reusable delivery details table component
+  const DeliveryDetailsTable = () => (
+    <Box sx={{ mb: 3 }}>
+      <Typography variant="h6" gutterBottom sx={{ display: 'flex', alignItems: 'center', 
+        color: 'primary.main', fontWeight: 600 }}>
+        <ListIcon sx={{ mr: 1 }} />
+        All Delivery Details
+      </Typography>
+      
+      <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 2, gap: 2 }}>
+        <TextField placeholder="Search by customer, order ID, or delivery ID" variant="outlined"
+          fullWidth value={searchTerm} onChange={handleSearchChange} size="small"
+          InputProps={{ startAdornment: <SearchIcon color="action" sx={{ mr: 1 }} /> }} />
+        <Button variant="outlined" color="primary" startIcon={<RefreshIcon />}
+          onClick={fetchDeliveries} size="small">Refresh</Button>
+      </Box>
+      
+      <TableContainer component={Paper} sx={{ borderRadius: 2, 
+        boxShadow: '0 2px 8px rgba(0,0,0,0.05)', mb: 2 }}>
+        <Table size="small">
+          <TableHead>
+            <TableRow sx={{ backgroundColor: alpha(theme.palette.primary.light, 0.1) }}>
+              {['Delivery ID', 'Customer', 'Order ID', 'Delivery Date', 'Status', 'Fee']
+                .map(header => <TableCell key={header} sx={{ fontWeight: 600 }}>{header}</TableCell>)}
+            </TableRow>
+          </TableHead>
+          <TableBody>
+            {deliveriesLoading ? (
+              <TableRow>
+                <TableCell colSpan={6} align="center" sx={{ py: 3 }}>
+                  <CircularProgress size={30} />
+                  <Typography variant="body2" sx={{ mt: 1 }}>Loading delivery data...</Typography>
+                </TableCell>
+              </TableRow>
+            ) : paginatedDeliveries.length === 0 ? (
+              <TableRow>
+                <TableCell colSpan={6} align="center" sx={{ py: 3 }}>
+                  <Typography variant="body1">No deliveries found</Typography>
+                  {searchTerm && <Typography variant="body2" color="text.secondary" sx={{ mt: 1 }}>
+                    Try adjusting your search</Typography>}
+                </TableCell>
+              </TableRow>
+            ) : (
+              paginatedDeliveries.map((delivery) => (
+                <TableRow key={delivery._id || delivery.deliveryId} hover>
+                  <TableCell sx={{ color: 'primary.main', fontWeight: 500, cursor: 'pointer',
+                    '&:hover': { textDecoration: 'underline' } }}>
+                    {delivery.deliveryId}
+                  </TableCell>
+                  <TableCell>{delivery.customerName}</TableCell>
+                  <TableCell>{delivery.orderId}</TableCell>
+                  <TableCell>{delivery.estimatedDeliveryDate 
+                    ? new Date(delivery.estimatedDeliveryDate).toLocaleDateString() : '—'}</TableCell>
+                  <TableCell>
+                    <Chip label={delivery.deliveryStatus} size="small" sx={{ 
+                      backgroundColor: alpha(getStatusColor(delivery.deliveryStatus), 0.1),
+                      color: getStatusColor(delivery.deliveryStatus), fontWeight: 500,
+                      '& .MuiChip-label': { px: 1 } }} />
+                  </TableCell>
+                  <TableCell>${Number(delivery.deliveryFee).toFixed(2)}</TableCell>
+                </TableRow>
+              ))
+            )}
+            
+            {/* Fee Subtotal Row */}
+            {paginatedDeliveries.length > 0 && (
+              <TableRow sx={{ backgroundColor: alpha(theme.palette.primary.light, 0.05),
+                '& td': { fontWeight: 600 } }}>
+                <TableCell colSpan={5} align="right">
+                  <Typography variant="subtitle2">Subtotal (Current Page):</Typography>
+                </TableCell>
+                <TableCell sx={{ color: theme.palette.primary.main, fontWeight: 700,
+                  borderTop: `2px solid ${alpha(theme.palette.primary.main, 0.2)}` }}>
+                  ${currentPageTotalFee.toFixed(2)}
+                </TableCell>
+              </TableRow>
+            )}
+            
+            {/* Total Fee Row (if filtered/search is applied) */}
+            {filteredDeliveries.length > rowsPerPage && (
+              <TableRow sx={{ backgroundColor: alpha(theme.palette.secondary.light, 0.05),
+                '& td': { fontWeight: 600 } }}>
+                <TableCell colSpan={5} align="right">
+                  <Typography variant="subtitle2">
+                    Total (All {filteredDeliveries.length} deliveries):
+                  </Typography>
+                </TableCell>
+                <TableCell sx={{ color: theme.palette.secondary.main, fontWeight: 700,
+                  borderTop: `2px solid ${alpha(theme.palette.secondary.main, 0.2)}` }}>
+                  ${allFilteredTotalFee.toFixed(2)}
+                </TableCell>
+              </TableRow>
+            )}
+          </TableBody>
+        </Table>
+      </TableContainer>
+      
+      {filteredDeliveries.length > rowsPerPage && (
+        <Box sx={{ display: 'flex', justifyContent: 'center', mt: 2 }}>
+          <Pagination count={Math.ceil(filteredDeliveries.length / rowsPerPage)}
+            page={page} onChange={handleChangePage} color="primary" size="small" />
+        </Box>
+      )}
+
+      <Typography variant="body2" color="text.secondary" sx={{ mt: 2 }}>
+        Showing {paginatedDeliveries.length} of {filteredDeliveries.length} deliveries
+      </Typography>
+    </Box>
+  );
+
+  // Order Summary component
+  const OrderSummary = () => (
+    <Box sx={{ mb: 3 }}>
+      <Typography variant="h6" gutterBottom sx={{ display: 'flex', alignItems: 'center', 
+        color: 'primary.main', fontWeight: 600 }}>
+        <CheckCircleIcon sx={{ mr: 1 }} />
+        Order Summary
+      </Typography>
+      <Paper elevation={0} sx={{ backgroundColor: alpha(theme.palette.primary.light, 0.05), 
+        p: 3, borderRadius: 2, border: `1px solid ${alpha(theme.palette.primary.main, 0.1)}` }}>
+        <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
+          {[
+            { label: 'Customer', value: formData.customerName || '—' },
+            { label: 'Order ID', value: formData.orderId || '—' },
+            { label: 'Delivery Status', value: (
+                <Box sx={{ display: 'flex', alignItems: 'center' }}>
+                  <Box component="span" sx={{ display: 'inline-block', width: 10, height: 10, 
+                    borderRadius: '50%', backgroundColor: getStatusColor(formData.deliveryStatus), mr: 1 }} />
+                  <Typography variant="body1" fontWeight="500">{formData.deliveryStatus}</Typography>
+                </Box>
+              ), isComponent: true },
+            { label: 'Delivery Address', value: formData.deliveryAddress || '—', 
+              style: { maxWidth: '60%', textAlign: 'right' } },
+            { label: 'Expected Delivery', value: formData.estimatedDeliveryDate ? 
+                new Date(formData.estimatedDeliveryDate).toLocaleDateString('en-US', {
+                  weekday: 'short', year: 'numeric', month: 'short', day: 'numeric'
+                }) : '—' },
+            { label: 'Delivery Fee', value: `$${Number(formData.deliveryFee).toFixed(2)}`,
+              valueStyle: { fontWeight: '700', color: 'primary.main' } }
+          ].map((item, index) => (
+            <React.Fragment key={index}>
+              {index > 0 && <Divider sx={{ opacity: 0.5 }} />}
+              <Box display="flex" justifyContent="space-between">
+                <Typography variant="body1" color="text.secondary">{item.label}</Typography>
+                {item.isComponent ? item.value : (
+                  <Typography variant="body1" fontWeight="500" sx={item.style || {}}
+                    color={item.valueStyle?.color} style={{ fontWeight: item.valueStyle?.fontWeight }}>
+                    {item.value}
+                  </Typography>
+                )}
+              </Box>
+            </React.Fragment>
+          ))}
+        </Box>
+      </Paper>
+    </Box>
+  );
+
   const renderStepContent = (step) => {
     switch (step) {
       case 0:
@@ -209,6 +367,11 @@ const AddDelivery = () => {
                 </Typography>
               )}
             </Box>
+
+            {/* Added Delivery Details Table to Customer Information step */}
+            <Divider sx={{ my: 3 }} />
+            <DeliveryDetailsTable />
+            
             <Box display="flex" justifyContent="flex-end" mt={4} sx={buttonSx}>
               <Button variant="contained" color="primary" onClick={handleNext}
                 endIcon={<ArrowBackIcon style={{ transform: 'rotate(180deg)' }} />} size="large">
@@ -274,160 +437,12 @@ const AddDelivery = () => {
             
             <Divider sx={{ my: 3 }} />
             
-            {/* Order Summary Section */}
-            <Box sx={{ mb: 3 }}>
-              <Typography variant="h6" gutterBottom sx={{ display: 'flex', alignItems: 'center', 
-                color: 'primary.main', fontWeight: 600 }}>
-                <CheckCircleIcon sx={{ mr: 1 }} />
-                Order Summary
-              </Typography>
-              <Paper elevation={0} sx={{ backgroundColor: alpha(theme.palette.primary.light, 0.05), 
-                p: 3, borderRadius: 2, border: `1px solid ${alpha(theme.palette.primary.main, 0.1)}` }}>
-                <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
-                  {[
-                    { label: 'Customer', value: formData.customerName || '—' },
-                    { label: 'Order ID', value: formData.orderId || '—' },
-                    { label: 'Delivery Status', value: (
-                        <Box sx={{ display: 'flex', alignItems: 'center' }}>
-                          <Box component="span" sx={{ display: 'inline-block', width: 10, height: 10, 
-                            borderRadius: '50%', backgroundColor: getStatusColor(formData.deliveryStatus), mr: 1 }} />
-                          <Typography variant="body1" fontWeight="500">{formData.deliveryStatus}</Typography>
-                        </Box>
-                      ), isComponent: true },
-                    { label: 'Delivery Address', value: formData.deliveryAddress || '—', 
-                      style: { maxWidth: '60%', textAlign: 'right' } },
-                    { label: 'Expected Delivery', value: formData.estimatedDeliveryDate ? 
-                        new Date(formData.estimatedDeliveryDate).toLocaleDateString('en-US', {
-                          weekday: 'short', year: 'numeric', month: 'short', day: 'numeric'
-                        }) : '—' },
-                    { label: 'Delivery Fee', value: `$${Number(formData.deliveryFee).toFixed(2)}`,
-                      valueStyle: { fontWeight: '700', color: 'primary.main' } }
-                  ].map((item, index) => (
-                    <React.Fragment key={index}>
-                      {index > 0 && <Divider sx={{ opacity: 0.5 }} />}
-                      <Box display="flex" justifyContent="space-between">
-                        <Typography variant="body1" color="text.secondary">{item.label}</Typography>
-                        {item.isComponent ? item.value : (
-                          <Typography variant="body1" fontWeight="500" sx={item.style || {}}
-                            color={item.valueStyle?.color} style={{ fontWeight: item.valueStyle?.fontWeight }}>
-                            {item.value}
-                          </Typography>
-                        )}
-                      </Box>
-                    </React.Fragment>
-                  ))}
-                </Box>
-              </Paper>
-            </Box>
+            {/* Order Summary Section using reusable component */}
+            <OrderSummary />
 
-            {/* All Delivery Details Section */}
+            {/* All Delivery Details Section using reusable component */}
             <Divider sx={{ my: 3 }} />
-            <Box sx={{ mb: 3 }}>
-              <Typography variant="h6" gutterBottom sx={{ display: 'flex', alignItems: 'center', 
-                color: 'primary.main', fontWeight: 600 }}>
-                <ListIcon sx={{ mr: 1 }} />
-                All Delivery Details
-              </Typography>
-              
-              <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 2, gap: 2 }}>
-                <TextField placeholder="Search by customer, order ID, or delivery ID" variant="outlined"
-                  fullWidth value={searchTerm} onChange={handleSearchChange} size="small"
-                  InputProps={{ startAdornment: <SearchIcon color="action" sx={{ mr: 1 }} /> }} />
-                <Button variant="outlined" color="primary" startIcon={<RefreshIcon />}
-                  onClick={fetchDeliveries} size="small">Refresh</Button>
-              </Box>
-              
-              <TableContainer component={Paper} sx={{ borderRadius: 2, 
-                boxShadow: '0 2px 8px rgba(0,0,0,0.05)', mb: 2 }}>
-                <Table size="small">
-                  <TableHead>
-                    <TableRow sx={{ backgroundColor: alpha(theme.palette.primary.light, 0.1) }}>
-                      {['Delivery ID', 'Customer', 'Order ID', 'Delivery Date', 'Status', 'Fee']
-                        .map(header => <TableCell key={header} sx={{ fontWeight: 600 }}>{header}</TableCell>)}
-                    </TableRow>
-                  </TableHead>
-                  <TableBody>
-                    {deliveriesLoading ? (
-                      <TableRow>
-                        <TableCell colSpan={6} align="center" sx={{ py: 3 }}>
-                          <CircularProgress size={30} />
-                          <Typography variant="body2" sx={{ mt: 1 }}>Loading delivery data...</Typography>
-                        </TableCell>
-                      </TableRow>
-                    ) : paginatedDeliveries.length === 0 ? (
-                      <TableRow>
-                        <TableCell colSpan={6} align="center" sx={{ py: 3 }}>
-                          <Typography variant="body1">No deliveries found</Typography>
-                          {searchTerm && <Typography variant="body2" color="text.secondary" sx={{ mt: 1 }}>
-                            Try adjusting your search</Typography>}
-                        </TableCell>
-                      </TableRow>
-                    ) : (
-                      paginatedDeliveries.map((delivery) => (
-                        <TableRow key={delivery._id || delivery.deliveryId} hover>
-                          <TableCell sx={{ color: 'primary.main', fontWeight: 500, cursor: 'pointer',
-                            '&:hover': { textDecoration: 'underline' } }}>
-                            {delivery.deliveryId}
-                          </TableCell>
-                          <TableCell>{delivery.customerName}</TableCell>
-                          <TableCell>{delivery.orderId}</TableCell>
-                          <TableCell>{delivery.estimatedDeliveryDate 
-                            ? new Date(delivery.estimatedDeliveryDate).toLocaleDateString() : '—'}</TableCell>
-                          <TableCell>
-                            <Chip label={delivery.deliveryStatus} size="small" sx={{ 
-                              backgroundColor: alpha(getStatusColor(delivery.deliveryStatus), 0.1),
-                              color: getStatusColor(delivery.deliveryStatus), fontWeight: 500,
-                              '& .MuiChip-label': { px: 1 } }} />
-                          </TableCell>
-                          <TableCell>${Number(delivery.deliveryFee).toFixed(2)}</TableCell>
-                        </TableRow>
-                      ))
-                    )}
-                    
-                    {/* Fee Subtotal Row */}
-                    {paginatedDeliveries.length > 0 && (
-                      <TableRow sx={{ backgroundColor: alpha(theme.palette.primary.light, 0.05),
-                        '& td': { fontWeight: 600 } }}>
-                        <TableCell colSpan={5} align="right">
-                          <Typography variant="subtitle2">Subtotal (Current Page):</Typography>
-                        </TableCell>
-                        <TableCell sx={{ color: theme.palette.primary.main, fontWeight: 700,
-                          borderTop: `2px solid ${alpha(theme.palette.primary.main, 0.2)}` }}>
-                          ${currentPageTotalFee.toFixed(2)}
-                        </TableCell>
-                      </TableRow>
-                    )}
-                    
-                    {/* Total Fee Row (if filtered/search is applied) */}
-                    {filteredDeliveries.length > rowsPerPage && (
-                      <TableRow sx={{ backgroundColor: alpha(theme.palette.secondary.light, 0.05),
-                        '& td': { fontWeight: 600 } }}>
-                        <TableCell colSpan={5} align="right">
-                          <Typography variant="subtitle2">
-                            Total (All {filteredDeliveries.length} deliveries):
-                          </Typography>
-                        </TableCell>
-                        <TableCell sx={{ color: theme.palette.secondary.main, fontWeight: 700,
-                          borderTop: `2px solid ${alpha(theme.palette.secondary.main, 0.2)}` }}>
-                          ${allFilteredTotalFee.toFixed(2)}
-                        </TableCell>
-                      </TableRow>
-                    )}
-                  </TableBody>
-                </Table>
-              </TableContainer>
-              
-              {filteredDeliveries.length > rowsPerPage && (
-                <Box sx={{ display: 'flex', justifyContent: 'center', mt: 2 }}>
-                  <Pagination count={Math.ceil(filteredDeliveries.length / rowsPerPage)}
-                    page={page} onChange={handleChangePage} color="primary" size="small" />
-                </Box>
-              )}
-
-              <Typography variant="body2" color="text.secondary" sx={{ mt: 2 }}>
-                Showing {paginatedDeliveries.length} of {filteredDeliveries.length} deliveries
-              </Typography>
-            </Box>
+            <DeliveryDetailsTable />
             
             <Box display="flex" justifyContent="space-between" mt={4} sx={buttonSx}>
               <Button variant="outlined" color="primary" onClick={handleBack}
