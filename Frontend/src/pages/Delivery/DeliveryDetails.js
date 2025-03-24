@@ -6,7 +6,7 @@ import autoTable from "jspdf-autotable";
 import "bootstrap/dist/css/bootstrap.min.css";
 import Header2 from "../../components/Header2"; // Import Header2
 import Navbar2 from "../../components/Navbar2"; // Import Navbar2
-import { Button, Container, Alert, Spinner, Form, Row, Col, Modal } from "react-bootstrap"; // Added Modal component
+import { Button, Container, Alert, Spinner, Form, Row, Col, Modal, Badge } from "react-bootstrap"; // Added Badge component
 
 export default function DeliveryDetails() {
   const [deliveries, setDeliveries] = useState([]);
@@ -21,6 +21,8 @@ export default function DeliveryDetails() {
   // New state variables for edit functionality
   const [showEditModal, setShowEditModal] = useState(false);
   const [editDelivery, setEditDelivery] = useState(null);
+  // New state for table display mode
+  const [viewMode, setViewMode] = useState("table"); // table or cards
 
   useEffect(() => {
     const fetchDeliveries = async () => {
@@ -189,6 +191,30 @@ export default function DeliveryDetails() {
     setEditDelivery({ ...editDelivery, [name]: value });
   };
 
+  // Get status color based on delivery date
+  const getDeliveryStatusColor = (dateString) => {
+    const deliveryDate = new Date(dateString);
+    const today = new Date();
+    const difference = Math.ceil((deliveryDate - today) / (1000 * 60 * 60 * 24));
+    
+    if (difference < 0) return "danger"; // Past due
+    if (difference <= 2) return "warning"; // Due soon
+    return "success"; // On track
+  };
+
+  // Get delivery status text
+  const getDeliveryStatusText = (dateString) => {
+    const deliveryDate = new Date(dateString);
+    const today = new Date();
+    const difference = Math.ceil((deliveryDate - today) / (1000 * 60 * 60 * 24));
+    
+    if (difference < 0) return "Delayed";
+    if (difference === 0) return "Today";
+    if (difference === 1) return "Tomorrow";
+    if (difference <= 2) return "Soon";
+    return "On Track";
+  };
+
   return (
     <div>
       {/* Add Header2 and Navbar2 */}
@@ -196,107 +222,240 @@ export default function DeliveryDetails() {
       <Navbar2 />
 
       <Container className="mt-5">
-        <h2 className="mb-4 text-center">Delivery Details</h2>
+        <div className="d-flex justify-content-between align-items-center mb-4">
+          <h2 className="text-primary fw-bold">Delivery Details</h2>
+          <div className="d-flex gap-2">
+            <Button 
+              variant={viewMode === "table" ? "primary" : "outline-primary"} 
+              onClick={() => setViewMode("table")}
+            >
+              <i className="fas fa-table me-1"></i> Table View
+            </Button>
+            <Button 
+              variant={viewMode === "cards" ? "primary" : "outline-primary"} 
+              onClick={() => setViewMode("cards")}
+            >
+              <i className="fas fa-th-large me-1"></i> Card View
+            </Button>
+          </div>
+        </div>
 
         {/* Search and Generate Report */}
-        <div className="mb-4">
+        <div className="mb-4 bg-light p-3 rounded shadow-sm">
           <div className="input-group">
+            <span className="input-group-text bg-primary text-white">
+              <i className="fas fa-search"></i>
+            </span>
             <input
               type="text"
               placeholder="Search by customer name or delivery ID..."
-              className="form-control"
+              className="form-control border-primary"
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
             />
-            <Button variant="primary" onClick={generateReport}>
-              <i className="fas fa-file-pdf"></i> Generate Report
+            <Button variant="primary" onClick={generateReport} className="fw-bold">
+              <i className="fas fa-file-pdf me-1"></i> Generate Report
             </Button>
+          </div>
+          <div className="mt-2 small text-muted">
+            {filteredDeliveries.length} deliveries found
           </div>
         </div>
 
         {error && <Alert variant="danger">{error}</Alert>}
 
         {loading ? (
-          <div className="text-center">
-            <Spinner animation="border" variant="primary" />
+          <div className="text-center p-5">
+            <Spinner animation="border" variant="primary" size="lg" />
+            <p className="mt-3 text-primary">Loading delivery information...</p>
           </div>
         ) : (
-          <div className="table-responsive">
-            <table className="table table-striped table-hover table-bordered">
-              <thead className="thead-dark">
-                <tr>
-                  <th>Delivery ID</th>
-                  <th>Order ID</th>
-                  <th>Customer Name</th>
-                  <th>Delivery Address</th>
-                  <th>Phone Number</th>
-                  <th>Email</th>
-                  <th>Estimated Delivery Date</th>
-                  <th>Delivery Fee</th>
-                  <th>Actions</th> {/* New column for actions */}
-                </tr>
-              </thead>
-              <tbody>
+          <>
+            {viewMode === "table" ? (
+              <div className="table-responsive bg-white rounded shadow">
+                <table className="table table-hover mb-0">
+                  <thead>
+                    <tr className="bg-primary text-white">
+                      <th className="py-3">Delivery ID</th>
+                      <th className="py-3">Order ID</th>
+                      <th className="py-3">Customer Name</th>
+                      <th className="py-3">Delivery Address</th>
+                      <th className="py-3">Contact</th>
+                      <th className="py-3">Estimated Delivery</th>
+                      <th className="py-3">Fee</th>
+                      <th className="py-3 text-center">Actions</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {filteredDeliveries.length > 0 ? (
+                      filteredDeliveries.map((delivery) => (
+                        <tr key={delivery._id} className="border-bottom">
+                          <td className="fw-bold py-3">{delivery.deliveryId}</td>
+                          <td className="py-3">{delivery.orderId}</td>
+                          <td className="py-3">
+                            <div className="d-flex align-items-center">
+                              <div className="bg-light rounded-circle text-center me-2" style={{width: "30px", height: "30px", lineHeight: "30px"}}>
+                                {delivery.customerName.charAt(0).toUpperCase()}
+                              </div>
+                              {delivery.customerName}
+                            </div>
+                          </td>
+                          <td className="py-3">
+                            <div style={{maxWidth: "200px", whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis"}}>
+                              <i className="fas fa-map-marker-alt text-danger me-1"></i>
+                              {delivery.deliveryAddress}
+                            </div>
+                          </td>
+                          <td className="py-3">
+                            <div><i className="fas fa-phone-alt text-success me-1"></i> {delivery.contactNumber}</div>
+                            <div className="small text-muted"><i className="fas fa-envelope me-1"></i> {delivery.email}</div>
+                          </td>
+                          <td className="py-3">
+                            <div>{delivery.estimatedDeliveryDate}</div>
+                            <Badge bg={getDeliveryStatusColor(delivery.estimatedDeliveryDate)}>
+                              {getDeliveryStatusText(delivery.estimatedDeliveryDate)}
+                            </Badge>
+                          </td>
+                          <td className="py-3 fw-bold">${delivery.deliveryFee}</td>
+                          <td className="text-center py-3">
+                            <div className="d-flex justify-content-center gap-2">
+                              <Button 
+                                variant="outline-success" 
+                                size="sm" 
+                                className="rounded-pill border-2"
+                                style={{
+                                  minWidth: '80px',
+                                  transition: 'all 0.3s ease',
+                                  fontWeight: '500'
+                                }}
+                                onClick={() => handleEditClick(delivery)}
+                              >
+                                <i className="fas fa-edit me-1"></i> Edit
+                              </Button>
+                              <Button 
+                                variant="outline-danger" 
+                                size="sm"
+                                className="rounded-pill border-2"
+                                style={{
+                                  minWidth: '80px',
+                                  transition: 'all 0.3s ease',
+                                  fontWeight: '500'
+                                }}
+                                onClick={() => handleDeleteClick(delivery._id)}
+                              >
+                                <i className="fas fa-trash-alt me-1"></i> Delete
+                              </Button>
+                            </div>
+                          </td>
+                        </tr>
+                      ))
+                    ) : (
+                      <tr>
+                        <td colSpan="8" className="text-center text-danger py-4">
+                          <i className="fas fa-exclamation-triangle me-2"></i>
+                          No matching deliveries found.
+                        </td>
+                      </tr>
+                    )}
+                  </tbody>
+                </table>
+              </div>
+            ) : (
+              <Row>
                 {filteredDeliveries.length > 0 ? (
                   filteredDeliveries.map((delivery) => (
-                    <tr key={delivery._id}>
-                      <td>{delivery.deliveryId}</td>
-                      <td>{delivery.orderId}</td>
-                      <td>{delivery.customerName}</td>
-                      <td>{delivery.deliveryAddress}</td>
-                      <td>{delivery.contactNumber}</td>
-                      <td>{delivery.email}</td>
-                      <td>{delivery.estimatedDeliveryDate}</td>
-                      <td>${delivery.deliveryFee}</td>
-                      <td className="text-center">
-                        <div className="d-flex justify-content-center gap-2">
-                          <Button 
-                            variant="success" 
-                            size="sm" 
-                            className="rounded-pill shadow-sm"
-                            style={{
-                              minWidth: '80px',
-                              transition: 'all 0.3s ease',
-                              fontWeight: '500'
-                            }}
-                            onClick={() => handleEditClick(delivery)}
-                          >
-                            <i className="fas fa-edit me-1"></i> Edit
-                          </Button>
-                          <Button 
-                            variant="danger" 
-                            size="sm"
-                            className="rounded-pill shadow-sm"
-                            style={{
-                              minWidth: '80px',
-                              transition: 'all 0.3s ease',
-                              fontWeight: '500'
-                            }}
-                            onClick={() => handleDeleteClick(delivery._id)}
-                          >
-                            <i className="fas fa-trash-alt me-1"></i> Delete
-                          </Button>
+                    <Col lg={4} md={6} className="mb-4" key={delivery._id}>
+                      <div className="card h-100 shadow-sm hover-shadow border-0">
+                        <div className="card-header bg-primary text-white">
+                          <div className="d-flex justify-content-between align-items-center">
+                            <span className="fw-bold">{delivery.deliveryId}</span>
+                            <Badge bg={getDeliveryStatusColor(delivery.estimatedDeliveryDate)}>
+                              {getDeliveryStatusText(delivery.estimatedDeliveryDate)}
+                            </Badge>
+                          </div>
                         </div>
-                      </td>
-                    </tr>
+                        <div className="card-body">
+                          <div className="mb-3">
+                            <div className="d-flex align-items-center mb-2">
+                              <div className="bg-light rounded-circle text-center me-2" style={{width: "40px", height: "40px", lineHeight: "40px"}}>
+                                {delivery.customerName.charAt(0).toUpperCase()}
+                              </div>
+                              <h5 className="mb-0">{delivery.customerName}</h5>
+                            </div>
+                            <p className="text-muted mb-0"><small>{delivery.email}</small></p>
+                          </div>
+                          
+                          <div className="mb-2">
+                            <div className="small text-muted mb-1">Delivery Address</div>
+                            <p className="mb-0">
+                              <i className="fas fa-map-marker-alt text-danger me-1"></i>
+                              {delivery.deliveryAddress}
+                            </p>
+                          </div>
+                          
+                          <div className="mb-2">
+                            <div className="small text-muted mb-1">Contact</div>
+                            <p className="mb-0">
+                              <i className="fas fa-phone-alt text-success me-1"></i>
+                              {delivery.contactNumber}
+                            </p>
+                          </div>
+                          
+                          <div className="d-flex justify-content-between mb-2">
+                            <div>
+                              <div className="small text-muted mb-1">Order ID</div>
+                              <p className="mb-0">{delivery.orderId}</p>
+                            </div>
+                            <div>
+                              <div className="small text-muted mb-1">Delivery Fee</div>
+                              <p className="fw-bold mb-0">${delivery.deliveryFee}</p>
+                            </div>
+                          </div>
+                          
+                          <div>
+                            <div className="small text-muted mb-1">Estimated Delivery Date</div>
+                            <p className="mb-0">{delivery.estimatedDeliveryDate}</p>
+                          </div>
+                        </div>
+                        <div className="card-footer bg-white border-0 pt-0">
+                          <div className="d-flex gap-2">
+                            <Button 
+                              variant="outline-success" 
+                              size="sm" 
+                              className="w-50 rounded-pill border-2"
+                              onClick={() => handleEditClick(delivery)}
+                            >
+                              <i className="fas fa-edit me-1"></i> Edit
+                            </Button>
+                            <Button 
+                              variant="outline-danger" 
+                              size="sm"
+                              className="w-50 rounded-pill border-2"
+                              onClick={() => handleDeleteClick(delivery._id)}
+                            >
+                              <i className="fas fa-trash-alt me-1"></i> Delete
+                            </Button>
+                          </div>
+                        </div>
+                      </div>
+                    </Col>
                   ))
                 ) : (
-                  <tr>
-                    <td colSpan="9" className="text-center text-danger">
-                      No matching deliveries found.
-                    </td>
-                  </tr>
+                  <Col className="text-center text-danger py-5">
+                    <i className="fas fa-exclamation-triangle fs-1 mb-3"></i>
+                    <h4>No matching deliveries found.</h4>
+                  </Col>
                 )}
-              </tbody>
-            </table>
-          </div>
+              </Row>
+            )}
+          </>
         )}
       </Container>
 
       {/* Edit Delivery Modal */}
       <Modal show={showEditModal} onHide={() => setShowEditModal(false)}>
-        <Modal.Header closeButton>
-          <Modal.Title>Edit Delivery</Modal.Title>
+        <Modal.Header closeButton className="bg-primary text-white">
+          <Modal.Title>Edit Delivery Details</Modal.Title>
         </Modal.Header>
         <Modal.Body>
           {editDelivery && (
@@ -309,6 +468,7 @@ export default function DeliveryDetails() {
                   value={editDelivery.deliveryId}
                   onChange={handleEditInputChange}
                   disabled
+                  className="bg-light"
                 />
               </Form.Group>
               <Form.Group className="mb-3">
@@ -319,6 +479,7 @@ export default function DeliveryDetails() {
                   value={editDelivery.orderId}
                   onChange={handleEditInputChange}
                   disabled
+                  className="bg-light"
                 />
               </Form.Group>
               <Form.Group className="mb-3">
@@ -381,10 +542,10 @@ export default function DeliveryDetails() {
         </Modal.Body>
         <Modal.Footer>
           <Button variant="secondary" onClick={() => setShowEditModal(false)}>
-            Close
+            <i className="fas fa-times me-1"></i> Close
           </Button>
           <Button variant="primary" onClick={handleSaveChanges}>
-            Save Changes
+            <i className="fas fa-save me-1"></i> Save Changes
           </Button>
         </Modal.Footer>
       </Modal>
