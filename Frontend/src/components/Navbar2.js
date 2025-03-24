@@ -14,7 +14,7 @@ const Navbar2 = () => {
           <Link to="/author" className="nav-link text-white mx-3">Author</Link>
           
           {/* Voice Mic Icon */}
-          <Link to="/voice" className="nav-link text-white mx-3">
+          <Link to="/home1" className="nav-link text-white mx-3">
             <i className="bi bi-mic"></i>
           </Link>
         </div>

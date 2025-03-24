@@ -30,6 +30,14 @@ import ManageProducts from './pages/Product/ManageProducts';
 import AddProducts from './pages/Product/AddProducts';
 import EditProduct from './pages/Product/EditProduct';
 
+//Amesh import
+import AdminBooksPanel from './pages/voicepayment/AdminBooksPanel';
+import  AdminTransactionsPanel from './pages/voicepayment/AdminTransactionsPanel';
+import  Home1 from './pages/voicepayment/Home1';
+import  PaymentForm from './pages/voicepayment/PaymentForm';
+import  SuccessPage from './pages/voicepayment/SuccessPage';
+
+
 
 function App() {
   const location = useLocation();
@@ -57,6 +65,15 @@ function App() {
         <Route path="/managecustomers" element={<ManageCustomers />} />
         <Route path="/customerfeedback" element={<CustomerFeedback />} />
         <Route path="/managefeedback" element={<ManageFeedback />} />
+
+        
+        <Route path="/home1" element={<Home1 />} />
+        <Route path="/admintransactions" element={<AdminTransactionsPanel />} /> 
+        <Route path="/adminbookspanel" element={<AdminBooksPanel />} /> 
+        <Route path="/payment" element={<PaymentForm />} /> // ✅ Required to load PaymentForm when navigating via voice
+        <Route path="/success" element={<SuccessPage />} /> // ✅ Add this if not already added
+
+
 
 
 
