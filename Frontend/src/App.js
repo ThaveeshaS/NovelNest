@@ -13,8 +13,12 @@ import CustomerAccount from './pages/Customer/CustomerAccount';
 import AdminLogin from "./pages/AdminLogin";
 import AdminDashboard from "./pages/AdminDashboard";
 import ManageCustomers from './pages/Customer/ManageCustomers'; 
+
+
 import AddDelivery from './pages/Delivery/AddDelivery'; // Corrected path
 import DeliveryDetails from './pages/Delivery/DeliveryDetails'; // Added import for DeliveryDetails
+import TrackDelivery from './pages/Delivery/TrackDelivery';
+
 
 import TermsAndConditions from './pages/TandCs';
 import PrivacyPolicy from './pages/PrivacyPolicy';
@@ -26,7 +30,7 @@ function App() {
   const location = useLocation();
 
   // Define routes where Header, Navbar should not be displayed
-  const excludePaths = ["/customerdashboard", "/admindashboard", "/managecustomers", "/customeraccount", "/admin/AddDelivery", "/admin/DeliveryDetails"];
+  const excludePaths = ["/customerdashboard", "/admindashboard", "/managecustomers", "/customeraccount", "/admin/AddDelivery", "/admin/DeliveryDetails", "/trackdelivery"];
 
   // Check if the current path is in the exclude list
   const shouldShowHeaderNavbarFooter = !excludePaths.includes(location.pathname);
@@ -46,8 +50,13 @@ function App() {
         <Route path="/adminlogin" element={<AdminLogin />} />
         <Route path="/admindashboard" element={<AdminDashboard />} />
         <Route path="/managecustomers" element={<ManageCustomers />} />
+
+
+
         <Route path="/admin/AddDelivery" element={<AddDelivery />} />
         <Route path="/admin/DeliveryDetails" element={<DeliveryDetails />} /> {/* Added DeliveryDetails route */}
+        <Route path="/trackdelivery" element={<TrackDelivery />} />
+
         
         <Route path="/TermsAndConditions" element={<TermsAndConditions />} />
         <Route path="/PrivacyPolicy" element={<PrivacyPolicy />} />
