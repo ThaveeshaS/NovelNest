@@ -1,14 +1,14 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import axios from "axios";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom";
 import "bootstrap/dist/css/bootstrap.min.css";
-
-// Import Header2 and Navbar2 components
 import Header2 from "../../components/Header2";
 import Navbar2 from "../../components/Navbar2";
 
-export default function AddProducts() {
+export default function EditProduct() {
   const navigate = useNavigate();
+  const { id } = useParams();
+  const [originalData, setOriginalData] = useState(null); // Store original data
   const [formData, setFormData] = useState({
     coverPage: null,
     bookTitle: "",
@@ -25,6 +25,47 @@ export default function AddProducts() {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [coverPreview, setCoverPreview] = useState(null);
 
+  // Check if the form has been edited
+  const isFormEdited = () => {
+    if (!originalData) return false; // If original data is not loaded yet, return false
+    return Object.keys(formData).some((key) => {
+      if (key === "coverPage") {
+        // Handle file comparison separately
+        return formData[key] !== originalData[key];
+      }
+      return formData[key] !== originalData[key];
+    });
+  };
+
+  useEffect(() => {
+    const fetchProduct = async () => {
+      try {
+        const response = await axios.get(`http://localhost:5000/api/product/${id}`);
+        setOriginalData(response.data); // Store original data
+        setFormData(response.data); // Set form data
+
+        // Handle coverPage preview
+        if (response.data.coverPage) {
+          if (typeof response.data.coverPage === "string") {
+            // If coverPage is a URL (string), set it directly as the preview
+            setCoverPreview(response.data.coverPage);
+          } else {
+            // If coverPage is a file object, create a preview URL
+            const reader = new FileReader();
+            reader.onloadend = () => {
+              setCoverPreview(reader.result);
+            };
+            reader.readAsDataURL(response.data.coverPage);
+          }
+        }
+      } catch (error) {
+        console.error("Error fetching product:", error);
+      }
+    };
+
+    fetchProduct();
+  }, [id]);
+
   const handleChange = (e) => {
     const { name, value } = e.target;
     setFormData({ ...formData, [name]: value });
@@ -36,7 +77,6 @@ export default function AddProducts() {
     setFormData({ ...formData, coverPage: file });
     validateField("coverPage", file);
 
-    // Create preview for the uploaded image
     if (file) {
       const reader = new FileReader();
       reader.onloadend = () => {
@@ -56,32 +96,22 @@ export default function AddProducts() {
         fieldErrors.bookTitle = value.trim() ? "" : "Book title is required";
         break;
       case "price":
-        fieldErrors.price = /^\d+(\.\d{1,2})?$/.test(value)
-          ? ""
-          : "Invalid price";
+        fieldErrors.price = /^\d+(\.\d{1,2})?$/.test(value) ? "" : "Invalid price";
         break;
       case "bookDescription":
-        fieldErrors.bookDescription = value.trim()
-          ? ""
-          : "Book description is required";
+        fieldErrors.bookDescription = value.trim() ? "" : "Book description is required";
         break;
       case "bookQuantity":
-        fieldErrors.bookQuantity = /^\d+$/.test(value)
-          ? ""
-          : "Invalid quantity";
+        fieldErrors.bookQuantity = /^\d+$/.test(value) ? "" : "Invalid quantity";
         break;
       case "category":
         fieldErrors.category = value ? "" : "Category is required";
         break;
       case "authorName":
-        fieldErrors.authorName = value.trim()
-          ? ""
-          : "Author's name is required";
+        fieldErrors.authorName = value.trim() ? "" : "Author's name is required";
         break;
       case "isbnNumber":
-        fieldErrors.isbnNumber = /^\d{10,13}$/.test(value)
-          ? ""
-          : "Invalid ISBN number";
+        fieldErrors.isbnNumber = /^\d{10,13}$/.test(value) ? "" : "Invalid ISBN number";
         break;
       case "language":
         fieldErrors.language = value.trim() ? "" : "Language is required";
@@ -107,7 +137,7 @@ export default function AddProducts() {
     validateField("bookQuantity", newQuantity);
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
 
     if (Object.values(errors).some((error) => error !== "")) {
@@ -115,10 +145,18 @@ export default function AddProducts() {
       return;
     }
 
+    if (!isFormEdited()) {
+      alert("No changes detected. Please edit the form before submitting.");
+      return;
+    }
+
     setIsSubmitting(true);
 
     const data = new FormData();
-    data.append("coverPage", formData.coverPage);
+    // Append coverPage only if a new file is selected
+    if (formData.coverPage instanceof File) {
+      data.append("coverPage", formData.coverPage);
+    }
     data.append("bookTitle", formData.bookTitle);
     data.append("price", formData.price);
     data.append("bookDescription", formData.bookDescription);
@@ -128,29 +166,29 @@ export default function AddProducts() {
     data.append("isbnNumber", formData.isbnNumber);
     data.append("language", formData.language);
 
-    axios
-      .post("http://localhost:5000/api/product/add", data, {
+    try {
+      const response = await axios.put(`http://localhost:5000/api/product/update/${id}`, data, {
         headers: {
           "Content-Type": "multipart/form-data",
         },
-      })
-      .then((response) => {
-        alert("Product Added Successfully!");
-        navigate("/manageproducts"); // Redirect to manageproducts page
-      })
-      .catch((error) => {
-        console.error("There was an error adding the product!", error);
-        alert(
-          "Error: " + error.response?.data?.message || "Something went wrong"
-        );
-      })
-      .finally(() => {
-        setIsSubmitting(false);
       });
+
+      if (response.status === 200) {
+        alert("Product Updated Successfully!");
+        navigate("/manageproducts");
+      } else {
+        alert("Failed to update product. Please try again.");
+      }
+    } catch (error) {
+      console.error("There was an error updating the product!", error);
+      alert("Error: " + (error.response?.data?.message || "Something went wrong"));
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   return (
-    <div className="add-products-page">
+    <div className="edit-products-page">
       <Header2 />
       <Navbar2 />
 
@@ -174,7 +212,7 @@ export default function AddProducts() {
                   }}
                 >
                   <h2 className="m-0 fw-bold">
-                    <i className="fas fa-book me-2"></i>Add New Book
+                    <i className="fas fa-book me-2"></i>Edit Book
                   </h2>
                 </div>
                 <div className="card-body p-5">
@@ -282,9 +320,7 @@ export default function AddProducts() {
                               <button
                                 type="button"
                                 className="btn btn-outline-primary btn-lg fw-bold"
-                                onClick={() =>
-                                  handleQuantityChange("decrement")
-                                }
+                                onClick={() => handleQuantityChange("decrement")}
                                 style={{ width: "50px", fontSize: "1.2rem" }}
                               >
                                 -
@@ -307,9 +343,7 @@ export default function AddProducts() {
                               <button
                                 type="button"
                                 className="btn btn-outline-primary btn-lg fw-bold"
-                                onClick={() =>
-                                  handleQuantityChange("increment")
-                                }
+                                onClick={() => handleQuantityChange("increment")}
                                 style={{ width: "50px", fontSize: "1.2rem" }}
                               >
                                 +
@@ -363,7 +397,9 @@ export default function AddProducts() {
                                 </option>
                                 <option value="Fiction">Fiction</option>
                                 <option value="Non-Fiction">Non-Fiction</option>
-                                <option value="Children's & Young Adult">Children's & Young Adult </option>
+                                <option value="Children's & Young Adult">
+                                  Children's & Young Adult
+                                </option>
                               </select>
                               {errors.category && (
                                 <div className="invalid-feedback d-block mt-1">
@@ -551,7 +587,6 @@ export default function AddProducts() {
                               id="coverPage"
                               name="coverPage"
                               onChange={handleFileChange}
-                              required
                             />
                             {errors.coverPage && (
                               <div className="text-danger mt-2">
@@ -578,7 +613,7 @@ export default function AddProducts() {
                       <button
                         type="submit"
                         className="btn btn-success btn-lg px-5 py-2"
-                        disabled={isSubmitting}
+                        disabled={!isFormEdited() || isSubmitting}
                         style={{
                           borderRadius: "0.5rem",
                           boxShadow: "0 2px 8px rgba(0,0,0,0.2)",
@@ -593,11 +628,11 @@ export default function AddProducts() {
                               role="status"
                               aria-hidden="true"
                             ></span>
-                            Adding...
+                            Updating...
                           </>
                         ) : (
                           <>
-                            <i className="fas fa-plus-circle me-2"></i>Add Book
+                            <i className="fas fa-save me-2"></i>Update Book
                           </>
                         )}
                       </button>

@@ -28,6 +28,7 @@ import WishlistPage from './pages/Product/Wishlist';
 import AddToCartPage from './pages/Product/AddtoCart';
 import ManageProducts from './pages/Product/ManageProducts';
 import AddProducts from './pages/Product/AddProducts';
+import EditProduct from './pages/Product/EditProduct';
 
 //Amesh import
 import AdminBooksPanel from './pages/voicepayment/AdminBooksPanel';
@@ -42,7 +43,7 @@ function App() {
   const location = useLocation();
 
   // Define routes where Header, Navbar should not be displayed
-  const excludePaths = ["/customerdashboard", "/admindashboard", "/managecustomers", "/customeraccount", "/wishlist", "/cart", "/manageproducts", "/addproducts", "/customerfeedback", "/managefeedback"];
+  const excludePaths = ["/customerdashboard", "/admindashboard", "/managecustomers", "/customeraccount", "/wishlist", "/cart", "/manageproducts", "/addproducts", "/customerfeedback", "/managefeedback", "/edit-product/:id"];
 
   // Check if the current path is in the exclude list
   const shouldShowHeaderNavbarFooter = !excludePaths.includes(location.pathname);
@@ -85,6 +86,7 @@ function App() {
         <Route path="/cart" element={<AddToCartPage />} />
         <Route path="/manageproducts" element={<ManageProducts/>} />
         <Route path="/addproducts" element={<AddProducts/>} />
+        <Route path="/edit-product/:id" element={<EditProduct/>} />
 
 
 

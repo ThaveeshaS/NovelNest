@@ -4,7 +4,7 @@ import { useNavigate } from "react-router-dom";
 import { Container, Row, Col, Card, Button, Alert } from "react-bootstrap";
 import "bootstrap/dist/css/bootstrap.min.css";
 import Header2 from "../components/Header2";
-import Navbar2 from "../components/Navbar2";
+
 
 const AdminDashboard = () => {
   const [admin, setAdmin] = useState(null);
@@ -65,8 +65,7 @@ const AdminDashboard = () => {
       {/* Header2 Component */}
       <Header2 />
 
-      {/* Navbar2 Component */}
-      <Navbar2 />
+      
 
       {/* Dashboard Content */}
       <Container fluid className="dashboard-container py-5">
