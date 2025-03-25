@@ -4,7 +4,7 @@ import { useNavigate } from "react-router-dom";
 import "bootstrap/dist/css/bootstrap.min.css";
 import Header2 from "../../components/Header2";
 import Navbar2 from "../../components/Navbar2";
-import { storage } from "../Product/firebase"; // Import Firebase storage
+import { storage } from "../Product/firebase";
 import { ref, uploadBytes, getDownloadURL } from "firebase/storage";
 
 export default function AddProducts() {
@@ -118,15 +118,22 @@ export default function AddProducts() {
 
     let coverPageUrl = "";
     if (formData.coverPage) {
-      const fileRef = ref(storage, `covers/${formData.coverPage.name}-${Date.now()}`);
-      await uploadBytes(fileRef, formData.coverPage);
-      coverPageUrl = await getDownloadURL(fileRef);
+      try {
+        const fileRef = ref(storage, `covers/${formData.coverPage.name}-${Date.now()}`);
+        await uploadBytes(fileRef, formData.coverPage);
+        coverPageUrl = await getDownloadURL(fileRef);
+      } catch (error) {
+        console.error("Error uploading image to Firebase:", error);
+        alert("Failed to upload cover image: " + error.message);
+        setIsSubmitting(false);
+        return;
+      }
     }
 
     const productData = {
       coverPage: coverPageUrl,
       bookTitle: formData.bookTitle,
-      price: formData.price,
+      price: parseFloat(formData.price), // Convert to number
       bookDescription: formData.bookDescription,
       bookQuantity: formData.bookQuantity,
       category: formData.category,
@@ -135,21 +142,27 @@ export default function AddProducts() {
       language: formData.language,
     };
 
-    axios
-      .post("http://localhost:5000/api/product/add", productData)
-      .then((response) => {
-        alert("Product Added Successfully!");
-        navigate("/manageproducts");
-      })
-      .catch((error) => {
-        console.error("There was an error adding the product!", error);
-        alert(
-          "Error: " + error.response?.data?.message || "Something went wrong"
-        );
-      })
-      .finally(() => {
-        setIsSubmitting(false);
-      });
+    console.log("Submitting product data:", productData);
+
+    try {
+      const response = await axios.post("http://localhost:5000/api/product/add", productData);
+      alert("Product Added Successfully!");
+      navigate("/manageproducts");
+    } catch (error) {
+      console.error("Error adding product:", error);
+      let errorMessage = "Something went wrong";
+      if (error.response) {
+        errorMessage = error.response.data.message || "Server error";
+        console.log("Backend response:", error.response.data);
+      } else if (error.request) {
+        errorMessage = "No response from server. Is the backend running on http://localhost:5000?";
+      } else {
+        errorMessage = error.message;
+      }
+      alert("Error: " + errorMessage);
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   return (
