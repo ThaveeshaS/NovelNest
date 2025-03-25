@@ -2,10 +2,10 @@ import React, { useState } from "react";
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
 import "bootstrap/dist/css/bootstrap.min.css";
-
-// Import Header2 and Navbar2 components
 import Header2 from "../../components/Header2";
 import Navbar2 from "../../components/Navbar2";
+import { storage } from "../Product/firebase"; // Import Firebase storage
+import { ref, uploadBytes, getDownloadURL } from "firebase/storage";
 
 export default function AddProducts() {
   const navigate = useNavigate();
@@ -36,7 +36,6 @@ export default function AddProducts() {
     setFormData({ ...formData, coverPage: file });
     validateField("coverPage", file);
 
-    // Create preview for the uploaded image
     if (file) {
       const reader = new FileReader();
       reader.onloadend = () => {
@@ -107,7 +106,7 @@ export default function AddProducts() {
     validateField("bookQuantity", newQuantity);
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
 
     if (Object.values(errors).some((error) => error !== "")) {
@@ -117,26 +116,30 @@ export default function AddProducts() {
 
     setIsSubmitting(true);
 
-    const data = new FormData();
-    data.append("coverPage", formData.coverPage);
-    data.append("bookTitle", formData.bookTitle);
-    data.append("price", formData.price);
-    data.append("bookDescription", formData.bookDescription);
-    data.append("bookQuantity", formData.bookQuantity);
-    data.append("category", formData.category);
-    data.append("authorName", formData.authorName);
-    data.append("isbnNumber", formData.isbnNumber);
-    data.append("language", formData.language);
+    let coverPageUrl = "";
+    if (formData.coverPage) {
+      const fileRef = ref(storage, `covers/${formData.coverPage.name}-${Date.now()}`);
+      await uploadBytes(fileRef, formData.coverPage);
+      coverPageUrl = await getDownloadURL(fileRef);
+    }
+
+    const productData = {
+      coverPage: coverPageUrl,
+      bookTitle: formData.bookTitle,
+      price: formData.price,
+      bookDescription: formData.bookDescription,
+      bookQuantity: formData.bookQuantity,
+      category: formData.category,
+      authorName: formData.authorName,
+      isbnNumber: formData.isbnNumber,
+      language: formData.language,
+    };
 
     axios
-      .post("http://localhost:5000/api/product/add", data, {
-        headers: {
-          "Content-Type": "multipart/form-data",
-        },
-      })
+      .post("http://localhost:5000/api/product/add", productData)
       .then((response) => {
         alert("Product Added Successfully!");
-        navigate("/manageproducts"); // Redirect to manageproducts page
+        navigate("/manageproducts");
       })
       .catch((error) => {
         console.error("There was an error adding the product!", error);
@@ -363,7 +366,9 @@ export default function AddProducts() {
                                 </option>
                                 <option value="Fiction">Fiction</option>
                                 <option value="Non-Fiction">Non-Fiction</option>
-                                <option value="Children's & Young Adult">Children's & Young Adult </option>
+                                <option value="Children's & Young Adult">
+                                  Children's & Young Adult
+                                </option>
                               </select>
                               {errors.category && (
                                 <div className="invalid-feedback d-block mt-1">
