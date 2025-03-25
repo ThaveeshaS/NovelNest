@@ -8,6 +8,8 @@ const adminRoutes = require("./routes/admin");
 const deliveryRoute = require("./routes/delivery.js");
 const feedbackRoutes = require("./routes/feedback");
 
+const productRoutes = require('./routes/product.js');
+
 dotenv.config();
 const app = express();
 const PORT = process.env.PORT || 5000;
@@ -38,6 +40,7 @@ app.use('/api/customer', customerRoutes);
 app.use('/api/admin', adminRoutes);             
 app.use('/api/feedback', feedbackRoutes);       
 app.use("/api/deliveries", deliveryRoute);
+app.use('/api/product', productRoutes);
 
 // ==================== 🚀 START SERVER ====================
 app.listen(PORT, () => {
