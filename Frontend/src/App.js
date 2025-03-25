@@ -1,3 +1,5 @@
+/* eslint-disable react/jsx-no-comment-textnodes */
+/* eslint-disable no-unused-vars */
 import React from 'react';
 import { BrowserRouter as Router, Route, Routes, useLocation } from "react-router-dom";
 import Navbar from "./components/Navbar";
@@ -16,9 +18,6 @@ import ManageCustomers from './pages/Customer/ManageCustomers';
 import CustomerFeedback from './pages/Customer/CustomerFeedback'; 
 import ManageFeedback from './pages/Customer/ManageFeedback';
 
-
-
-
 import TermsAndConditions from './pages/TandCs';
 import PrivacyPolicy from './pages/PrivacyPolicy';
 import Help from './pages/Help';
@@ -30,6 +29,12 @@ import ManageProducts from './pages/Product/ManageProducts';
 import AddProducts from './pages/Product/AddProducts';
 import EditProduct from './pages/Product/EditProduct';
 
+
+
+import AddDelivery from './pages/Delivery/AddDelivery'; // Corrected path
+import DeliveryDetails from './pages/Delivery/DeliveryDetails'; // Added import for DeliveryDetails
+import TrackDelivery from './pages/Delivery/TrackDelivery';
+
 //Amesh import
 import AdminBooksPanel from './pages/voicepayment/AdminBooksPanel';
 import  AdminTransactionsPanel from './pages/voicepayment/AdminTransactionsPanel';
@@ -37,13 +42,11 @@ import  Home1 from './pages/voicepayment/Home1';
 import  PaymentForm from './pages/voicepayment/PaymentForm';
 import  SuccessPage from './pages/voicepayment/SuccessPage';
 
-
-
 function App() {
   const location = useLocation();
 
   // Define routes where Header, Navbar should not be displayed
-  const excludePaths = ["/customerdashboard", "/admindashboard", "/managecustomers", "/customeraccount", "/wishlist", "/cart", "/manageproducts", "/addproducts", "/customerfeedback", "/managefeedback", "/edit-product/:id"];
+  const excludePaths = ["/customerdashboard", "/admindashboard", "/managecustomers", "/customeraccount", "/admin/AddDelivery", "/admin/DeliveryDetails", "/trackdelivery"];
 
   // Check if the current path is in the exclude list
   const shouldShowHeaderNavbarFooter = !excludePaths.includes(location.pathname);
@@ -66,7 +69,6 @@ function App() {
         <Route path="/customerfeedback" element={<CustomerFeedback />} />
         <Route path="/managefeedback" element={<ManageFeedback />} />
 
-        
         <Route path="/home1" element={<Home1 />} />
         <Route path="/admintransactions" element={<AdminTransactionsPanel />} /> 
         <Route path="/adminbookspanel" element={<AdminBooksPanel />} /> 
@@ -74,9 +76,11 @@ function App() {
         <Route path="/success" element={<SuccessPage />} /> // ✅ Add this if not already added
 
 
+        <Route path="/admin/AddDelivery" element={<AddDelivery />} />
+        <Route path="/admin/DeliveryDetails" element={<DeliveryDetails />} /> {/* Added DeliveryDetails route */}
+        <Route path="/trackdelivery" element={<TrackDelivery />} />
 
-
-
+        
         <Route path="/TermsAndConditions" element={<TermsAndConditions />} />
         <Route path="/PrivacyPolicy" element={<PrivacyPolicy />} />
         <Route path="/Help" element={<Help />} />
@@ -87,10 +91,6 @@ function App() {
         <Route path="/manageproducts" element={<ManageProducts/>} />
         <Route path="/addproducts" element={<AddProducts/>} />
         <Route path="/edit-product/:id" element={<EditProduct/>} />
-
-
-
-
       </Routes>
       <Footer />
     </>

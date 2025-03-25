@@ -1,3 +1,4 @@
+/* eslint-disable no-unused-vars */
 import React, { useEffect, useState } from "react";
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
@@ -199,7 +200,7 @@ const AdminDashboard = () => {
                 <Button
                   variant="warning"
                   className="mt-auto"
-                  onClick={() => navigate("/admin/DeliveryHandling")}
+                  onClick={() => navigate("/admin/AddDelivery")}
                 >
                   Manage Deliveries
                 </Button>
