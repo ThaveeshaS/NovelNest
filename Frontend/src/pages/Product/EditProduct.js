@@ -1,14 +1,16 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import axios from "axios";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom";
 import "bootstrap/dist/css/bootstrap.min.css";
 import Header2 from "../../components/Header2";
 import Navbar2 from "../../components/Navbar2";
-import { storage } from "../Product/firebase"; // Import Firebase storage
+import { storage } from "../Product/firebase";
 import { ref, uploadBytes, getDownloadURL } from "firebase/storage";
 
-export default function AddProducts() {
+export default function EditProduct() {
   const navigate = useNavigate();
+  const { id } = useParams();
+  const [originalData, setOriginalData] = useState(null);
   const [formData, setFormData] = useState({
     coverPage: null,
     bookTitle: "",
@@ -24,6 +26,37 @@ export default function AddProducts() {
   const [errors, setErrors] = useState({});
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [coverPreview, setCoverPreview] = useState(null);
+
+  // Check if the form has been edited
+  const isFormEdited = () => {
+    if (!originalData) return false;
+    return Object.keys(formData).some((key) => {
+      if (key === "coverPage") {
+        return formData[key] !== null && formData[key] !== originalData[key];
+      }
+      return formData[key] !== originalData[key];
+    });
+  };
+
+  useEffect(() => {
+    const fetchProduct = async () => {
+      try {
+        const response = await axios.get(`http://localhost:5000/api/product/${id}`);
+        const productData = response.data;
+        setOriginalData(productData);
+        setFormData({
+          ...productData,
+          coverPage: null, // Reset to null since we don't store the file, only the URL
+        });
+        if (productData.coverPage) {
+          setCoverPreview(productData.coverPage); // Use Firebase URL directly
+        }
+      } catch (error) {
+        console.error("Error fetching product:", error);
+      }
+    };
+    fetchProduct();
+  }, [id]);
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -55,32 +88,22 @@ export default function AddProducts() {
         fieldErrors.bookTitle = value.trim() ? "" : "Book title is required";
         break;
       case "price":
-        fieldErrors.price = /^\d+(\.\d{1,2})?$/.test(value)
-          ? ""
-          : "Invalid price";
+        fieldErrors.price = /^\d+(\.\d{1,2})?$/.test(value) ? "" : "Invalid price";
         break;
       case "bookDescription":
-        fieldErrors.bookDescription = value.trim()
-          ? ""
-          : "Book description is required";
+        fieldErrors.bookDescription = value.trim() ? "" : "Book description is required";
         break;
       case "bookQuantity":
-        fieldErrors.bookQuantity = /^\d+$/.test(value)
-          ? ""
-          : "Invalid quantity";
+        fieldErrors.bookQuantity = /^\d+$/.test(value) ? "" : "Invalid quantity";
         break;
       case "category":
         fieldErrors.category = value ? "" : "Category is required";
         break;
       case "authorName":
-        fieldErrors.authorName = value.trim()
-          ? ""
-          : "Author's name is required";
+        fieldErrors.authorName = value.trim() ? "" : "Author's name is required";
         break;
       case "isbnNumber":
-        fieldErrors.isbnNumber = /^\d{10,13}$/.test(value)
-          ? ""
-          : "Invalid ISBN number";
+        fieldErrors.isbnNumber = /^\d{10,13}$/.test(value) ? "" : "Invalid ISBN number";
         break;
       case "language":
         fieldErrors.language = value.trim() ? "" : "Language is required";
@@ -114,10 +137,15 @@ export default function AddProducts() {
       return;
     }
 
+    if (!isFormEdited()) {
+      alert("No changes detected. Please edit the form before submitting.");
+      return;
+    }
+
     setIsSubmitting(true);
 
-    let coverPageUrl = "";
-    if (formData.coverPage) {
+    let coverPageUrl = originalData.coverPage;
+    if (formData.coverPage instanceof File) {
       const fileRef = ref(storage, `covers/${formData.coverPage.name}-${Date.now()}`);
       await uploadBytes(fileRef, formData.coverPage);
       coverPageUrl = await getDownloadURL(fileRef);
@@ -135,25 +163,24 @@ export default function AddProducts() {
       language: formData.language,
     };
 
-    axios
-      .post("http://localhost:5000/api/product/add", productData)
-      .then((response) => {
-        alert("Product Added Successfully!");
+    try {
+      const response = await axios.put(`http://localhost:5000/api/product/update/${id}`, productData);
+      if (response.status === 200) {
+        alert("Product Updated Successfully!");
         navigate("/manageproducts");
-      })
-      .catch((error) => {
-        console.error("There was an error adding the product!", error);
-        alert(
-          "Error: " + error.response?.data?.message || "Something went wrong"
-        );
-      })
-      .finally(() => {
-        setIsSubmitting(false);
-      });
+      } else {
+        alert("Failed to update product. Please try again.");
+      }
+    } catch (error) {
+      console.error("There was an error updating the product!", error);
+      alert("Error: " + (error.response?.data?.message || "Something went wrong"));
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   return (
-    <div className="add-products-page">
+    <div className="edit-products-page">
       <Header2 />
       <Navbar2 />
 
@@ -177,7 +204,7 @@ export default function AddProducts() {
                   }}
                 >
                   <h2 className="m-0 fw-bold">
-                    <i className="fas fa-book me-2"></i>Add New Book
+                    <i className="fas fa-book me-2"></i>Edit Book
                   </h2>
                 </div>
                 <div className="card-body p-5">
@@ -285,9 +312,7 @@ export default function AddProducts() {
                               <button
                                 type="button"
                                 className="btn btn-outline-primary btn-lg fw-bold"
-                                onClick={() =>
-                                  handleQuantityChange("decrement")
-                                }
+                                onClick={() => handleQuantityChange("decrement")}
                                 style={{ width: "50px", fontSize: "1.2rem" }}
                               >
                                 -
@@ -310,9 +335,7 @@ export default function AddProducts() {
                               <button
                                 type="button"
                                 className="btn btn-outline-primary btn-lg fw-bold"
-                                onClick={() =>
-                                  handleQuantityChange("increment")
-                                }
+                                onClick={() => handleQuantityChange("increment")}
                                 style={{ width: "50px", fontSize: "1.2rem" }}
                               >
                                 +
@@ -556,7 +579,6 @@ export default function AddProducts() {
                               id="coverPage"
                               name="coverPage"
                               onChange={handleFileChange}
-                              required
                             />
                             {errors.coverPage && (
                               <div className="text-danger mt-2">
@@ -583,7 +605,7 @@ export default function AddProducts() {
                       <button
                         type="submit"
                         className="btn btn-success btn-lg px-5 py-2"
-                        disabled={isSubmitting}
+                        disabled={!isFormEdited() || isSubmitting}
                         style={{
                           borderRadius: "0.5rem",
                           boxShadow: "0 2px 8px rgba(0,0,0,0.2)",
@@ -598,11 +620,11 @@ export default function AddProducts() {
                               role="status"
                               aria-hidden="true"
                             ></span>
-                            Adding...
+                            Updating...
                           </>
                         ) : (
                           <>
-                            <i className="fas fa-plus-circle me-2"></i>Add Book
+                            <i className="fas fa-save me-2"></i>Update Book
                           </>
                         )}
                       </button>

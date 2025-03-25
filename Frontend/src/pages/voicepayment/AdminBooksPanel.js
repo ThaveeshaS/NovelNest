@@ -1,8 +1,12 @@
+
 "use client"
 
-import { useState, useEffect, useRef } from "react"
-import axios from "axios"
-import { useNavigate } from "react-router-dom"
+
+/* eslint-disable react-hooks/exhaustive-deps */
+import React, { useState, useEffect, useRef } from 'react';
+import axios from 'axios';
+import { useNavigate } from 'react-router-dom';
+
 
 const AdminBooksPanel = () => {
   const navigate = useNavigate()
