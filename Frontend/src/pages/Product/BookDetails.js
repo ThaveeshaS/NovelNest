@@ -237,7 +237,7 @@ const BookDetails = () => {
                 <strong>Author:</strong> {book.authorName || 'Unknown'}
               </p>
               <p className="mb-1" style={{ fontSize: '0.9rem', color: '#555' }}>
-                <strong>SKU:</strong> {book.isbnNumber || 'N/A'}
+                <strong>ISBN:</strong> {book.isbnNumber || 'N/A'} {/* Changed SKU to ISBN */}
               </p>
               <p className="mb-3" style={{ fontSize: '0.9rem', color: '#555' }}>
                 <strong>Category:</strong> {book.category || 'N/A'}
