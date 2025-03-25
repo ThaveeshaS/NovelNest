@@ -1,3 +1,5 @@
+/* eslint-disable react/jsx-no-comment-textnodes */
+/* eslint-disable no-unused-vars */
 import React from 'react';
 import { BrowserRouter as Router, Route, Routes, useLocation } from "react-router-dom";
 import Navbar from "./components/Navbar";
@@ -16,17 +18,29 @@ import ManageCustomers from './pages/Customer/ManageCustomers';
 import CustomerFeedback from './pages/Customer/CustomerFeedback'; 
 import ManageFeedback from './pages/Customer/ManageFeedback';
 
-
-import AddDelivery from './pages/Delivery/AddDelivery'; // Corrected path
-import DeliveryDetails from './pages/Delivery/DeliveryDetails'; // Added import for DeliveryDetails
-import TrackDelivery from './pages/Delivery/TrackDelivery';
-
-
 import TermsAndConditions from './pages/TandCs';
 import PrivacyPolicy from './pages/PrivacyPolicy';
 import Help from './pages/Help';
 import Tips from './pages/Tips';
 import CustomerService from './pages/CustomerService';
+import WishlistPage from './pages/Product/Wishlist';
+import AddToCartPage from './pages/Product/AddtoCart';
+import ManageProducts from './pages/Product/ManageProducts';
+import AddProducts from './pages/Product/AddProducts';
+import EditProduct from './pages/Product/EditProduct';
+
+
+
+import AddDelivery from './pages/Delivery/AddDelivery'; // Corrected path
+import DeliveryDetails from './pages/Delivery/DeliveryDetails'; // Added import for DeliveryDetails
+import TrackDelivery from './pages/Delivery/TrackDelivery';
+
+//Amesh import
+import AdminBooksPanel from './pages/voicepayment/AdminBooksPanel';
+import  AdminTransactionsPanel from './pages/voicepayment/AdminTransactionsPanel';
+import  Home1 from './pages/voicepayment/Home1';
+import  PaymentForm from './pages/voicepayment/PaymentForm';
+import  SuccessPage from './pages/voicepayment/SuccessPage';
 
 function App() {
   const location = useLocation();
@@ -52,7 +66,14 @@ function App() {
         <Route path="/adminlogin" element={<AdminLogin />} />
         <Route path="/admindashboard" element={<AdminDashboard />} />
         <Route path="/managecustomers" element={<ManageCustomers />} />
+        <Route path="/customerfeedback" element={<CustomerFeedback />} />
+        <Route path="/managefeedback" element={<ManageFeedback />} />
 
+        <Route path="/home1" element={<Home1 />} />
+        <Route path="/admintransactions" element={<AdminTransactionsPanel />} /> 
+        <Route path="/adminbookspanel" element={<AdminBooksPanel />} /> 
+        <Route path="/payment" element={<PaymentForm />} /> // ✅ Required to load PaymentForm when navigating via voice
+        <Route path="/success" element={<SuccessPage />} /> // ✅ Add this if not already added
 
 
         <Route path="/admin/AddDelivery" element={<AddDelivery />} />
@@ -65,6 +86,11 @@ function App() {
         <Route path="/Help" element={<Help />} />
         <Route path="/Tips" element={<Tips />} />
         <Route path="/CustomerService" element={<CustomerService />} />
+        <Route path="/wishlist" element={<WishlistPage />} />
+        <Route path="/cart" element={<AddToCartPage />} />
+        <Route path="/manageproducts" element={<ManageProducts/>} />
+        <Route path="/addproducts" element={<AddProducts/>} />
+        <Route path="/edit-product/:id" element={<EditProduct/>} />
       </Routes>
       <Footer />
     </>
