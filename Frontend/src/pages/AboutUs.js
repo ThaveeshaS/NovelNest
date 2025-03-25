@@ -1,6 +1,8 @@
 import React from "react";
 import Sahan from '../components/images/Sahan.jpg'; // Import image
 import Thaveesha from '../components/images/Thaveesha.jpg'; // Import image
+import Amesh from '../components/images/Amesh.jpg'; // Import image
+import Viraj from '../components/images/Viraj.jpg'; // Import image
 import "bootstrap/dist/css/bootstrap.min.css";
 
 const AboutUs = () => {
@@ -15,7 +17,7 @@ const AboutUs = () => {
       <div className="row mb-5">
         <div className="col-md-6">
           <img
-            src="https://static.vecteezy.com/system/resources/thumbnails/031/332/726/small_2x/a-book-pile-close-up-on-a-table-front-view-pile-book-for-festival-of-world-book-day-national-book-day-or-national-education-day-stack-of-colorful-books-on-white-background-by-ai-generated-free-photo.jpg"
+            src="https://img.freepik.com/premium-photo/classical-library-books-wooden-background-study-living-room-education_872147-4741.jpg"
             alt="Our Story"
             className="img-fluid rounded shadow"
           />
@@ -113,7 +115,7 @@ const AboutUs = () => {
             <div className="card shadow h-100">
               <div className="d-flex justify-content-center mt-3">
                 <img
-                  src={Sahan}
+                  src={Amesh}
                   alt="Amesh Thishara"
                   className="rounded-circle"
                   style={{
@@ -136,7 +138,7 @@ const AboutUs = () => {
             <div className="card shadow h-100">
               <div className="d-flex justify-content-center mt-3">
                 <img
-                  src={Sahan}
+                  src={Viraj}
                   alt="Viraj Pasindu"
                   className="rounded-circle"
                   style={{
