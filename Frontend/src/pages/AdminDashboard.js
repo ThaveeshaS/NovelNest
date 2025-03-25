@@ -200,7 +200,7 @@ const AdminDashboard = () => {
                 <Button
                   variant="warning"
                   className="mt-auto"
-                  onClick={() => navigate("/admin/DeliveryHandling")}
+                  onClick={() => navigate("/admin/AddDelivery")}
                 >
                   Manage Deliveries
                 </Button>
