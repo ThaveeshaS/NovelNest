@@ -1,5 +1,8 @@
 import React from "react";
 import Sahan from '../components/images/Sahan.jpg'; // Import image
+import Thaveesha from '../components/images/Thaveesha.jpg'; // Import image
+import Amesh from '../components/images/Amesh.jpg'; // Import image
+import Viraj from '../components/images/Viraj.jpg'; // Import image
 import "bootstrap/dist/css/bootstrap.min.css";
 
 const AboutUs = () => {
@@ -14,7 +17,7 @@ const AboutUs = () => {
       <div className="row mb-5">
         <div className="col-md-6">
           <img
-            src="https://static.vecteezy.com/system/resources/thumbnails/031/332/726/small_2x/a-book-pile-close-up-on-a-table-front-view-pile-book-for-festival-of-world-book-day-national-book-day-or-national-education-day-stack-of-colorful-books-on-white-background-by-ai-generated-free-photo.jpg"
+            src="https://img.freepik.com/premium-photo/classical-library-books-wooden-background-study-living-room-education_872147-4741.jpg"
             alt="Our Story"
             className="img-fluid rounded shadow"
           />
@@ -63,12 +66,20 @@ const AboutUs = () => {
         <div className="row">
           {/* Team Member 1 - Sahan */}
           <div className="col-md-3 mb-4">
-            <div className="card shadow">
-              <img
-                src={Sahan} // Use the imported image
-                alt="Sahan Viduranga"
-                className="card-img-top rounded-circle p-3"
-              />
+            <div className="card shadow h-100">
+              <div className="d-flex justify-content-center mt-3">
+                <img
+                  src={Sahan}
+                  alt="Sahan Viduranga"
+                  className="rounded-circle"
+                  style={{
+                    width: '170px',
+                    height: '170px',
+                    objectFit: 'cover',
+                    border: '3px solid #f8f9fa'
+                  }}
+                />
+              </div>
               <div className="card-body">
                 <h5 className="card-title">Sahan Viduranga</h5>
                 <p className="card-text text-muted">Handling customer accounts</p>
@@ -78,29 +89,45 @@ const AboutUs = () => {
 
           {/* Team Member 2 */}
           <div className="col-md-3 mb-4">
-            <div className="card shadow">
-              <img
-                src={Sahan} // Use the imported image
-                alt="Sahan Viduranga"
-                className="card-img-top rounded-circle p-3"
-              />
+            <div className="card shadow h-100">
+              <div className="d-flex justify-content-center mt-3">
+                <img
+                  src={Thaveesha}
+                  alt="Thaveesha Sanjana"
+                  className="rounded-circle"
+                  style={{
+                    width: '170px',
+                    height: '170px',
+                    objectFit: 'cover',
+                    border: '3px solid #f8f9fa'
+                  }}
+                />
+              </div>
               <div className="card-body">
-                <h5 className="card-title">Thaveesha</h5>
-                <p className="card-text text-muted">Product Handiling</p>
+                <h5 className="card-title">Thaveesha Sanjana</h5>
+                <p className="card-text text-muted">Product Handling</p>
               </div>
             </div>
           </div>
 
           {/* Team Member 3 */}
           <div className="col-md-3 mb-4">
-            <div className="card shadow">
-              <img
-                src={Sahan} // Use the imported image
-                alt="Sahan Viduranga"
-                className="card-img-top rounded-circle p-3"
-              />
+            <div className="card shadow h-100">
+              <div className="d-flex justify-content-center mt-3">
+                <img
+                  src={Amesh}
+                  alt="Amesh Thishara"
+                  className="rounded-circle"
+                  style={{
+                    width: '170px',
+                    height: '170px',
+                    objectFit: 'cover',
+                    border: '3px solid #f8f9fa'
+                  }}
+                />
+              </div>
               <div className="card-body">
-                <h5 className="card-title">Amesh</h5>
+                <h5 className="card-title">Amesh Thishara</h5>
                 <p className="card-text text-muted">Payment Gateway</p>
               </div>
             </div>
@@ -108,15 +135,23 @@ const AboutUs = () => {
 
           {/* Team Member 4 */}
           <div className="col-md-3 mb-4">
-            <div className="card shadow">
-              <img
-                src={Sahan} // Use the imported image
-                alt="Sahan Viduranga"
-                className="card-img-top rounded-circle p-3"
-              />
+            <div className="card shadow h-100">
+              <div className="d-flex justify-content-center mt-3">
+                <img
+                  src={Viraj}
+                  alt="Viraj Pasindu"
+                  className="rounded-circle"
+                  style={{
+                    width: '170px',
+                    height: '170px',
+                    objectFit: 'cover',
+                    border: '3px solid #f8f9fa'
+                  }}
+                />
+              </div>
               <div className="card-body">
-                <h5 className="card-title">Viraj</h5>
-                <p className="card-text text-muted">Delivery Handiling</p>
+                <h5 className="card-title">Viraj Pasindu</h5>
+                <p className="card-text text-muted">Delivery Handling</p>
               </div>
             </div>
           </div>
