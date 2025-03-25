@@ -52,35 +52,64 @@ export default function AddProducts() {
 
     switch (name) {
       case "bookTitle":
-        fieldErrors.bookTitle = value.trim() ? "" : "Book title is required";
+        if (!value.trim()) {
+          fieldErrors.bookTitle = "Book title is required";
+        } else if (value.length > 100) {
+          fieldErrors.bookTitle = "Book title cannot exceed 100 characters";
+        } else if (!/^[a-zA-Z\s]+$/.test(value)) {
+          fieldErrors.bookTitle = "Book title must contain only letters and spaces";
+        } else {
+          fieldErrors.bookTitle = "";
+        }
         break;
       case "price":
-        fieldErrors.price = /^\d+(\.\d{1,2})?$/.test(value)
-          ? ""
-          : "Invalid price";
+        if (!/^\d+\.\d{2}$/.test(value)) {
+          fieldErrors.price = "Price must be a number with exactly two decimal places (e.g., 10.00)";
+        } else {
+          const priceValue = parseFloat(value);
+          if (priceValue <= 0) {
+            fieldErrors.price = "Price must be greater than 0.00";
+          } else if (priceValue > 100000) {
+            fieldErrors.price = "Price cannot exceed 100,000.00";
+          } else {
+            fieldErrors.price = "";
+          }
+        }
         break;
       case "bookDescription":
-        fieldErrors.bookDescription = value.trim()
-          ? ""
-          : "Book description is required";
+        if (!value.trim()) {
+          fieldErrors.bookDescription = "Book description is required";
+        } else if (value.length < 10) {
+          fieldErrors.bookDescription = "Description must be at least 10 characters";
+        } else if (value.length > 500) {
+          fieldErrors.bookDescription = "Description cannot exceed 500 characters";
+        } else {
+          fieldErrors.bookDescription = "";
+        }
+        break;
+      case "authorName":
+        if (!value.trim()) {
+          fieldErrors.authorName = "Author's name is required";
+        } else if (value.length > 50) {
+          fieldErrors.authorName = "Author's name cannot exceed 50 characters";
+        } else if (!/^[a-zA-Z\s]+$/.test(value)) {
+          fieldErrors.authorName = "Author's name must contain only letters and spaces";
+        } else {
+          fieldErrors.authorName = "";
+        }
+        break;
+      case "isbnNumber":
+        if (!/^\d{10}$|^\d{13}$/.test(value)) {
+          fieldErrors.isbnNumber = "ISBN must be exactly 10 or 13 digits with no letters or symbols";
+        } else {
+          fieldErrors.isbnNumber = validateISBN(value) ? "" : "Invalid ISBN checksum";
+        }
         break;
       case "bookQuantity":
-        fieldErrors.bookQuantity = /^\d+$/.test(value)
-          ? ""
-          : "Invalid quantity";
+        fieldErrors.bookQuantity = /^\d+$/.test(value) ? "" : "Invalid quantity";
         break;
       case "category":
         fieldErrors.category = value ? "" : "Category is required";
-        break;
-      case "authorName":
-        fieldErrors.authorName = value.trim()
-          ? ""
-          : "Author's name is required";
-        break;
-      case "isbnNumber":
-        fieldErrors.isbnNumber = /^\d{10,13}$/.test(value)
-          ? ""
-          : "Invalid ISBN number";
         break;
       case "language":
         fieldErrors.language = value.trim() ? "" : "Language is required";
@@ -93,6 +122,25 @@ export default function AddProducts() {
     }
 
     setErrors(fieldErrors);
+  };
+
+  const validateISBN = (isbn) => {
+    if (isbn.length === 10) {
+      let sum = 0;
+      for (let i = 0; i < 9; i++) {
+        sum += parseInt(isbn[i]) * (10 - i);
+      }
+      const check = isbn[9] === "X" ? 10 : parseInt(isbn[9]);
+      return (sum + check) % 11 === 0;
+    } else if (isbn.length === 13) {
+      let sum = 0;
+      for (let i = 0; i < 12; i++) {
+        sum += parseInt(isbn[i]) * (i % 2 === 0 ? 1 : 3);
+      }
+      const check = (10 - (sum % 10)) % 10;
+      return check === parseInt(isbn[12]);
+    }
+    return false;
   };
 
   const handleQuantityChange = (operation) => {
