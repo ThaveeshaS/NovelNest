@@ -1,3 +1,4 @@
+/* eslint-disable no-unused-vars */
 import React from 'react';
 import { BrowserRouter as Router, Route, Routes, useLocation } from "react-router-dom";
 import Navbar from "./components/Navbar";
@@ -52,7 +53,10 @@ function App() {
         <Route path="/adminlogin" element={<AdminLogin />} />
         <Route path="/admindashboard" element={<AdminDashboard />} />
         <Route path="/managecustomers" element={<ManageCustomers />} />
+        <Route path="/customerfeedback" element={<CustomerFeedback />} />
+        <Route path="/managefeedback" element={<ManageFeedback />} />
 
+        
 
 
         <Route path="/admin/AddDelivery" element={<AddDelivery />} />
