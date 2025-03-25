@@ -98,11 +98,6 @@ function App() {
         <Route path="/edit-product/:id" element={<EditProduct/>} />
         <Route path="/bookslist" element={<BookList />} />
         <Route path="/bookdetails/:id" element={<BookDetails />} />
-
-
-
-
-
       </Routes>
       <Footer />
     </>
