@@ -27,7 +27,7 @@ mongoose.connect(process.env.MONGO_URI || process.env.MONGO_URL, {
   .then(() => console.log('✅ MongoDB connected'))
   .catch((err) => console.error('❌ MongoDB connection error:', err));
 
-// ==================== 📚 API ROUTES ====================
+// ==================== API ROUTES ====================
 // Book Management Routes
 app.use('/api/books', bookRoutes);              // Book CRUD operations
 app.use('/api/transactions', transactionRoutes); // Order & PDF transactions
@@ -37,9 +37,11 @@ app.use('/api/send-otp', otpRoutes);            // OTP functionality
 app.use('/api/customer', customerRoutes);       // Customer account management
 app.use('/api/admin', adminRoutes);             // Admin control panel
 app.use('/api/feedback', feedbackRoutes);       // Feedback system
+
+// Product Management Routes
 app.use('/api/product', productRoutes);         // Product management
 
-// ==================== 🚀 SERVER START ====================
+// ==================== SERVER START ====================
 const PORT = process.env.PORT || 5000;
 app.listen(PORT, () => {
   console.log(`Server is running on port ${PORT}`);
