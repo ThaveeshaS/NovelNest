@@ -2,10 +2,10 @@ import React, { useState } from "react";
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
 import "bootstrap/dist/css/bootstrap.min.css";
-
-// Import Header2 and Navbar2 components
 import Header2 from "../../components/Header2";
 import Navbar2 from "../../components/Navbar2";
+import { storage } from "../Product/firebase"; // Import Firebase storage
+import { ref, uploadBytes, getDownloadURL } from "firebase/storage";
 
 export default function AddProducts() {
   const navigate = useNavigate();
@@ -36,7 +36,6 @@ export default function AddProducts() {
     setFormData({ ...formData, coverPage: file });
     validateField("coverPage", file);
 
-    // Create preview for the uploaded image
     if (file) {
       const reader = new FileReader();
       reader.onloadend = () => {
@@ -53,35 +52,64 @@ export default function AddProducts() {
 
     switch (name) {
       case "bookTitle":
-        fieldErrors.bookTitle = value.trim() ? "" : "Book title is required";
+        if (!value.trim()) {
+          fieldErrors.bookTitle = "Book title is required";
+        } else if (value.length > 100) {
+          fieldErrors.bookTitle = "Book title cannot exceed 100 characters";
+        } else if (!/^[a-zA-Z\s]+$/.test(value)) {
+          fieldErrors.bookTitle = "Book title must contain only letters and spaces";
+        } else {
+          fieldErrors.bookTitle = "";
+        }
         break;
       case "price":
-        fieldErrors.price = /^\d+(\.\d{1,2})?$/.test(value)
-          ? ""
-          : "Invalid price";
+        if (!/^\d+\.\d{2}$/.test(value)) {
+          fieldErrors.price = "Price must be a number with exactly two decimal places (e.g., 10.00)";
+        } else {
+          const priceValue = parseFloat(value);
+          if (priceValue <= 0) {
+            fieldErrors.price = "Price must be greater than 0.00";
+          } else if (priceValue > 100000) {
+            fieldErrors.price = "Price cannot exceed 100,000.00";
+          } else {
+            fieldErrors.price = "";
+          }
+        }
         break;
       case "bookDescription":
-        fieldErrors.bookDescription = value.trim()
-          ? ""
-          : "Book description is required";
+        if (!value.trim()) {
+          fieldErrors.bookDescription = "Book description is required";
+        } else if (value.length < 10) {
+          fieldErrors.bookDescription = "Description must be at least 10 characters";
+        } else if (value.length > 500) {
+          fieldErrors.bookDescription = "Description cannot exceed 500 characters";
+        } else {
+          fieldErrors.bookDescription = "";
+        }
+        break;
+      case "authorName":
+        if (!value.trim()) {
+          fieldErrors.authorName = "Author's name is required";
+        } else if (value.length > 50) {
+          fieldErrors.authorName = "Author's name cannot exceed 50 characters";
+        } else if (!/^[a-zA-Z\s]+$/.test(value)) {
+          fieldErrors.authorName = "Author's name must contain only letters and spaces";
+        } else {
+          fieldErrors.authorName = "";
+        }
+        break;
+      case "isbnNumber":
+        if (!/^\d{10}$|^\d{13}$/.test(value)) {
+          fieldErrors.isbnNumber = "ISBN must be exactly 10 or 13 digits with no letters or symbols";
+        } else {
+          fieldErrors.isbnNumber = validateISBN(value) ? "" : "Invalid ISBN checksum";
+        }
         break;
       case "bookQuantity":
-        fieldErrors.bookQuantity = /^\d+$/.test(value)
-          ? ""
-          : "Invalid quantity";
+        fieldErrors.bookQuantity = /^\d+$/.test(value) ? "" : "Invalid quantity";
         break;
       case "category":
         fieldErrors.category = value ? "" : "Category is required";
-        break;
-      case "authorName":
-        fieldErrors.authorName = value.trim()
-          ? ""
-          : "Author's name is required";
-        break;
-      case "isbnNumber":
-        fieldErrors.isbnNumber = /^\d{10,13}$/.test(value)
-          ? ""
-          : "Invalid ISBN number";
         break;
       case "language":
         fieldErrors.language = value.trim() ? "" : "Language is required";
@@ -96,6 +124,25 @@ export default function AddProducts() {
     setErrors(fieldErrors);
   };
 
+  const validateISBN = (isbn) => {
+    if (isbn.length === 10) {
+      let sum = 0;
+      for (let i = 0; i < 9; i++) {
+        sum += parseInt(isbn[i]) * (10 - i);
+      }
+      const check = isbn[9] === "X" ? 10 : parseInt(isbn[9]);
+      return (sum + check) % 11 === 0;
+    } else if (isbn.length === 13) {
+      let sum = 0;
+      for (let i = 0; i < 12; i++) {
+        sum += parseInt(isbn[i]) * (i % 2 === 0 ? 1 : 3);
+      }
+      const check = (10 - (sum % 10)) % 10;
+      return check === parseInt(isbn[12]);
+    }
+    return false;
+  };
+
   const handleQuantityChange = (operation) => {
     let newQuantity = formData.bookQuantity;
     if (operation === "increment") {
@@ -107,7 +154,7 @@ export default function AddProducts() {
     validateField("bookQuantity", newQuantity);
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
 
     if (Object.values(errors).some((error) => error !== "")) {
@@ -117,26 +164,30 @@ export default function AddProducts() {
 
     setIsSubmitting(true);
 
-    const data = new FormData();
-    data.append("coverPage", formData.coverPage);
-    data.append("bookTitle", formData.bookTitle);
-    data.append("price", formData.price);
-    data.append("bookDescription", formData.bookDescription);
-    data.append("bookQuantity", formData.bookQuantity);
-    data.append("category", formData.category);
-    data.append("authorName", formData.authorName);
-    data.append("isbnNumber", formData.isbnNumber);
-    data.append("language", formData.language);
+    let coverPageUrl = "";
+    if (formData.coverPage) {
+      const fileRef = ref(storage, `covers/${formData.coverPage.name}-${Date.now()}`);
+      await uploadBytes(fileRef, formData.coverPage);
+      coverPageUrl = await getDownloadURL(fileRef);
+    }
+
+    const productData = {
+      coverPage: coverPageUrl,
+      bookTitle: formData.bookTitle,
+      price: formData.price,
+      bookDescription: formData.bookDescription,
+      bookQuantity: formData.bookQuantity,
+      category: formData.category,
+      authorName: formData.authorName,
+      isbnNumber: formData.isbnNumber,
+      language: formData.language,
+    };
 
     axios
-      .post("http://localhost:5000/api/product/add", data, {
-        headers: {
-          "Content-Type": "multipart/form-data",
-        },
-      })
+      .post("http://localhost:5000/api/product/add", productData)
       .then((response) => {
         alert("Product Added Successfully!");
-        navigate("/manageproducts"); // Redirect to manageproducts page
+        navigate("/manageproducts");
       })
       .catch((error) => {
         console.error("There was an error adding the product!", error);
@@ -363,7 +414,9 @@ export default function AddProducts() {
                                 </option>
                                 <option value="Fiction">Fiction</option>
                                 <option value="Non-Fiction">Non-Fiction</option>
-                                <option value="Children's & Young Adult">Children's & Young Adult </option>
+                                <option value="Children's & Young Adult">
+                                  Children's & Young Adult
+                                </option>
                               </select>
                               {errors.category && (
                                 <div className="invalid-feedback d-block mt-1">

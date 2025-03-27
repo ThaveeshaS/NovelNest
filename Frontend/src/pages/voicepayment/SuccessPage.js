@@ -310,9 +310,9 @@ const SuccessPage = () => {
           style={isHovered ? {...styles.button, ...styles.buttonHover} : styles.button}
           onMouseEnter={() => setIsHovered(true)}
           onMouseLeave={() => setIsHovered(false)}
-          onClick={() => navigate('/')}
+          onClick={() => navigate('/admin/AddDelivery')}
         >
-          Return to Bookstore
+          Proceed to Dilivery
         </button>
       </div>
     </div>
