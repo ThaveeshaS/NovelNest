@@ -41,6 +41,38 @@ export default function DeliveryDetails() {
     generateCaptcha(); // Generate captcha on component mount
   }, []);
 
+  // Calculate analytics
+  const calculateAnalytics = () => {
+    const today = new Date();
+    let totalFee = 0;
+    let pendingOrders = 0;
+    let onTrackOrders = 0;
+    let soonOrders = 0;
+    let delayedOrders = 0;
+
+    deliveries.forEach(delivery => {
+      totalFee += delivery.deliveryFee || 0;
+      
+      const deliveryDate = new Date(delivery.estimatedDeliveryDate);
+      const difference = Math.ceil((deliveryDate - today) / (1000 * 60 * 60 * 24));
+      
+      if (difference < 0) delayedOrders++;
+      else if (difference <= 2) soonOrders++;
+      else onTrackOrders++;
+    });
+
+    return {
+      totalFee: totalFee.toFixed(2),
+      totalOrders: deliveries.length,
+      pendingOrders,
+      onTrackOrders,
+      soonOrders,
+      delayedOrders
+    };
+  };
+
+  const analytics = calculateAnalytics();
+
   // Search Filter
   const filteredDeliveries = deliveries.filter(
     (delivery) =>
@@ -222,6 +254,65 @@ export default function DeliveryDetails() {
       <Navbar2 />
 
       <Container className="mt-5">
+        
+        {/* Analytics Section */}
+        <div className="mb-4">
+          <Row>
+            <Col md={3} sm={6} className="mb-3">
+              <div className="bg-white p-3 rounded shadow-sm border-start border-5 border-primary">
+                <div className="d-flex justify-content-between align-items-center">
+                  <div>
+                    <h6 className="text-muted mb-1">Total Fee</h6>
+                    <h4 className="mb-0">${analytics.totalFee}</h4>
+                  </div>
+                  <div className="bg-primary bg-opacity-10 p-2 rounded">
+                    <i className="fas fa-dollar-sign text-primary fs-4"></i>
+                  </div>
+                </div>
+              </div>
+            </Col>
+            <Col md={3} sm={6} className="mb-3">
+              <div className="bg-white p-3 rounded shadow-sm border-start border-5 border-info">
+                <div className="d-flex justify-content-between align-items-center">
+                  <div>
+                    <h6 className="text-muted mb-1">Total Orders</h6>
+                    <h4 className="mb-0">{analytics.totalOrders}</h4>
+                  </div>
+                  <div className="bg-info bg-opacity-10 p-2 rounded">
+                    <i className="fas fa-truck text-info fs-4"></i>
+                  </div>
+                </div>
+              </div>
+            </Col>
+            <Col md={3} sm={6} className="mb-3">
+              <div className="bg-white p-3 rounded shadow-sm border-start border-5 border-success">
+                <div className="d-flex justify-content-between align-items-center">
+                  <div>
+                    <h6 className="text-muted mb-1">On Track</h6>
+                    <h4 className="mb-0">{analytics.onTrackOrders}</h4>
+                  </div>
+                  <div className="bg-success bg-opacity-10 p-2 rounded">
+                    <i className="fas fa-check-circle text-success fs-4"></i>
+                  </div>
+                </div>
+              </div>
+            </Col>
+            <Col md={3} sm={6} className="mb-3">
+              <div className="bg-white p-3 rounded shadow-sm border-start border-5 border-warning">
+                <div className="d-flex justify-content-between align-items-center">
+                  <div>
+                    <h6 className="text-muted mb-1">Coming Soon</h6>
+                    <h4 className="mb-0">{analytics.soonOrders}</h4>
+                  </div>
+                  <div className="bg-warning bg-opacity-10 p-2 rounded">
+                    <i className="fas fa-clock text-warning fs-4"></i>
+                  </div>
+                </div>
+              </div>
+            </Col>
+          </Row>
+        </div>
+
         <div className="d-flex justify-content-between align-items-center mb-4">
           <h2 className="text-primary fw-bold">Delivery Details</h2>
           <div className="d-flex gap-2">
