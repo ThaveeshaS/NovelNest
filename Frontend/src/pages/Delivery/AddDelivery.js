@@ -28,7 +28,8 @@ import {
   useTheme,
   useMediaQuery,
   Tooltip,
-  Chip
+  Chip,
+  Grid
 } from '@mui/material';
 import { styled } from '@mui/material/styles';
 import { useNavigate } from 'react-router-dom';
@@ -48,6 +49,7 @@ import AttachMoneyIcon from '@mui/icons-material/AttachMoney';
 import InventoryIcon from '@mui/icons-material/Inventory';
 import CheckCircleIcon from '@mui/icons-material/CheckCircle';
 import AssignmentIcon from '@mui/icons-material/Assignment';
+import GpsFixedIcon from '@mui/icons-material/GpsFixed';
 import { motion } from 'framer-motion';
 
 // Custom styled components
@@ -259,6 +261,10 @@ const AddDelivery = () => {
     } finally {
       setLoading(false);
     }
+  };
+
+  const handleTrackDelivery = () => {
+    navigate('/admin/TrackDelivery', { state: { deliveryId: formData.deliveryId } });
   };
 
   const steps = ['Customer Information', 'Delivery Details', 'Confirmation'];
@@ -706,41 +712,72 @@ const AddDelivery = () => {
                 </SummaryCard>
               </MotionBox>
               
-              <Box display="flex" justifyContent="space-between" mt={3}>
-                <Button
-                  variant="outlined"
-                  color="primary"
-                  onClick={handleBack}
-                  startIcon={<ArrowBackIcon />}
-                  sx={{ 
-                    borderRadius: '8px',
-                    padding: '10px 24px' 
-                  }}
-                >
-                  Back
-                </Button>
-                <Button
-                  variant="contained"
-                  color="primary"
-                  type="submit"
-                  disabled={loading || isSubmitted}
-                  onClick={handleSubmit}
-                  sx={{ 
-                    borderRadius: '8px',
-                    padding: '10px 24px',
-                    boxShadow: '0 4px 12px rgba(63, 81, 181, 0.2)',
-                    '&:hover': {
-                      boxShadow: '0 6px 16px rgba(63, 81, 181, 0.4)',
-                      transform: 'translateY(-2px)'
-                    },
-                    transition: 'all 0.3s ease'
-                  }}
-                  startIcon={loading ? <CircularProgress size={20} color="inherit" /> : 
-                             isSubmitted ? <CheckCircleIcon /> : <SaveIcon />}
-                >
-                  {loading ? 'Processing...' : isSubmitted ? 'Submitted!' : 'Confirm & Submit'}
-                </Button>
-              </Box>
+              <Grid container spacing={2} mt={3}>
+                <Grid item xs={12} sm={6}>
+                  <Button
+                    fullWidth
+                    variant="outlined"
+                    color="primary"
+                    onClick={handleBack}
+                    startIcon={<ArrowBackIcon />}
+                    sx={{ 
+                      borderRadius: '8px',
+                      padding: '10px 24px',
+                      height: '48px'
+                    }}
+                  >
+                    Back
+                  </Button>
+                </Grid>
+                <Grid item xs={12} sm={6}>
+                  <Button
+                    fullWidth
+                    variant="contained"
+                    color="primary"
+                    type="submit"
+                    disabled={loading || isSubmitted}
+                    onClick={handleSubmit}
+                    sx={{ 
+                      borderRadius: '8px',
+                      padding: '10px 24px',
+                      boxShadow: '0 4px 12px rgba(63, 81, 181, 0.2)',
+                      '&:hover': {
+                        boxShadow: '0 6px 16px rgba(63, 81, 181, 0.4)',
+                        transform: 'translateY(-2px)'
+                      },
+                      transition: 'all 0.3s ease',
+                      height: '48px'
+                    }}
+                    startIcon={loading ? <CircularProgress size={20} color="inherit" /> : 
+                               isSubmitted ? <CheckCircleIcon /> : <SaveIcon />}
+                  >
+                    {loading ? 'Processing...' : isSubmitted ? 'Submitted!' : 'Confirm & Submit'}
+                  </Button>
+                </Grid>
+                <Grid item xs={12}>
+                  <Button
+                    fullWidth
+                    variant="contained"
+                    color="secondary"
+                    onClick={handleTrackDelivery}
+                    startIcon={<GpsFixedIcon />}
+                    sx={{ 
+                      borderRadius: '8px',
+                      padding: '10px 24px',
+                      boxShadow: '0 4px 12px rgba(0, 0, 0, 0.1)',
+                      '&:hover': {
+                        boxShadow: '0 6px 16px rgba(0, 0, 0, 0.2)',
+                        transform: 'translateY(-2px)'
+                      },
+                      transition: 'all 0.3s ease',
+                      height: '48px',
+                      mt: 1
+                    }}
+                  >
+                    Track This Delivery
+                  </Button>
+                </Grid>
+              </Grid>
             </Box>
           </Fade>
         );
@@ -799,8 +836,6 @@ const AddDelivery = () => {
             )}
           </StyledPaper>
         </Zoom>
-        
-        
       </Container>
       
       <Snackbar 
