@@ -264,7 +264,7 @@ const AddDelivery = () => {
   };
 
   const handleTrackDelivery = () => {
-    navigate('/admin/TrackDelivery', { state: { deliveryId: formData.deliveryId } });
+    navigate('/admin/trackdelivery', { state: { deliveryId: formData.deliveryId } });
   };
 
   const steps = ['Customer Information', 'Delivery Details', 'Confirmation'];
