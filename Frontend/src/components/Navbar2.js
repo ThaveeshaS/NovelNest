@@ -1,9 +1,12 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
-import 'bootstrap/dist/css/bootstrap.min.css'; // Import Bootstrap CSS
-import 'bootstrap-icons/font/bootstrap-icons.css'; // Import Bootstrap Icons CSS
+import { useWishlist } from "../pages/Product/WishlistContext";
+import 'bootstrap/dist/css/bootstrap.min.css';
+import 'bootstrap-icons/font/bootstrap-icons.css';
 
 const Navbar2 = () => {
+  const { wishlist } = useWishlist(); // Get wishlist from context
+
   return (
     <nav className="navbar navbar-expand-lg" style={{ backgroundColor: 'rgb(0, 78, 156)' }}>
       <div className="container-fluid">
@@ -21,8 +24,8 @@ const Navbar2 = () => {
 
         {/* Right-aligned icons */}
         <div className="ms-auto d-flex align-items-center">
-          {/* Wishlist Icon */}
-          <Link to="/wishlist" className="nav-link text-white mx-3">
+          {/* Wishlist Icon with Count */}
+          <Link to="/wishlist" className="nav-link text-white mx-3 position-relative">
             <svg
               xmlns="http://www.w3.org/2000/svg"
               width="24"
@@ -36,6 +39,21 @@ const Navbar2 = () => {
             >
               <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78L12 21.23l8.84-8.84a5.5 5.5 0 0 0 0-7.78z"></path>
             </svg>
+            {wishlist.length > 0 && (
+              <span 
+                className="position-absolute top-0 start-100 translate-middle badge rounded-pill"
+                style={{ 
+                  backgroundColor: 'rgba(255, 255, 255, 0.9)',
+                  color: 'rgb(0, 78, 156)',
+                  fontSize: '0.7rem',
+                  fontWeight: 'bold',
+                  padding: '2px 6px',
+                  border: '1px solid rgb(0, 78, 156)'
+                }}
+              >
+                {wishlist.length}
+              </span>
+            )}
           </Link>
 
           {/* Add to Cart Icon */}
