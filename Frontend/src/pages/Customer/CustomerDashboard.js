@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import 'bootstrap/dist/css/bootstrap.min.css';
-import { useNavigate } from 'react-router-dom'; // Import useNavigate
+import { useNavigate } from 'react-router-dom';
 import Header2 from '../../components/Header2';
 import Navbar2 from '../../components/Navbar2';
 import Slider from 'react-slick';
@@ -8,6 +8,7 @@ import 'slick-carousel/slick/slick.css';
 import 'slick-carousel/slick/slick-theme.css';
 import slideVideo1 from '../../components/images/SlideVideo1.mp4';
 import axios from 'axios';
+import { useWishlist } from '../../pages/Product/WishlistContext'; // Added import (adjust path as needed)
 
 const CustomerDashboard = () => {
   const [fictionBooks, setFictionBooks] = useState([]);
@@ -15,7 +16,8 @@ const CustomerDashboard = () => {
   const [childrenBooks, setChildrenBooks] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-  const navigate = useNavigate(); // Initialize useNavigate
+  const navigate = useNavigate();
+  const { addToWishlist, isInWishlist } = useWishlist(); // Added wishlist context hooks
 
   const fetchBooks = async () => {
     try {
@@ -76,11 +78,16 @@ const CustomerDashboard = () => {
     ],
   };
 
+  // Updated ProductCard component with wishlist functionality
   const ProductCard = ({ product }) => {
     const handleCardClick = (e) => {
-      // Prevent navigation if the click is on the hover overlay icons
       if (e.target.closest('.hover-overlay')) return;
-      navigate(`/bookdetails/${product._id}`); // Navigate to BookDetails page
+      navigate(`/bookdetails/${product._id}`);
+    };
+
+    const handleWishlistClick = (e) => {
+      e.stopPropagation(); // Prevent card click from triggering
+      addToWishlist(product);
     };
 
     return (
@@ -99,9 +106,9 @@ const CustomerDashboard = () => {
             transition: 'transform 0.3s ease, box-shadow 0.3s ease',
             position: 'relative',
             overflow: 'hidden',
-            cursor: 'pointer', // Add cursor pointer to indicate clickability
+            cursor: 'pointer',
           }}
-          onClick={handleCardClick} // Add onClick handler for navigation
+          onClick={handleCardClick}
         >
           <div
             style={{
@@ -116,7 +123,7 @@ const CustomerDashboard = () => {
             className="product-image-container"
           >
             <img
-              src={product.coverPage} // Direct Firebase Storage URL
+              src={product.coverPage}
               className="card-img-top"
               alt={product.bookTitle}
               style={{
@@ -137,8 +144,22 @@ const CustomerDashboard = () => {
                   <path d="M16 10a4 4 0 0 1-8 0"></path>
                 </svg>
               </div>
-              <div className="wishlist-icon">
-                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <div 
+                className="wishlist-icon"
+                onClick={handleWishlistClick}
+                style={{ color: isInWishlist(product._id) ? '#ff0000' : '#6c757d' }}
+              >
+                <svg 
+                  xmlns="http://www.w3.org/2000/svg" 
+                  width="24" 
+                  height="24" 
+                  viewBox="0 0 24 24" 
+                  fill={isInWishlist(product._id) ? '#ff0000' : 'none'}
+                  stroke="currentColor" 
+                  strokeWidth="2" 
+                  strokeLinecap="round" 
+                  strokeLinejoin="round"
+                >
                   <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78L12 21.23l8.84-8.84a5.5 5.5 0 0 0 0-7.78z"></path>
                 </svg>
               </div>
@@ -310,7 +331,7 @@ const CustomerDashboard = () => {
             bottom: -30px !important;
           }
           .slick-dots li button:before {
-            font-size: 12px !important;
+            fontSize: 12px !important;
           }
           .slick-slider {
             padding-bottom: 40px;

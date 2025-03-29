@@ -4,6 +4,7 @@ import { useNavigate } from 'react-router-dom';
 import Header2 from '../../components/Header2';
 import Navbar2 from '../../components/Navbar2';
 import axios from 'axios';
+import { useWishlist } from '../../pages/Product/WishlistContext'; // Added import
 
 const BookList = () => {
   const [fictionBooks, setFictionBooks] = useState([]);
@@ -57,121 +58,140 @@ const BookList = () => {
     });
   };
 
-  const handleBookClick = (bookId) => {
-    navigate(`/bookdetails/${bookId}`);
-  };
+  // Updated ProductCard component
+  const ProductCard = ({ product }) => {
+    const { addToWishlist, isInWishlist } = useWishlist();
+    const handleWishlistClick = (e) => {
+      e.stopPropagation();
+      addToWishlist(product);
+    };
 
-  const ProductCard = ({ product }) => (
-    <div className="col-lg-3 col-md-4 col-sm-6 mb-4">
-      <div
-        className="card shadow-sm mx-auto product-card-container"
-        style={{
-          border: 'none',
-          padding: '5px',
-          height: '340px',
-          width: '220px',
-          display: 'flex',
-          flexDirection: 'column',
-          justifyContent: 'space-between',
-          transition: 'transform 0.3s ease, box-shadow 0.3s ease',
-          position: 'relative',
-          overflow: 'hidden',
-          cursor: 'pointer',
-        }}
-        onClick={() => handleBookClick(product._id)}
-      >
+    return (
+      <div className="col-lg-3 col-md-4 col-sm-6 mb-4">
         <div
+          className="card shadow-sm mx-auto product-card-container"
           style={{
-            padding: '10px',
-            textAlign: 'center',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            height: '200px',
-            position: 'relative',
-          }}
-          className="product-image-container"
-        >
-          <img
-            src={product.coverPage}
-            className="card-img-top"
-            alt={product.bookTitle}
-            style={{
-              maxHeight: '200px',
-              width: 'auto',
-              maxWidth: '160px',
-              objectFit: 'contain',
-              borderRadius: '10px 10px 0 0',
-              transition: 'transform 0.3s ease',
-            }}
-            onError={(e) => (e.target.src = 'https://via.placeholder.com/160x200?text=No+Image')}
-          />
-          <div className="hover-overlay">
-            <div className="add-to-cart-icon">
-              <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                <path d="M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"></path>
-                <line x1="3" y1="6" x2="21" y2="6"></line>
-                <path d="M16 10a4 4 0 0 1-8 0"></path>
-              </svg>
-            </div>
-            <div className="wishlist-icon">
-              <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78L12 21.23l8.84-8.84a5.5 5.5 0 0 0 0-7.78z"></path>
-              </svg>
-            </div>
-          </div>
-        </div>
-        <div
-          className="card-body text-center"
-          style={{
-            padding: '10px',
+            border: 'none',
+            padding: '5px',
+            height: '340px',
+            width: '220px',
             display: 'flex',
             flexDirection: 'column',
-            justifyContent: 'center',
-            height: '120px',
+            justifyContent: 'space-between',
+            transition: 'transform 0.3s ease, box-shadow 0.3s ease',
+            position: 'relative',
+            overflow: 'hidden',
+            cursor: 'pointer',
           }}
+          onClick={() => navigate(`/bookdetails/${product._id}`)}
         >
-          <h5
-            className="card-title text-center"
+          <div
             style={{
-              fontSize: '1rem',
-              fontWeight: 'bold',
-              marginBottom: '5px',
-              overflow: 'hidden',
-              textOverflow: 'ellipsis',
-              display: '-webkit-box',
-              WebkitLineClamp: 2,
-              WebkitBoxOrient: 'vertical',
-              color: '#0066cc',
+              padding: '10px',
+              textAlign: 'center',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              height: '200px',
+              position: 'relative',
+            }}
+            className="product-image-container"
+          >
+            <img
+              src={product.coverPage}
+              className="card-img-top"
+              alt={product.bookTitle}
+              style={{
+                maxHeight: '200px',
+                width: 'auto',
+                maxWidth: '160px',
+                objectFit: 'contain',
+                borderRadius: '10px 10px 0 0',
+                transition: 'transform 0.3s ease',
+              }}
+              onError={(e) => (e.target.src = 'https://via.placeholder.com/160x200?text=No+Image')}
+            />
+            <div className="hover-overlay">
+              <div className="add-to-cart-icon">
+                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                  <path d="M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"></path>
+                  <line x1="3" y1="6" x2="21" y2="6"></line>
+                  <path d="M16 10a4 4 0 0 1-8 0"></path>
+                </svg>
+              </div>
+              <div 
+                className="wishlist-icon"
+                onClick={handleWishlistClick}
+                style={{ color: isInWishlist(product._id) ? '#ff0000' : '#6c757d' }}
+              >
+                <svg 
+                  xmlns="http://www.w3.org/2000/svg" 
+                  width="24" 
+                  height="24" 
+                  viewBox="0 0 24 24" 
+                  fill={isInWishlist(product._id) ? '#ff0000' : 'none'}
+                  stroke="currentColor" 
+                  strokeWidth="2" 
+                  strokeLinecap="round" 
+                  strokeLinejoin="round"
+                >
+                  <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78L12 21.23l8.84-8.84a5.5 5.5 0 0 0 0-7.78z"></path>
+                </svg>
+              </div>
+            </div>
+          </div>
+          <div
+            className="card-body text-center"
+            style={{
+              padding: '10px',
+              display: 'flex',
+              flexDirection: 'column',
+              justifyContent: 'center',
+              height: '120px',
             }}
           >
-            {product.bookTitle}
-          </h5>
-          <p
-            className="card-text text-center"
-            style={{
-              fontSize: '0.9rem',
-              color: '#004080',
-              marginBottom: '5px',
-              overflow: 'hidden',
-              textOverflow: 'ellipsis',
-              display: '-webkit-box',
-              WebkitLineClamp: 1,
-              WebkitBoxOrient: 'vertical',
-            }}
-          >
-            {product.authorName}
-          </p>
-          <p
-            className="card-text text-center"
-            style={{ fontSize: '0.9rem', color: '#0066cc', fontWeight: 'bold' }}
-          >
-            RS. {product.price}
-          </p>
+            <h5
+              className="card-title text-center"
+              style={{
+                fontSize: '1rem',
+                fontWeight: 'bold',
+                marginBottom: '5px',
+                overflow: 'hidden',
+                textOverflow: 'ellipsis',
+                display: '-webkit-box',
+                WebkitLineClamp: 2,
+                WebkitBoxOrient: 'vertical',
+                color: '#0066cc',
+              }}
+            >
+              {product.bookTitle}
+            </h5>
+            <p
+              className="card-text text-center"
+              style={{
+                fontSize: '0.9rem',
+                color: '#004080',
+                marginBottom: '5px',
+                overflow: 'hidden',
+                textOverflow: 'ellipsis',
+                display: '-webkit-box',
+                WebkitLineClamp: 1,
+                WebkitBoxOrient: 'vertical',
+              }}
+            >
+              {product.authorName}
+            </p>
+            <p
+              className="card-text text-center"
+              style={{ fontSize: '0.9rem', color: '#0066cc', fontWeight: 'bold' }}
+            >
+              RS. {product.price}
+            </p>
+          </div>
         </div>
       </div>
-    </div>
-  );
+    );
+  };
 
   return (
     <div>
@@ -254,7 +274,6 @@ const BookList = () => {
           .add-to-cart-icon,
           .wishlist-icon {
             cursor: pointer;
-            color: #6c757d;
             transition: color 0.2s;
           }
           .add-to-cart-icon:hover,

@@ -1,52 +1,102 @@
-import React, { useState } from 'react';
+import React from 'react';
 import Navbar2 from '../../components/Navbar2';
 import Header2 from '../../components/Header2';
+import { useWishlist } from '../../pages/Product/WishlistContext';
+import { useNavigate } from 'react-router-dom';
+// Make sure to import Bootstrap CSS in your main index.js or App.js
+// import 'bootstrap/dist/css/bootstrap.min.css';
 
 const WishlistPage = () => {
-  const [wishlist, setWishlist] = useState([
-    { id: 1, name: 'Item 1', description: 'Description for Item 1' },
-    { id: 2, name: 'Item 2', description: 'Description for Item 2' },
-    { id: 3, name: 'Item 3', description: 'Description for Item 3' },
-  ]);
-
-  const removeFromWishlist = (id) => {
-    setWishlist(wishlist.filter(item => item.id !== id));
-  };
+  const { wishlist, removeFromWishlist } = useWishlist();
+  const navigate = useNavigate();
 
   return (
-    <div className="min-h-screen bg-gray-50">
-      {/* Header at the top */}
+    <div className="min-vh-100 bg-light">
       <Header2 />
-      
-      {/* Navbar below the header */}
       <Navbar2 />
-      
-      <div className="container mx-auto px-4 py-8">
-        <h1 className="text-3xl font-bold text-center mb-8 text-gray-800">My Wishlist</h1>
+      <div className="container px-4 py-5">
+        <h1 className="display-4 fw-bold text-center mb-5 text-dark">
+          My Wishlist
+        </h1>
         
         {wishlist.length === 0 ? (
-          <div className="text-center p-8 bg-white rounded-lg shadow">
-            <p className="text-xl text-gray-500">Your wishlist is empty.</p>
+          <div className="card shadow-sm p-5 text-center">
+            <p className="fs-4 text-muted mb-0">
+              Your wishlist is empty
+            </p>
+            <button 
+              className="btn btn-outline-primary mt-3"
+              onClick={() => navigate('/books')}
+            >
+              Explore Books
+            </button>
           </div>
         ) : (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {wishlist.map(item => (
-              <div key={item.id} className="bg-white rounded-lg shadow-md overflow-hidden hover:shadow-lg transition-shadow duration-300">
-                <div className="p-6">
-                  <h2 className="text-xl font-semibold mb-2 text-gray-800">{item.name}</h2>
-                  <p className="text-gray-600 mb-4">{item.description}</p>
-                  <button 
-                    onClick={() => removeFromWishlist(item.id)}
-                    className="w-full bg-red-500 hover:bg-red-600 text-white py-2 px-4 rounded-md transition-colors duration-300"
-                  >
-                    Remove from Wishlist
-                  </button>
+          <div className="row row-cols-1 row-cols-md-2 row-cols-lg-3 g-4">
+            {wishlist.map(product => (
+              <div key={product._id} className="col">
+                <div className="card h-100 shadow-sm border-0 hover-lift">
+                  <div className="card-img-top p-4 bg-white">
+                    <img
+                      src={product.coverPage}
+                      alt={product.bookTitle}
+                      className="img-fluid"
+                      style={{ maxHeight: '200px', objectFit: 'contain' }}
+                      onError={(e) => (e.target.src = 'https://via.placeholder.com/150?text=No+Image')}
+                    />
+                  </div>
+                  <div className="card-body">
+                    <h2 
+                      className="card-title fs-5 fw-semibold text-dark cursor-pointer hover-title"
+                      onClick={() => navigate(`/bookdetails/${product._id}`)}
+                    >
+                      {product.bookTitle}
+                    </h2>
+                    <p className="text-muted mb-2">{product.authorName}</p>
+                    <p className="fs-5 fw-bold text-success mb-3">
+                      RS. {product.price}
+                    </p>
+                  </div>
+                  <div className="card-footer bg-white border-0 pb-3">
+                    <button 
+                      onClick={() => removeFromWishlist(product._id)}
+                      className="btn btn-danger w-100 fw-medium"
+                    >
+                      Remove from Wishlist
+                    </button>
+                  </div>
                 </div>
               </div>
             ))}
           </div>
         )}
       </div>
+
+      {/* Inline styles */}
+      <style jsx>{`
+        .hover-lift {
+          transition: transform 0.2s ease-in-out, box-shadow 0.2s ease-in-out;
+        }
+        .hover-lift:hover {
+          transform: translateY(-5px);
+          box-shadow: 0 10px 20px rgba(0,0,0,0.1) !important;
+        }
+        .hover-title:hover {
+          color: #007bff !important;
+          text-decoration: underline;
+        }
+        .card {
+          border-radius: 10px;
+          overflow: hidden;
+        }
+        .btn-danger {
+          transition: background-color 0.2s ease-in-out;
+        }
+        .btn-danger:hover {
+          background-color: #dc3545;
+          border-color: #dc3545;
+        }
+      `}</style>
     </div>
   );
 };
