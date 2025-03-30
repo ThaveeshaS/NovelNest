@@ -4,12 +4,14 @@ import { useParams, useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import Header2 from '../../components/Header2';
 import Navbar2 from '../../components/Navbar2';
-import { useWishlist } from '../../pages/Product/WishlistContext'; // Added import
+import { useWishlist } from '../../pages/Product/WishlistContext';
+import { useCart } from '../../pages/Product/CartContext'; // Added import for cart context
 
 const BookDetails = () => {
   const { id } = useParams();
   const navigate = useNavigate();
-  const { addToWishlist, removeFromWishlist, isInWishlist } = useWishlist(); // Added
+  const { addToWishlist, removeFromWishlist, isInWishlist } = useWishlist();
+  const { addToCart } = useCart(); // Added cart context hook
   const [book, setBook] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -38,14 +40,25 @@ const BookDetails = () => {
   };
 
   const handleAddToCart = () => {
-    console.log(`Added ${book.bookTitle} to cart with quantity: ${selectedQuantity}`);
+    if (book && book.bookQuantity > 0) {
+      const cartItem = {
+        _id: book._id || id, // Use _id if available, otherwise fallback to id from useParams
+        bookTitle: book.bookTitle,
+        price: book.price,
+        coverPage: book.coverPage,
+        authorName: book.authorName,
+        bookQuantity: book.bookQuantity,
+        quantity: selectedQuantity, // Initial quantity added to cart
+      };
+      addToCart(cartItem, selectedQuantity);
+      console.log(`Added ${book.bookTitle} to cart with quantity: ${selectedQuantity}`);
+    }
   };
 
   const handleBuyNow = () => {
     console.log(`Proceeding to buy ${book.bookTitle} with quantity: ${selectedQuantity}`);
   };
 
-  // Updated handleWishlist
   const handleWishlist = () => {
     if (isInWishlist(id)) {
       removeFromWishlist(id);
@@ -193,7 +206,6 @@ const BookDetails = () => {
                 Buy Now
               </button>
             </div>
-            {/* Updated Wishlist section */}
             <div className="mb-4">
               <button
                 className="btn p-0 d-flex align-items-center"
