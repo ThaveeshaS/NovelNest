@@ -5,9 +5,12 @@ import Navbar2 from '../../components/Navbar2';
 
 const CustomerFeedbackPage = () => {
   const [formData, setFormData] = useState({
-    name: '',
+    fullName: '',
     email: '',
+    feedbackTopic: 'general',
     message: '',
+    rating: 0,
+    sentiment: 'positive',
   });
 
   const [submitStatus, setSubmitStatus] = useState({
@@ -16,16 +19,34 @@ const CustomerFeedbackPage = () => {
   });
 
   const [errors, setErrors] = useState({
-    name: '',
+    fullName: '',
     email: '',
+    rating: '',
   });
+
+  // Feedback topics options
+  const feedbackTopics = [
+    { value: 'general', label: 'General Feedback' },
+    { value: 'product', label: 'Product Feedback' },
+    { value: 'service', label: 'Service Feedback' },
+    { value: 'website', label: 'Website Experience' },
+    { value: 'delivery', label: 'Delivery Experience' },
+    { value: 'other', label: 'Other' },
+  ];
+
+  // Sentiment options
+  const sentimentOptions = [
+    { value: 'positive', label: 'Positive', icon: 'bi-emoji-smile' },
+    { value: 'neutral', label: 'Neutral', icon: 'bi-emoji-neutral' },
+    { value: 'negative', label: 'Negative', icon: 'bi-emoji-frown' },
+  ];
 
   // Handle form input changes
   const handleChange = (e) => {
     const { name, value } = e.target;
 
-    // Filter out non-letter characters for the name field
-    if (name === 'name') {
+    // Filter out non-letter characters for the fullName field
+    if (name === 'fullName') {
       const filteredValue = value.replace(/[^a-zA-Z\s]/g, ''); // Allow only letters and spaces
       setFormData({
         ...formData,
@@ -46,7 +67,16 @@ const CustomerFeedbackPage = () => {
     }
 
     // Validate the field as the user types
-    validateField(name, name === 'name' ? value.replace(/[^a-zA-Z\s]/g, '') : value);
+    validateField(name, name === 'fullName' ? value.replace(/[^a-zA-Z\s]/g, '') : value);
+  };
+
+  // Handle star rating selection
+  const handleRatingChange = (rating) => {
+    setFormData({
+      ...formData,
+      rating: rating,
+    });
+    validateField('rating', rating);
   };
 
   // Validate individual fields
@@ -54,18 +84,27 @@ const CustomerFeedbackPage = () => {
     let fieldErrors = { ...errors };
 
     switch (name) {
-      case 'name':
+      case 'fullName':
         if (!/^[a-zA-Z\s]{2,}$/.test(value)) {
-          fieldErrors.name = 'Name must contain only letters and be at least 2 characters long.';
+          fieldErrors.fullName = 'Full name must contain only letters and be at least 2 characters long.';
         } else {
-          fieldErrors.name = '';
+          fieldErrors.fullName = '';
         }
         break;
       case 'email':
-        if (!/^[a-z0-9@.]+@[a-z0-9]+\.[a-z]{2,}$/.test(value)) {
+        if (!value) {
+          fieldErrors.email = 'Email is required.';
+        } else if (!/^[a-z0-9@.]+@[a-z0-9]+\.[a-z]{2,}$/.test(value)) {
           fieldErrors.email = 'Please enter a valid email address.';
         } else {
           fieldErrors.email = '';
+        }
+        break;
+      case 'rating':
+        if (value === 0) {
+          fieldErrors.rating = 'Please select a rating.';
+        } else {
+          fieldErrors.rating = '';
         }
         break;
       default:
@@ -79,12 +118,13 @@ const CustomerFeedbackPage = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
 
-    // Validate all fields before submission
-    validateField('name', formData.name);
+    // Validate all required fields before submission
+    validateField('fullName', formData.fullName);
     validateField('email', formData.email);
+    validateField('rating', formData.rating);
 
     // Check if there are any errors
-    if (errors.name || errors.email) {
+    if (errors.fullName || errors.email || errors.rating) {
       alert('Please fix the errors in the form before submitting.');
       return;
     }
@@ -103,9 +143,12 @@ const CustomerFeedbackPage = () => {
         setSubmitStatus({ submitted: true, success: true });
         // Clear the form after submission
         setFormData({
-          name: '',
+          fullName: '',
           email: '',
+          feedbackTopic: 'general',
           message: '',
+          rating: 0,
+          sentiment: 'positive',
         });
 
         // Reset status after 5 seconds
@@ -131,10 +174,10 @@ const CustomerFeedbackPage = () => {
     }
   };
 
-  // Prevent non-letter keys from being entered in the name field
+  // Prevent non-letter keys from being entered in the fullName field
   const handleKeyDown = (e) => {
     const { name, key } = e;
-    if (name === 'name' && !/^[a-zA-Z\s]$/.test(key) && key !== 'Backspace' && key !== 'Delete' && key !== 'ArrowLeft' && key !== 'ArrowRight') {
+    if (name === 'fullName' && !/^[a-zA-Z\s]$/.test(key) && key !== 'Backspace' && key !== 'Delete' && key !== 'ArrowLeft' && key !== 'ArrowRight') {
       e.preventDefault();
     } else if (name === 'email' && !/^[a-z0-9@.]$/.test(key) && key !== 'Backspace' && key !== 'Delete' && key !== 'ArrowLeft' && key !== 'ArrowRight') {
       e.preventDefault();
@@ -161,7 +204,7 @@ const CustomerFeedbackPage = () => {
                 src="https://s1.picswalls.com/wallpapers/2016/03/29/beautiful-nature-high-definition_042323787_304.jpg"
                 alt="Customer Feedback"
                 className="img-fluid w-100"
-                style={{ height: '735px', objectFit: 'cover' }}
+                style={{ height: '1010px', objectFit: 'cover' }}
               />
               <div className="position-absolute top-0 start-0 w-100 h-100 bg-dark bg-opacity-50 d-flex flex-column justify-content-start px-4 px-lg-5 text-white pt-5">
                 <h2 className="fw-bold mb-3">Help Us Serve You Better</h2>
@@ -195,10 +238,10 @@ const CustomerFeedbackPage = () => {
                 )}
 
                 <form onSubmit={handleSubmit} className="needs-validation" noValidate>
-                  {/* Name Field */}
+                  {/* Full Name Field */}
                   <div className="mb-4">
-                    <label htmlFor="name" className="form-label fw-semibold">
-                      Name
+                    <label htmlFor="fullName" className="form-label fw-semibold">
+                      Full Name
                     </label>
                     <div className="input-group">
                       <span className="input-group-text bg-light">
@@ -206,18 +249,18 @@ const CustomerFeedbackPage = () => {
                       </span>
                       <input
                         type="text"
-                        className={`form-control form-control-lg bg-light ${errors.name ? 'is-invalid' : ''}`}
-                        id="name"
-                        name="name"
+                        className={`form-control form-control-lg bg-light ${errors.fullName ? 'is-invalid' : ''}`}
+                        id="fullName"
+                        name="fullName"
                         placeholder="Your full name"
-                        value={formData.name}
+                        value={formData.fullName}
                         onChange={handleChange}
                         onKeyDown={handleKeyDown}
                         required
                         style={{ fontSize: '14px' }}
                       />
                     </div>
-                    {errors.name && <div className="invalid-feedback">{errors.name}</div>}
+                    {errors.fullName && <div className="invalid-feedback">{errors.fullName}</div>}
                   </div>
 
                   {/* Email Field */}
@@ -245,17 +288,86 @@ const CustomerFeedbackPage = () => {
                     {errors.email && <div className="invalid-feedback">{errors.email}</div>}
                   </div>
 
+                  {/* Feedback Topic Field */}
+                  <div className="mb-4">
+                    <label htmlFor="feedbackTopic" className="form-label fw-semibold">
+                      Feedback Topic
+                    </label>
+                    <select
+                      className="form-select form-select-lg bg-light"
+                      id="feedbackTopic"
+                      name="feedbackTopic"
+                      value={formData.feedbackTopic}
+                      onChange={handleChange}
+                      style={{ fontSize: '14px' }}
+                    >
+                      {feedbackTopics.map((topic) => (
+                        <option key={topic.value} value={topic.value}>
+                          {topic.label}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+
+                  {/* Star Rating Field */}
+                  <div className="mb-4">
+                    <label className="form-label fw-semibold d-block">Your Rating</label>
+                    <div className="d-flex align-items-center">
+                      <div className="star-rating">
+                        {[1, 2, 3, 4, 5].map((star) => (
+                          <button
+                            key={star}
+                            type="button"
+                            className={`star-btn ${star <= formData.rating ? 'text-warning' : 'text-secondary'}`}
+                            onClick={() => handleRatingChange(star)}
+                            style={{ background: 'none', border: 'none', fontSize: '24px' }}
+                          >
+                            <i className="bi bi-star-fill"></i>
+                          </button>
+                        ))}
+                      </div>
+                      <span className="ms-2 text-muted small">
+                        {formData.rating === 0 ? 'Select a rating' : `${formData.rating} star${formData.rating !== 1 ? 's' : ''}`}
+                      </span>
+                    </div>
+                    {errors.rating && <div className="invalid-feedback d-block">{errors.rating}</div>}
+                  </div>
+
+                  {/* Feedback Sentiment Field */}
+                  <div className="mb-4">
+                    <label className="form-label fw-semibold d-block">How do you feel?</label>
+                    <div className="d-flex gap-3">
+                      {sentimentOptions.map((sentiment) => (
+                        <div key={sentiment.value} className="form-check">
+                          <input
+                            className="form-check-input"
+                            type="radio"
+                            name="sentiment"
+                            id={`sentiment-${sentiment.value}`}
+                            value={sentiment.value}
+                            checked={formData.sentiment === sentiment.value}
+                            onChange={handleChange}
+                          />
+                          <label className="form-check-label d-flex align-items-center" htmlFor={`sentiment-${sentiment.value}`}>
+                            <i className={`bi ${sentiment.icon} me-1`}></i>
+                            {sentiment.label}
+                          </label>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+
                   {/* Feedback Message Field */}
                   <div className="mb-4">
                     <label htmlFor="message" className="form-label fw-semibold">
-                      Your Feedback
+                      Your Feedback Message
                     </label>
                     <textarea
                       className="form-control form-control-lg bg-light"
                       id="message"
                       name="message"
                       rows="5"
-                      placeholder="Share your thoughts, suggestions, or concerns with us..."
+                      placeholder="Share your detailed thoughts, suggestions, or concerns with us..."
                       value={formData.message}
                       onChange={handleChange}
                       required
