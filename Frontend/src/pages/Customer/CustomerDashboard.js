@@ -388,11 +388,13 @@ const CustomerDashboard = () => {
           .add-to-cart-icon,
           .wishlist-icon {
             cursor: pointer;
-            transition: transform 0.2s ease;
+            transition: transform 0.2s ease, stroke 0.2s ease;
           }
           .add-to-cart-icon:hover {
-            color: #007bff;
             transform: scale(1.2);
+          }
+          .add-to-cart-icon:hover svg {
+            stroke: #007bff;
           }
           .wishlist-icon:hover {
             transform: scale(1.2);

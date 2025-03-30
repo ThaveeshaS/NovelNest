@@ -6,22 +6,40 @@ import { useNavigate } from 'react-router-dom';
 import { ShoppingCart, ArrowRight, Trash2, Plus, Minus } from "lucide-react";
 
 const AddToCartPage = () => {
-  const { cartItems, removeFromCart, updateQuantity } = useCart(); // Assume updateQuantity is added to CartContext
+  const { cartItems, removeFromCart, updateQuantity } = useCart();
   const navigate = useNavigate();
   const [couponCode, setCouponCode] = useState('');
+  const [quantityErrors, setQuantityErrors] = useState({});
 
-  const handleQuantityChange = (itemId, delta) => {
+  const handleQuantityChange = async (itemId, delta) => {
     const item = cartItems.find(i => i._id === itemId);
-    const newQuantity = Math.max(1, item.quantity + delta);
-    updateQuantity(itemId, newQuantity);
+    const newQuantity = item.quantity + delta;
+
+    if (newQuantity < 1) return; // Prevent quantity from going below 1
+
+    await updateQuantity(itemId, newQuantity);
+
+    // Check if the updated quantity matches the requested quantity
+    const updatedItem = cartItems.find(i => i._id === itemId);
+    if (newQuantity > updatedItem?.bookQuantity) {
+      setQuantityErrors(prev => ({
+        ...prev,
+        [itemId]: `Only ${updatedItem.bookQuantity} items available in stock`
+      }));
+    } else {
+      setQuantityErrors(prev => {
+        const newErrors = { ...prev };
+        delete newErrors[itemId];
+        return newErrors;
+      });
+    }
   };
 
   const subtotal = cartItems.reduce((total, item) => total + (item.price * item.quantity), 0);
-  const deliveryFee = 370.00; // Fixed delivery fee as per the image
+  const deliveryFee = 370.00;
   const totalPrice = subtotal + deliveryFee;
 
   const handleApplyCoupon = () => {
-    // Placeholder for coupon logic
     console.log("Coupon applied:", couponCode);
   };
 
@@ -98,6 +116,7 @@ const AddToCartPage = () => {
                           <button
                             className="quantity-btn"
                             onClick={() => handleQuantityChange(item._id, -1)}
+                            disabled={item.quantity <= 1}
                           >
                             <Minus size={16} />
                           </button>
@@ -105,10 +124,14 @@ const AddToCartPage = () => {
                           <button
                             className="quantity-btn"
                             onClick={() => handleQuantityChange(item._id, 1)}
+                            disabled={item.quantity >= item.bookQuantity}
                           >
                             <Plus size={16} />
                           </button>
                         </div>
+                        {quantityErrors[item._id] && (
+                          <p className="quantity-error">{quantityErrors[item._id]}</p>
+                        )}
                       </td>
                       <td className="subtotal-column">
                         <div className="current-price">Rs. {(item.price * item.quantity).toLocaleString('en-US', { minimumFractionDigits: 2 })}</div>
@@ -321,13 +344,25 @@ const AddToCartPage = () => {
           transition: background-color 0.2s;
         }
 
-        .quantity-btn:hover {
+        .quantity-btn:disabled {
+          background-color: #e0e0e0;
+          cursor: not-allowed;
+          opacity: 0.6;
+        }
+
+        .quantity-btn:hover:not(:disabled) {
           background-color: #e0e0e0;
         }
 
         .quantity-value {
           font-weight: 500;
           color: #333;
+        }
+
+        .quantity-error {
+          color: #ff3333;
+          font-size: 0.8rem;
+          margin-top: 5px;
         }
 
         .remove-btn {
