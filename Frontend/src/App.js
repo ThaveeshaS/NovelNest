@@ -32,6 +32,8 @@ import AddProducts from './pages/Product/AddProducts';
 import EditProduct from './pages/Product/EditProduct';
 import BookList from './pages/Product/BookList';
 import BookDetails from './pages/Product/BookDetails';
+import { WishlistProvider } from './pages/Product/WishlistContext';
+import { CartProvider } from './pages/Product/CartContext';
 
 
 import AddDelivery from './pages/Delivery/AddDelivery';
@@ -107,9 +109,13 @@ function App() {
 
 function AppWrapper() {
   return (
+    <WishlistProvider>
+      <CartProvider>
     <Router>
       <App />
     </Router>
+    </CartProvider>
+    </WishlistProvider>
   );
 }
 
