@@ -5,6 +5,7 @@ import Header2 from '../../components/Header2';
 import Navbar2 from '../../components/Navbar2';
 import axios from 'axios';
 import { useWishlist } from '../../pages/Product/WishlistContext';
+import { useCart } from '../../pages/Product/CartContext';
 
 const BookList = () => {
   const [fictionBooks, setFictionBooks] = useState([]);
@@ -13,6 +14,8 @@ const BookList = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const navigate = useNavigate();
+  const { addToWishlist, isInWishlist } = useWishlist();
+  const { addToCart, isInCart } = useCart();
 
   const fetchBooks = async () => {
     try {
@@ -59,10 +62,19 @@ const BookList = () => {
   };
 
   const ProductCard = ({ product }) => {
-    const { addToWishlist, isInWishlist } = useWishlist();
+    const handleCardClick = (e) => {
+      if (e.target.closest('.hover-overlay')) return;
+      navigate(`/bookdetails/${product._id}`);
+    };
+
     const handleWishlistClick = (e) => {
       e.stopPropagation();
       addToWishlist(product);
+    };
+
+    const handleAddToCart = (e) => {
+      e.stopPropagation();
+      addToCart(product);
     };
 
     return (
@@ -82,7 +94,7 @@ const BookList = () => {
             overflow: 'hidden',
             cursor: 'pointer',
           }}
-          onClick={() => navigate(`/bookdetails/${product._id}`)}
+          onClick={handleCardClick}
         >
           <div
             style={{
@@ -111,11 +123,31 @@ const BookList = () => {
               onError={(e) => (e.target.src = 'https://via.placeholder.com/160x200?text=No+Image')}
             />
             <div className="hover-overlay">
-              <div className="add-to-cart-icon">
-                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                  <path d="M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"></path>
-                  <line x1="3" y1="6" x2="21" y2="6"></line>
-                  <path d="M16 10a4 4 0 0 1-8 0"></path>
+              <div 
+                className="add-to-cart-icon"
+                onClick={handleAddToCart}
+                style={{ color: isInCart(product._id) ? '#007bff' : '#6c757d' }}
+              >
+                <svg 
+                  xmlns="http://www.w3.org/2000/svg" 
+                  width="24" 
+                  height="24" 
+                  viewBox="0 0 24 24" 
+                  fill={isInCart(product._id) ? '#007bff' : 'none'}
+                  stroke="currentColor" 
+                  strokeWidth="2" 
+                  strokeLinecap="round" 
+                  strokeLinejoin="round"
+                >
+                  {isInCart(product._id) ? (
+                    <path d="M20 6H4l2 12h12l2-12zM9 6V4a2 2 0 0 1 2-2h2a2 2 0 0 1 2 2v2" />
+                  ) : (
+                    <>
+                      <path d="M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z" />
+                      <line x1="3" y1="6" x2="21" y2="6" />
+                      <path d="M16 10a4 4 0 0 1-8 0" />
+                    </>
+                  )}
                 </svg>
               </div>
               <div 
@@ -134,7 +166,7 @@ const BookList = () => {
                   strokeLinecap="round" 
                   strokeLinejoin="round"
                 >
-                  <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78L12 21.23l8.84-8.84a5.5 5.5 0 0 0 0-7.78z"></path>
+                  <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78L12 21.23l8.84-8.84a5.5 5.5 0 0 0 0-7.78z" />
                 </svg>
               </div>
             </div>
