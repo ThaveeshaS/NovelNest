@@ -1,0 +1,87 @@
+/* Custom animations */
+@keyframes floating {
+    0% { transform: translateY(0px); }
+    50% { transform: translateY(-15px); }
+    100% { transform: translateY(0px); }
+  }
+  
+  /* Phone input customization */
+  .react-tel-input .form-control {
+    width: 100% !important;
+    height: 56px !important;
+    font-size: 16px !important;
+    border-radius: 12px !important;
+    border: 1px solid rgba(0, 0, 0, 0.23) !important;
+    transition: all 0.3s ease !important;
+  }
+  
+  .react-tel-input .form-control:hover {
+    border-color: rgba(0, 0, 0, 0.87) !important;
+  }
+  
+  .react-tel-input .form-control:focus {
+    border-color: #3f51b5 !important;
+    box-shadow: 0 0 0 2px rgba(63, 81, 181, 0.2) !important;
+  }
+  
+  .react-tel-input .flag-dropdown {
+    border-radius: 12px 0 0 12px !important;
+    border-right: none !important;
+    background-color: rgba(63, 81, 181, 0.05) !important;
+  }
+  
+  .react-tel-input .flag-dropdown.open {
+    background-color: rgba(63, 81, 181, 0.1) !important;
+  }
+  
+  .react-tel-input .selected-flag:hover, .react-tel-input .selected-flag:focus {
+    background-color: rgba(63, 81, 181, 0.1) !important;
+  }
+  
+  .react-tel-input .country-list {
+    border-radius: 12px !important;
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.15) !important;
+  }
+  
+  /* Custom scrollbar */
+  ::-webkit-scrollbar {
+    width: 8px;
+    height: 8px;
+  }
+  
+  ::-webkit-scrollbar-track {
+    background: rgba(0, 0, 0, 0.05);
+    border-radius: 10px;
+  }
+  
+  ::-webkit-scrollbar-thumb {
+    background: rgba(63, 81, 181, 0.3);
+    border-radius: 10px;
+  }
+  
+  ::-webkit-scrollbar-thumb:hover {
+    background: rgba(63, 81, 181, 0.5);
+  }
+  
+  /* Page transitions */
+  .page-enter {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  
+  .page-enter-active {
+    opacity: 1;
+    transform: translateY(0);
+    transition: all 300ms ease-out;
+  }
+  
+  .page-exit {
+    opacity: 1;
+    transform: translateY(0);
+  }
+  
+  .page-exit-active {
+    opacity: 0;
+    transform: translateY(-20px);
+    transition: all 300ms ease-in;
+  }

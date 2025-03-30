@@ -17,6 +17,8 @@ import AdminDashboard from "./pages/AdminDashboard";
 import ManageCustomers from './pages/Customer/ManageCustomers'; 
 import CustomerFeedback from './pages/Customer/CustomerFeedback'; 
 import ManageFeedback from './pages/Customer/ManageFeedback';
+import Analysis from './pages/Analysis';
+
 
 import TermsAndConditions from './pages/TandCs';
 import PrivacyPolicy from './pages/PrivacyPolicy';
@@ -30,16 +32,15 @@ import AddProducts from './pages/Product/AddProducts';
 import EditProduct from './pages/Product/EditProduct';
 import BookList from './pages/Product/BookList';
 import BookDetails from './pages/Product/BookDetails';
+import { WishlistProvider } from './pages/Product/WishlistContext';
+import { CartProvider } from './pages/Product/CartContext';
 
 
-
-
-
-import AddDelivery from './pages/Delivery/AddDelivery'; // Corrected path
-import DeliveryDetails from './pages/Delivery/DeliveryDetails'; // Added import for DeliveryDetails
+import AddDelivery from './pages/Delivery/AddDelivery';
+import DeliveryDetails from './pages/Delivery/DeliveryDetails'; 
 import TrackDelivery from './pages/Delivery/TrackDelivery';
 
-//Amesh import
+
 import AdminBooksPanel from './pages/voicepayment/AdminBooksPanel';
 import  AdminTransactionsPanel from './pages/voicepayment/AdminTransactionsPanel';
 import  Home1 from './pages/voicepayment/Home1';
@@ -51,7 +52,7 @@ function App() {
 
   // Define routes where Header, Navbar should not be displayed
 
-  const excludePaths = ["/customerdashboard", "/admindashboard", "/managecustomers", "/customeraccount", "/wishlist", "/cart", "/manageproducts", "/addproducts", "/customerfeedback", "/managefeedback", "/edit-product/:id", "/bookslist", "/bookdetails/:id", "/bookdetails/:id", "/admin/AddDelivery", "/admin/DeliveryDetails", "/trackdelivery"];
+  const excludePaths = ["/customerdashboard", "/admindashboard", "/managecustomers", "/customeraccount", "/wishlist", "/cart", "/manageproducts", "/addproducts", "/customerfeedback", "/managefeedback", "/edit-product/:id", "/bookslist", "/bookdetails/:id", "/bookdetails/:id", "/admin/AddDelivery", "/admin/DeliveryDetails", "/trackdelivery", "/analysis"];
 
   // Check if the current path is in the exclude list
   const shouldShowHeaderNavbarFooter = !excludePaths.includes(location.pathname);
@@ -73,6 +74,8 @@ function App() {
         <Route path="/managecustomers" element={<ManageCustomers />} />
         <Route path="/customerfeedback" element={<CustomerFeedback />} />
         <Route path="/managefeedback" element={<ManageFeedback />} />
+        <Route path="/analysis" element={<Analysis />} />
+
 
         <Route path="/home1" element={<Home1 />} />
         <Route path="/admintransactions" element={<AdminTransactionsPanel />} /> 
@@ -106,9 +109,13 @@ function App() {
 
 function AppWrapper() {
   return (
+    <WishlistProvider>
+      <CartProvider>
     <Router>
       <App />
     </Router>
+    </CartProvider>
+    </WishlistProvider>
   );
 }
 
