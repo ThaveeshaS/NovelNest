@@ -8,7 +8,7 @@ import 'slick-carousel/slick/slick.css';
 import 'slick-carousel/slick/slick-theme.css';
 import slideVideo1 from '../../components/images/SlideVideo1.mp4';
 import axios from 'axios';
-import { useWishlist } from '../../pages/Product/WishlistContext'; // Added import (adjust path as needed)
+import { useWishlist } from '../../pages/Product/WishlistContext';
 
 const CustomerDashboard = () => {
   const [fictionBooks, setFictionBooks] = useState([]);
@@ -17,7 +17,7 @@ const CustomerDashboard = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const navigate = useNavigate();
-  const { addToWishlist, isInWishlist } = useWishlist(); // Added wishlist context hooks
+  const { addToWishlist, isInWishlist } = useWishlist();
 
   const fetchBooks = async () => {
     try {
@@ -78,7 +78,6 @@ const CustomerDashboard = () => {
     ],
   };
 
-  // Updated ProductCard component with wishlist functionality
   const ProductCard = ({ product }) => {
     const handleCardClick = (e) => {
       if (e.target.closest('.hover-overlay')) return;
@@ -86,7 +85,7 @@ const CustomerDashboard = () => {
     };
 
     const handleWishlistClick = (e) => {
-      e.stopPropagation(); // Prevent card click from triggering
+      e.stopPropagation();
       addToWishlist(product);
     };
 
@@ -362,17 +361,23 @@ const CustomerDashboard = () => {
           .add-to-cart-icon,
           .wishlist-icon {
             cursor: pointer;
-            color: #6c757d;
-            transition: color 0.2s;
+            transition: transform 0.2s ease;
           }
-          .add-to-cart-icon:hover,
-          .wishlist-icon:hover {
+          .add-to-cart-icon:hover {
             color: #007bff;
+            transform: scale(1.2);
+          }
+          .wishlist-icon:hover {
+            transform: scale(1.2);
+          }
+          .wishlist-icon:hover svg {
+            stroke: #ff0000;
           }
           .add-to-cart-icon svg,
           .wishlist-icon svg {
             width: 24px;
             height: 24px;
+            transition: stroke 0.2s ease;
           }
         `}</style>
       </div>

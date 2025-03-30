@@ -4,7 +4,7 @@ import { useNavigate } from 'react-router-dom';
 import Header2 from '../../components/Header2';
 import Navbar2 from '../../components/Navbar2';
 import axios from 'axios';
-import { useWishlist } from '../../pages/Product/WishlistContext'; // Added import
+import { useWishlist } from '../../pages/Product/WishlistContext';
 
 const BookList = () => {
   const [fictionBooks, setFictionBooks] = useState([]);
@@ -58,7 +58,6 @@ const BookList = () => {
     });
   };
 
-  // Updated ProductCard component
   const ProductCard = ({ product }) => {
     const { addToWishlist, isInWishlist } = useWishlist();
     const handleWishlistClick = (e) => {
@@ -274,16 +273,23 @@ const BookList = () => {
           .add-to-cart-icon,
           .wishlist-icon {
             cursor: pointer;
-            transition: color 0.2s;
+            transition: transform 0.2s ease;
           }
-          .add-to-cart-icon:hover,
-          .wishlist-icon:hover {
+          .add-to-cart-icon:hover {
             color: #007bff;
+            transform: scale(1.2);
+          }
+          .wishlist-icon:hover {
+            transform: scale(1.2);
+          }
+          .wishlist-icon:hover svg {
+            stroke: #ff0000;
           }
           .add-to-cart-icon svg,
           .wishlist-icon svg {
             width: 24px;
             height: 24px;
+            transition: stroke 0.2s ease;
           }
         `}</style>
       </div>
