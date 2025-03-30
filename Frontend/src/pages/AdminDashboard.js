@@ -238,15 +238,15 @@ const AdminDashboard = () => {
                 <div className="card-icon mb-3">
                   <i className="fas fa-chart-line fa-2x text-secondary"></i>
                 </div>
-                <Card.Title>Book Sales Analytics</Card.Title>
+                <Card.Title>Novel Nest Book Store Analytics</Card.Title>
                 <Card.Text className="flex-grow-1">
-                  View book sales reports, popular genres, bestsellers, and
+                  View customer account & feedback reports, book sales reports, popular genres, bestsellers, and
                   other key performance metrics.
                 </Card.Text>
                 <Button
                   variant="secondary"
                   className="mt-auto"
-                  onClick={() => navigate("/admin/analytics")}
+                  onClick={() => navigate("/analysis")}
                 >
                   View Analytics
                 </Button>

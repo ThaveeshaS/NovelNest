@@ -4,12 +4,13 @@ import axios from "axios";
 import { useNavigate } from "react-router-dom";
 import Header2 from "../../components/Header2";
 import Navbar2 from "../../components/Navbar2";
-import { FaUser, FaEdit, FaSignOutAlt, FaCamera, FaTrash } from "react-icons/fa"; // Added icons
+import { FaUser, FaEdit, FaSignOutAlt, FaCamera, FaTrash } from "react-icons/fa";
 
 export default function CustomerAccount() {
   const [activeTab, setActiveTab] = useState("personal-details");
   const [customerData, setCustomerData] = useState(null);
   const [formData, setFormData] = useState({});
+  const [errors, setErrors] = useState({});
   const [error, setError] = useState(null);
   const [success, setSuccess] = useState(null);
   const [isLoading, setIsLoading] = useState(false);
@@ -30,7 +31,6 @@ export default function CustomerAccount() {
           if (response.data) {
             setCustomerData(response.data);
             setFormData(response.data);
-            // If the customer has a profile image stored (e.g. in localStorage or from API)
             const storedImage = localStorage.getItem("profileImage");
             if (storedImage) {
               setProfileImage(storedImage);
@@ -49,18 +49,78 @@ export default function CustomerAccount() {
     }
   }, [navigate]);
 
+  // Validate individual fields
+  const validateField = (name, value) => {
+    let fieldErrors = { ...errors };
+
+    switch (name) {
+      case "firstName":
+      case "lastName":
+        fieldErrors[name] = /^[a-zA-Z\s]+$/.test(value) ? "" : "Invalid characters";
+        break;
+      case "email":
+        fieldErrors.email = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value) ? "" : "Invalid email";
+        break;
+      case "contactInfo":
+        fieldErrors.contactInfo = /^\+94[0-9]{9}$/.test(value) ? "" : "Invalid contact number (format: +947xxxxxxxx)";
+        break;
+      case "birthday":
+        const today = new Date();
+        const birthDate = new Date(value);
+        const age = today.getFullYear() - birthDate.getFullYear();
+        const isFutureDate = birthDate > today;
+        fieldErrors.birthday = age >= 16 && !isFutureDate ? "" : "You must be at least 16 years old";
+        break;
+      case "address":
+        fieldErrors.address =
+          value.length > 0 && value.length <= 100 && /^[a-zA-Z0-9/.,\s]+$/.test(value)
+            ? ""
+            : "Invalid address (max 100 characters)";
+        break;
+      case "gender":
+        fieldErrors.gender = value ? "" : "Gender is required";
+        break;
+      default:
+        break;
+    }
+
+    setErrors(fieldErrors);
+  };
+
   const handleEditChange = (e) => {
     const { name, value } = e.target;
     setFormData({
       ...formData,
       [name]: value,
     });
+    validateField(name, value);
+  };
+
+  // Handle key press for specific fields
+  const handleKeyPress = (e) => {
+    const { name, value } = e.target;
+
+    // Restrict input for contactInfo
+    if (name === "contactInfo") {
+      if (value.length === 0 && e.key === "+") return; // Allow '+' as the first character
+      if (!/[0-9]/.test(e.key)) e.preventDefault(); // Allow only numbers
+    }
+
+    // Restrict input for firstName and lastName
+    if ((name === "firstName" || name === "lastName") && !/[a-zA-Z\s]/.test(e.key)) {
+      e.preventDefault();
+    }
+
+    // Restrict input for address
+    if (name === "address" && !/[a-zA-Z0-9/.,\s]/.test(e.key)) {
+      e.preventDefault();
+    }
   };
 
   const handleImageUpload = (e) => {
     const file = e.target.files[0];
     if (file) {
-      if (file.size > 5 * 1024 * 1024) { // 5MB limit
+      if (file.size > 5 * 1024 * 1024) {
         setError("Image size must be less than 5MB");
         return;
       }
@@ -95,7 +155,19 @@ export default function CustomerAccount() {
     setIsLoading(true);
     const token = localStorage.getItem("authToken");
     
-    // Validate form data
+    // Validate all fields before submission
+    Object.keys(formData).forEach(key => {
+      validateField(key, formData[key]);
+    });
+
+    // Check for errors
+    if (Object.values(errors).some(error => error !== "")) {
+      setError("Please fix the errors in the form before submitting.");
+      setIsLoading(false);
+      return;
+    }
+
+    // Check required fields
     if (!formData.email || !formData.firstName || !formData.lastName) {
       setError("Please fill in all required fields");
       setIsLoading(false);
@@ -111,7 +183,6 @@ export default function CustomerAccount() {
           setCustomerData(response.data);
           setFormData(response.data);
           
-          // Save the temporary profile image as the current one
           if (tempProfileImage) {
             setProfileImage(tempProfileImage);
             localStorage.setItem("profileImage", tempProfileImage);
@@ -121,7 +192,6 @@ export default function CustomerAccount() {
           setError(null);
           setIsLoading(false);
           
-          // Automatically switch back to personal details tab after successful update
           setTimeout(() => {
             setActiveTab("personal-details");
             setSuccess(null);
@@ -144,18 +214,22 @@ export default function CustomerAccount() {
     }
   };
 
-  // Format date properly for display
   const formatDate = (dateString) => {
     if (!dateString) return "";
     const date = new Date(dateString);
     return date.toLocaleDateString();
   };
 
-  // Format date for input field
   const formatDateForInput = (dateString) => {
     if (!dateString) return "";
     return dateString.split("T")[0];
   };
+
+  // Calculate max date for birthday (16 years ago)
+  const today = new Date().toISOString().split("T")[0];
+  const maxDate = new Date();
+  maxDate.setFullYear(maxDate.getFullYear() - 16);
+  const maxDateString = maxDate.toISOString().split("T")[0];
 
   return (
     <div className="bg-light min-vh-100">
@@ -232,7 +306,7 @@ export default function CustomerAccount() {
                           
                           <Form>
                             <Row>
-                            <Col md={6}>
+                              <Col md={6}>
                                 <Form.Group className="mb-3">
                                   <Form.Label><strong>Full Name</strong></Form.Label>
                                   <Form.Control
@@ -319,7 +393,6 @@ export default function CustomerAccount() {
                         <div className="py-3">
                           <h4 className="mb-4 text-center text-primary">Update Your Information</h4>
                           
-                          {/* Profile Picture Upload Section */}
                           <Row className="justify-content-center mb-4">
                             <Col sm={4} md={3} className="text-center">
                               <div className="position-relative mb-2">
@@ -388,7 +461,7 @@ export default function CustomerAccount() {
                           </Row>
                           
                           <Form onSubmit={handleSubmit}>
-                          <Row>
+                            <Row>
                               <Col md={6}>
                                 <Form.Group className="mb-3">
                                   <Form.Label><strong>First Name *</strong></Form.Label>
@@ -397,8 +470,13 @@ export default function CustomerAccount() {
                                     name="firstName"
                                     value={formData.firstName || ""}
                                     onChange={handleEditChange}
+                                    onKeyPress={handleKeyPress}
+                                    isInvalid={!!errors.firstName}
                                     required
                                   />
+                                  <Form.Control.Feedback type="invalid">
+                                    {errors.firstName}
+                                  </Form.Control.Feedback>
                                 </Form.Group>
                               </Col>
                               <Col md={6}>
@@ -409,8 +487,13 @@ export default function CustomerAccount() {
                                     name="lastName"
                                     value={formData.lastName || ""}
                                     onChange={handleEditChange}
+                                    onKeyPress={handleKeyPress}
+                                    isInvalid={!!errors.lastName}
                                     required
                                   />
+                                  <Form.Control.Feedback type="invalid">
+                                    {errors.lastName}
+                                  </Form.Control.Feedback>
                                 </Form.Group>
                               </Col>
                             </Row>
@@ -423,8 +506,12 @@ export default function CustomerAccount() {
                                     name="email"
                                     value={formData.email || ""}
                                     onChange={handleEditChange}
+                                    isInvalid={!!errors.email}
                                     required
                                   />
+                                  <Form.Control.Feedback type="invalid">
+                                    {errors.email}
+                                  </Form.Control.Feedback>
                                 </Form.Group>
                               </Col>
                               <Col md={6}>
@@ -435,7 +522,12 @@ export default function CustomerAccount() {
                                     name="contactInfo"
                                     value={formData.contactInfo || ""}
                                     onChange={handleEditChange}
+                                    onKeyPress={handleKeyPress}
+                                    isInvalid={!!errors.contactInfo}
                                   />
+                                  <Form.Control.Feedback type="invalid">
+                                    {errors.contactInfo}
+                                  </Form.Control.Feedback>
                                 </Form.Group>
                               </Col>
                             </Row>
@@ -448,7 +540,12 @@ export default function CustomerAccount() {
                                     name="birthday"
                                     value={formatDateForInput(formData.birthday) || ""}
                                     onChange={handleEditChange}
+                                    max={maxDateString}
+                                    isInvalid={!!errors.birthday}
                                   />
+                                  <Form.Control.Feedback type="invalid">
+                                    {errors.birthday}
+                                  </Form.Control.Feedback>
                                 </Form.Group>
                               </Col>
                               <Col md={6}>
@@ -458,11 +555,16 @@ export default function CustomerAccount() {
                                     name="gender"
                                     value={formData.gender || ""}
                                     onChange={handleEditChange}
+                                    isInvalid={!!errors.gender}
                                   >
+                                    <option value="">Select Gender</option>
                                     <option value="Male">Male</option>
                                     <option value="Female">Female</option>
                                     <option value="Other">Not Disclose</option>
                                   </Form.Select>
+                                  <Form.Control.Feedback type="invalid">
+                                    {errors.gender}
+                                  </Form.Control.Feedback>
                                 </Form.Group>
                               </Col>
                             </Row>
@@ -475,7 +577,12 @@ export default function CustomerAccount() {
                                 name="address"
                                 value={formData.address || ""}
                                 onChange={handleEditChange}
+                                onKeyPress={handleKeyPress}
+                                isInvalid={!!errors.address}
                               />
+                              <Form.Control.Feedback type="invalid">
+                                {errors.address}
+                              </Form.Control.Feedback>
                             </Form.Group>
                             
                             <div className="d-flex justify-content-between mt-4">
@@ -485,7 +592,7 @@ export default function CustomerAccount() {
                               <Button 
                                 variant="primary" 
                                 type="submit"
-                                disabled={isLoading}
+                                disabled={isLoading || Object.values(errors).some(error => error !== "")}
                               >
                                 {isLoading ? (
                                   <>

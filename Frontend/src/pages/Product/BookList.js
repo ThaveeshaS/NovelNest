@@ -3,15 +3,11 @@ import 'bootstrap/dist/css/bootstrap.min.css';
 import { useNavigate } from 'react-router-dom';
 import Header2 from '../../components/Header2';
 import Navbar2 from '../../components/Navbar2';
-import Slider from 'react-slick';
-import 'slick-carousel/slick/slick.css';
-import 'slick-carousel/slick/slick-theme.css';
-import slideVideo1 from '../../components/images/SlideVideo1.mp4';
 import axios from 'axios';
 import { useWishlist } from '../../pages/Product/WishlistContext';
 import { useCart } from '../../pages/Product/CartContext';
 
-const CustomerDashboard = () => {
+const BookList = () => {
   const [fictionBooks, setFictionBooks] = useState([]);
   const [nonFictionBooks, setNonFictionBooks] = useState([]);
   const [childrenBooks, setChildrenBooks] = useState([]);
@@ -65,21 +61,6 @@ const CustomerDashboard = () => {
     });
   };
 
-  const sliderSettings = {
-    dots: true,
-    infinite: true,
-    speed: 500,
-    slidesToShow: 4,
-    slidesToScroll: 1,
-    autoplay: true,
-    autoplaySpeed: 2000,
-    responsive: [
-      { breakpoint: 1024, settings: { slidesToShow: 3, slidesToScroll: 1 } },
-      { breakpoint: 768, settings: { slidesToShow: 2, slidesToScroll: 1 } },
-      { breakpoint: 480, settings: { slidesToShow: 1, slidesToScroll: 1 } },
-    ],
-  };
-
   const ProductCard = ({ product }) => {
     const handleCardClick = (e) => {
       if (e.target.closest('.hover-overlay')) return;
@@ -97,7 +78,7 @@ const CustomerDashboard = () => {
     };
 
     return (
-      <div className="px-2">
+      <div className="col-lg-3 col-md-4 col-sm-6 mb-4">
         <div
           className="card shadow-sm mx-auto product-card-container"
           style={{
@@ -108,7 +89,6 @@ const CustomerDashboard = () => {
             display: 'flex',
             flexDirection: 'column',
             justifyContent: 'space-between',
-            marginBottom: '20px',
             transition: 'transform 0.3s ease, box-shadow 0.3s ease',
             position: 'relative',
             overflow: 'hidden',
@@ -249,39 +229,9 @@ const CustomerDashboard = () => {
       <Header2 />
       <Navbar2 />
       <div style={{ padding: '20px', textAlign: 'center' }}>
-        <div
-          id="carouselExampleAutoplaying"
-          className="carousel slide carousel-fade"
-          data-bs-ride="carousel"
-          data-bs-interval="5000"
-          aria-label="Homepage Carousel"
-        >
-          <div className="carousel-inner">
-            <div className="carousel-item active">
-              <video
-                className="d-block w-100 rounded-3"
-                autoPlay
-                muted
-                loop
-                playsInline
-                style={{ maxHeight: '600px', objectFit: 'cover' }}
-                aria-label="Background video showcasing our product"
-              >
-                <source src={slideVideo1} type="video/mp4" />
-                Your browser does not support the video tag.
-                <img
-                  src="path/to/fallback-image.jpg"
-                  alt="Fallback Image"
-                  className="d-block w-100"
-                />
-              </video>
-            </div>
-          </div>
-        </div>
-
         <div className="my-5">
-          <h2 className="display-4 fw-bold text-primary mb-3">Welcome to NovelNest</h2>
-          <p className="lead text-secondary">Explore Our Book Collection</p>
+          <h2 className="display-4 fw-bold text-primary mb-3">Book List</h2>
+          <p className="lead text-secondary">Browse Our Entire Collection</p>
           <button
             className="btn btn-primary mt-3"
             onClick={fetchBooks}
@@ -304,64 +254,31 @@ const CustomerDashboard = () => {
             </div>
           </div>
         ) : (
-          <>
-            <div className="container mt-4">
-              <h3 className="text-start mb-3 ps-2">Fiction</h3>
-              <div className="slider-container">
-                <Slider {...sliderSettings}>
-                  {fictionBooks.map((product) => (
-                    <ProductCard key={`fiction-${product._id}`} product={product} />
-                  ))}
-                </Slider>
-              </div>
+          <div className="container">
+            <h3 className="text-start mb-3 ps-2">Fiction</h3>
+            <div className="row">
+              {fictionBooks.map((product) => (
+                <ProductCard key={`fiction-${product._id}`} product={product} />
+              ))}
             </div>
 
-            <div className="container mt-5">
-              <h3 className="text-start mb-3 ps-2">Non-Fiction</h3>
-              <div className="slider-container">
-                <Slider {...sliderSettings}>
-                  {nonFictionBooks.map((product) => (
-                    <ProductCard key={`non-fiction-${product._id}`} product={product} />
-                  ))}
-                </Slider>
-              </div>
+            <h3 className="text-start mb-3 ps-2 mt-5">Non-Fiction</h3>
+            <div className="row">
+              {nonFictionBooks.map((product) => (
+                <ProductCard key={`non-fiction-${product._id}`} product={product} />
+              ))}
             </div>
 
-            <div className="container mt-5 mb-4">
-              <h3 className="text-start mb-3 ps-2">Children and Young Adult</h3>
-              <div className="slider-container">
-                <Slider {...sliderSettings}>
-                  {childrenBooks.map((product) => (
-                    <ProductCard key={`children-${product._id}`} product={product} />
-                  ))}
-                </Slider>
-              </div>
+            <h3 className="text-start mb-3 ps-2 mt-5">Children and Young Adult</h3>
+            <div className="row">
+              {childrenBooks.map((product) => (
+                <ProductCard key={`children-${product._id}`} product={product} />
+              ))}
             </div>
-          </>
+          </div>
         )}
 
         <style jsx>{`
-          .slider-container {
-            margin-bottom: 40px;
-          }
-          .slider-container .slick-track {
-            display: flex !important;
-          }
-          .slider-container .slick-slide {
-            height: inherit !important;
-            display: flex !important;
-            justify-content: center;
-            align-items: center;
-          }
-          .slick-dots {
-            bottom: -30px !important;
-          }
-          .slick-dots li button:before {
-            fontSize: 12px !important;
-          }
-          .slick-slider {
-            padding-bottom: 40px;
-          }
           .card:hover {
             transform: translateY(-5px);
             box-shadow: 0 10px 20px rgba(0, 102, 204, 0.37) !important;
@@ -414,4 +331,4 @@ const CustomerDashboard = () => {
   );
 };
 
-export default CustomerDashboard;
+export default BookList;

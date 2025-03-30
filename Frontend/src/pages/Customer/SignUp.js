@@ -137,7 +137,7 @@ export default function CustomerSignUp() {
     <div
       className="d-flex justify-content-center align-items-center vh-100"
       style={{
-        backgroundImage: "url('https://ik.imagekit.io/storybird/images/3b0e543a-6210-4bd5-8307-56eb233d5752/0_11548165.webp')",
+        backgroundImage: "url('https://miro.medium.com/v2/resize:fit:1024/1*8voFBoSzgnFWL4S3Mb_uqw.jpeg')",
         backgroundSize: "cover",
         backgroundPosition: "center",
         backgroundRepeat: "no-repeat",

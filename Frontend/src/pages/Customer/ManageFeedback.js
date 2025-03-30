@@ -6,7 +6,7 @@ import "bootstrap/dist/css/bootstrap.min.css";
 import logo from "../../components/images/logo.jpg";
 import Header2 from "../../components/Header2";
 import Navbar2 from "../../components/Navbar2";
-import { FaSearch, FaFilePdf, FaEdit, FaSave, FaTrashAlt, FaSpinner, FaArrowLeft } from "react-icons/fa";
+import { FaSearch, FaFilePdf, FaEdit, FaSave, FaTrashAlt, FaSpinner, FaArrowLeft, FaStar } from "react-icons/fa";
 import { useNavigate } from "react-router-dom";
 
 export default function ManageFeedback() {
@@ -18,6 +18,23 @@ export default function ManageFeedback() {
   const [editedMessage, setEditedMessage] = useState("");
   const [sortConfig, setSortConfig] = useState({ key: 'createdAt', direction: 'desc' });
   const navigate = useNavigate();
+
+  // Feedback topic options
+  const feedbackTopics = [
+    { value: 'general', label: 'General' },
+    { value: 'product', label: 'Product' },
+    { value: 'service', label: 'Service' },
+    { value: 'website', label: 'Website' },
+    { value: 'delivery', label: 'Delivery' },
+    { value: 'other', label: 'Other' },
+  ];
+
+  // Sentiment options
+  const sentimentOptions = [
+    { value: 'positive', label: 'Positive' },
+    { value: 'neutral', label: 'Neutral' },
+    { value: 'negative', label: 'Negative' },
+  ];
 
   // Fetch feedback data
   useEffect(() => {
@@ -73,11 +90,11 @@ export default function ManageFeedback() {
     setEditedMessage(message);
   };
 
-  // Generate PDF report with professional company styling
+  // Generate PDF report with professional company styling (unchanged)
   const generateReport = () => {
     const filteredFeedback = feedback.filter(
       (item) =>
-        item.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        item.fullName.toLowerCase().includes(searchTerm.toLowerCase()) ||
         item.email.toLowerCase().includes(searchTerm.toLowerCase())
     );
 
@@ -86,32 +103,25 @@ export default function ManageFeedback() {
     const pageHeight = doc.internal.pageSize.height;
     const margin = 15;
 
-    //rgb(255, 255, 255)
-
-    doc.setFillColor(255, 252, 255); // Set RGB color
+    doc.setFillColor(255, 252, 255);
     doc.rect(0, 0, pageWidth, pageHeight, 'F');
     
-    // Add borders to the entire page
-    doc.setDrawColor(0, 71, 171); // Company blue color
+    doc.setDrawColor(0, 71, 171);
     doc.setLineWidth(1);
     doc.rect(margin, margin, pageWidth - 2 * margin, pageHeight - 2 * margin);
     
-    // Add decorative header bar
     doc.setFillColor(0, 71, 171);
     doc.rect(margin, margin, pageWidth - 2 * margin, 12, 'F');
     
-    // Add company logo
     if (logo) {
       doc.addImage(logo, "JPEG", pageWidth / 2 - 20, margin + 18, 40, 40);
     }
     
-    // Add Company Name
     doc.setFontSize(20);
     doc.setFont("helvetica", "bold");
     doc.setTextColor(0, 71, 171);
     doc.text("NOVEL NEST BOOK STORE", pageWidth / 2, margin + 70, { align: "center" });
     
-    // Add company details
     doc.setFontSize(10);
     doc.setFont("helvetica", "normal");
     doc.setTextColor(0, 0, 0);
@@ -119,12 +129,10 @@ export default function ManageFeedback() {
     doc.text("Phone: +94 123 456 789 | Email: info@bookstore.com", pageWidth / 2, margin + 88, { align: "center" });
     doc.text("www.novelnest.com", pageWidth / 2, margin + 96, { align: "center" });
     
-    // Add horizontal separator
     doc.setDrawColor(0, 71, 171);
     doc.setLineWidth(0.5);
     doc.line(margin + 10, margin + 105, pageWidth - margin - 10, margin + 105);
     
-    // Add report title and date
     doc.setFontSize(16);
     doc.setFont("helvetica", "bold");
     doc.text("CUSTOMER FEEDBACK REPORT", pageWidth / 2, margin + 120, { align: "center" });
@@ -134,12 +142,11 @@ export default function ManageFeedback() {
     doc.setFont("helvetica", "normal");
     doc.text(`Report Generated: ${today.toLocaleDateString()} at ${today.toLocaleTimeString()}`, pageWidth / 2, margin + 130, { align: "center" });
     
-    // Add table with styling
     autoTable(doc, {
       startY: margin + 140,
       head: [["Name", "Email", "Message", "Date"]],
       body: filteredFeedback.map((item) => [
-        item.name,
+        item.fullName,
         item.email,
         item.message,
         formatDate(item.createdAt),
@@ -160,11 +167,10 @@ export default function ManageFeedback() {
         lineWidth: 0.1,
       },
       columnStyles: {
-        2: { cellWidth: 'auto' }, // Give message column more space
+        2: { cellWidth: 'auto' },
       },
     });
     
-    // Add summary section
     const finalY = doc.lastAutoTable.finalY + 10;
     doc.setFontSize(11);
     doc.setFont("helvetica", "bold");
@@ -175,33 +181,24 @@ export default function ManageFeedback() {
     doc.text(`• Total Feedback Entries: ${feedback.length}`, margin + 10, finalY + 8);
     doc.text(`• Filtered Entries: ${filteredFeedback.length}`, margin + 10, finalY + 13);
     
-    // Add signature section with dotted lines
-    const signY = pageHeight - margin - 22; // Position the signature section near the bottom
-    doc.setDrawColor(0); // Set line color to black
-    doc.setLineWidth(0.5); // Set line thickness
-
-    // Draw dotted lines for signatures
-    doc.setLineDash([1, 1]); // Set dotted line pattern (1 units on, 1 units off)
-    doc.line(margin + 10, signY, margin + 60, signY); // Left dotted line
-    doc.line(pageWidth - margin - 60, signY, pageWidth - margin - 10, signY); // Right dotted line
-
-    // Reset line dash to solid for other elements (if needed)
-    doc.setLineDash([]); // Reset to solid line
-
-    // Add labels for the signature section
-    doc.setFontSize(9);
-    doc.text("Prepared By", margin + 10, signY + 5); // Left label
-    doc.text("Feedback Manager Signature", pageWidth - margin - 60, signY + 5); // Right label
+    const signY = pageHeight - margin - 22;
+    doc.setDrawColor(0);
+    doc.setLineWidth(0.5);
+    doc.setLineDash([1, 1]);
+    doc.line(margin + 10, signY, margin + 60, signY);
+    doc.line(pageWidth - margin - 60, signY, pageWidth - margin - 10, signY);
+    doc.setLineDash([]);
     
-    // Add footer
+    doc.setFontSize(9);
+    doc.text("Prepared By", margin + 10, signY + 5);
+    doc.text("Feedback Manager Signature", pageWidth - margin - 60, signY + 5);
+    
     doc.setFontSize(8);
     doc.setTextColor(100, 100, 100);
     doc.text(`© ${today.getFullYear()} Novel Nest Book Store. All Rights Reserved.`, pageWidth / 2, pageHeight - margin - 5, { align: "center" });
     
-    // Add page number
     doc.text(`Page ${doc.getCurrentPageInfo().pageNumber} of ${doc.getNumberOfPages()}`, pageWidth - margin - 5, pageHeight - margin - 5, { align: "right" });
     
-    // Save the document
     doc.save("Novel Nest Feedback Report.pdf");
   };
 
@@ -209,6 +206,35 @@ export default function ManageFeedback() {
   const formatDate = (dateString) => {
     const date = new Date(dateString);
     return date.toLocaleDateString();
+  };
+
+  // Render star rating
+  const renderRating = (rating) => {
+    return (
+      <div className="d-flex">
+        {[...Array(5)].map((_, i) => (
+          <FaStar 
+            key={i} 
+            className={i < rating ? "text-warning" : "text-secondary"} 
+          />
+        ))}
+      </div>
+    );
+  };
+
+  // Get sentiment badge
+  const getSentimentBadge = (sentiment) => {
+    const badgeClass = {
+      positive: "bg-success",
+      neutral: "bg-secondary",
+      negative: "bg-danger"
+    };
+    
+    return (
+      <span className={`badge ${badgeClass[sentiment]}`}>
+        {sentiment.charAt(0).toUpperCase() + sentiment.slice(1)}
+      </span>
+    );
   };
 
   // Sort function
@@ -238,7 +264,7 @@ export default function ManageFeedback() {
     
     return sortableItems.filter(
       (item) =>
-        item.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        item.fullName.toLowerCase().includes(searchTerm.toLowerCase()) ||
         item.email.toLowerCase().includes(searchTerm.toLowerCase())
     );
   };
@@ -306,12 +332,15 @@ export default function ManageFeedback() {
                   <table className="table table-hover align-middle">
                     <thead className="table-light">
                       <tr>
-                        <th onClick={() => requestSort('name')} className="cursor-pointer">
-                          Name {getSortIndicator('name')}
+                        <th onClick={() => requestSort('fullName')} className="cursor-pointer">
+                          Name {getSortIndicator('fullName')}
                         </th>
                         <th onClick={() => requestSort('email')} className="cursor-pointer">
                           Email {getSortIndicator('email')}
                         </th>
+                        <th>Topic</th>
+                        <th>Rating</th>
+                        <th>Sentiment</th>
                         <th>Message</th>
                         <th onClick={() => requestSort('createdAt')} className="cursor-pointer">
                           Date {getSortIndicator('createdAt')}
@@ -323,8 +352,13 @@ export default function ManageFeedback() {
                       {filteredFeedback.length > 0 ? (
                         filteredFeedback.map((item) => (
                           <tr key={item._id}>
-                            <td className="fw-medium">{item.name}</td>
+                            <td className="fw-medium">{item.fullName}</td>
                             <td>{item.email}</td>
+                            <td>
+                              {feedbackTopics.find(t => t.value === item.feedbackTopic)?.label}
+                            </td>
+                            <td>{renderRating(item.rating)}</td>
+                            <td>{getSentimentBadge(item.sentiment)}</td>
                             <td>
                               {editingId === item._id ? (
                                 <textarea
@@ -370,7 +404,7 @@ export default function ManageFeedback() {
                         ))
                       ) : (
                         <tr>
-                          <td colSpan="5" className="text-center py-4">
+                          <td colSpan="8" className="text-center py-4">
                             <div className="text-muted">
                               <p className="mb-0">No matching feedback found.</p>
                               {searchTerm && (
