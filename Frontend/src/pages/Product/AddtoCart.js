@@ -1,17 +1,29 @@
-import React from 'react';
+import React, { useState } from 'react';
 import Navbar2 from '../../components/Navbar2';
 import Header2 from '../../components/Header2';
 import { useCart } from './CartContext';
 import { useNavigate } from 'react-router-dom';
-import { ShoppingCart, ArrowRight } from "lucide-react";
+import { ShoppingCart, ArrowRight, Trash2, Plus, Minus } from "lucide-react";
 
 const AddToCartPage = () => {
-  const { cartItems, removeFromCart } = useCart();
+  const { cartItems, removeFromCart, updateQuantity } = useCart(); // Assume updateQuantity is added to CartContext
   const navigate = useNavigate();
+  const [couponCode, setCouponCode] = useState('');
 
-  const totalPrice = cartItems.reduce((total, item) => 
-    total + (item.price * item.quantity), 0
-  );
+  const handleQuantityChange = (itemId, delta) => {
+    const item = cartItems.find(i => i._id === itemId);
+    const newQuantity = Math.max(1, item.quantity + delta);
+    updateQuantity(itemId, newQuantity);
+  };
+
+  const subtotal = cartItems.reduce((total, item) => total + (item.price * item.quantity), 0);
+  const deliveryFee = 370.00; // Fixed delivery fee as per the image
+  const totalPrice = subtotal + deliveryFee;
+
+  const handleApplyCoupon = () => {
+    // Placeholder for coupon logic
+    console.log("Coupon applied:", couponCode);
+  };
 
   return (
     <div className="cart-container">
@@ -43,73 +55,123 @@ const AddToCartPage = () => {
             </button>
           </div>
         ) : (
-          <div className="cart-content">
-            <table className="cart-table">
-              <thead>
-                <tr>
-                  <th className="item-column">Item</th>
-                  <th className="price-column">Price</th>
-                  <th className="quantity-column">Quantity</th>
-                  <th className="action-column"></th>
-                </tr>
-              </thead>
-              <tbody>
-                {cartItems.map(item => (
-                  <tr key={item._id} className="cart-item">
-                    <td className="item-column">
-                      <div className="product-info">
-                        <div className="product-image">
-                          <img
-                            src={item.coverPage}
-                            alt={item.bookTitle}
-                            onError={(e) => (e.target.src = "https://via.placeholder.com/80x120?text=No+Image")}
-                          />
-                        </div>
-                        <div className="product-details">
-                          <h3 
-                            className="product-title" 
-                            onClick={() => navigate(`/bookdetails/${item._id}`)}
-                          >
-                            {item.bookTitle}
-                          </h3>
-                          <p className="product-author">{item.authorName}</p>
-                        </div>
-                      </div>
-                    </td>
-                    <td className="price-column">
-                      <div className="current-price">RS. {item.price}</div>
-                    </td>
-                    <td className="quantity-column">
-                      {item.quantity}
-                    </td>
-                    <td className="action-column">
-                      <button 
-                        className="remove-btn"
-                        onClick={() => removeFromCart(item._id)}
-                      >
-                        Remove
-                      </button>
-                    </td>
+          <div className="cart-content-wrapper">
+            <div className="cart-content">
+              <table className="cart-table">
+                <thead>
+                  <tr>
+                    <th className="item-column">PRODUCT</th>
+                    <th className="price-column">PRICE</th>
+                    <th className="quantity-column">QUANTITY</th>
+                    <th className="subtotal-column">SUBTOTAL</th>
+                    <th className="action-column"></th>
                   </tr>
-                ))}
-              </tbody>
-            </table>
+                </thead>
+                <tbody>
+                  {cartItems.map(item => (
+                    <tr key={item._id} className="cart-item">
+                      <td className="item-column">
+                        <div className="product-info">
+                          <div className="product-image">
+                            <img
+                              src={item.coverPage}
+                              alt={item.bookTitle}
+                              onError={(e) => (e.target.src = "https://via.placeholder.com/80x120?text=No+Image")}
+                            />
+                          </div>
+                          <div className="product-details">
+                            <h3
+                              className="product-title"
+                              onClick={() => navigate(`/bookdetails/${item._id}`)}
+                            >
+                              {item.bookTitle}
+                            </h3>
+                            <p className="product-author">{item.authorName}</p>
+                          </div>
+                        </div>
+                      </td>
+                      <td className="price-column">
+                        <div className="current-price">Rs. {item.price.toLocaleString('en-US', { minimumFractionDigits: 2 })}</div>
+                      </td>
+                      <td className="quantity-column">
+                        <div className="quantity-controls">
+                          <button
+                            className="quantity-btn"
+                            onClick={() => handleQuantityChange(item._id, -1)}
+                          >
+                            <Minus size={16} />
+                          </button>
+                          <span className="quantity-value">{item.quantity}</span>
+                          <button
+                            className="quantity-btn"
+                            onClick={() => handleQuantityChange(item._id, 1)}
+                          >
+                            <Plus size={16} />
+                          </button>
+                        </div>
+                      </td>
+                      <td className="subtotal-column">
+                        <div className="current-price">Rs. {(item.price * item.quantity).toLocaleString('en-US', { minimumFractionDigits: 2 })}</div>
+                      </td>
+                      <td className="action-column">
+                        <button
+                          className="remove-btn"
+                          onClick={() => removeFromCart(item._id)}
+                        >
+                          <Trash2 size={16} />
+                        </button>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
 
-            <div className="cart-footer">
-              <div className="cart-total">
-                <h3>Total Price: RS. {totalPrice.toFixed(2)}</h3>
-                <button className="btn btn-success checkout-btn">
-                  Proceed to Checkout
+              <div className="cart-actions">
+                <div className="coupon-section">
+                  <input
+                    type="text"
+                    placeholder="Coupon code"
+                    value={couponCode}
+                    onChange={(e) => setCouponCode(e.target.value)}
+                    className="coupon-input"
+                  />
+                  <button
+                    className="apply-coupon-btn"
+                    onClick={handleApplyCoupon}
+                  >
+                    APPLY COUPON
+                  </button>
+                </div>
+                <button className="update-cart-btn">
+                  UPDATE CART
                 </button>
               </div>
-              <div className="continue-shopping">
-                <button
-                  className="continue-btn"
-                  onClick={() => navigate("/customerdashboard")}
-                >
-                  Continue Shopping <ArrowRight size={16} />
-                </button>
+            </div>
+
+            <div className="cart-summary">
+              <h3 className="summary-title">CART DETAILS</h3>
+              <div className="summary-item">
+                <span>Subtotal</span>
+                <span>Rs. {subtotal.toLocaleString('en-US', { minimumFractionDigits: 2 })}</span>
               </div>
+              <div className="summary-item">
+                <span>Courier</span>
+                <span>Rs. {deliveryFee.toLocaleString('en-US', { minimumFractionDigits: 2 })}</span>
+              </div>
+              <div className="summary-item">
+                <span>Delivery within 2-5 days</span>
+                <span>In-Store Pickup Available Shipping Options to Colombo</span>
+              </div>
+              <div className="summary-item total">
+                <span>TOTAL</span>
+                <span>Rs. {totalPrice.toLocaleString('en-US', { minimumFractionDigits: 2 })}</span>
+              </div>
+              <button
+                className="checkout-btn"
+                onClick={() => navigate('/checkout')}
+              >
+                PROCEED TO CHECKOUT
+              </button>
             </div>
           </div>
         )}
@@ -118,7 +180,7 @@ const AddToCartPage = () => {
       <style jsx>{`
         .cart-container {
           min-height: 100vh;
-          background-color: #ffffff;
+          background-color: #f5f5f5;
           padding-bottom: 50px;
         }
 
@@ -166,7 +228,14 @@ const AddToCartPage = () => {
           margin: 40px auto;
         }
 
+        .cart-content-wrapper {
+          display: flex;
+          gap: 20px;
+          flex-wrap: wrap;
+        }
+
         .cart-content {
+          flex: 1;
           background-color: white;
           border-radius: 3px;
           box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
@@ -183,6 +252,7 @@ const AddToCartPage = () => {
           border-bottom: 1px solid #e5e5e5;
           font-weight: 500;
           color: #333;
+          font-size: 0.9rem;
         }
 
         .cart-table td {
@@ -236,23 +306,44 @@ const AddToCartPage = () => {
           color: #333;
         }
 
-        .remove-btn {
-          background-color: #ff3333;
-          color: white;
-          border: none;
-          padding: 8px 16px;
+        .quantity-controls {
+          display: flex;
+          align-items: center;
+          gap: 10px;
+        }
+
+        .quantity-btn {
+          background-color: #f0f0f0;
+          border: 1px solid #ddd;
+          padding: 5px;
           border-radius: 4px;
-          font-weight: 500;
           cursor: pointer;
           transition: background-color 0.2s;
         }
 
+        .quantity-btn:hover {
+          background-color: #e0e0e0;
+        }
+
+        .quantity-value {
+          font-weight: 500;
+          color: #333;
+        }
+
+        .remove-btn {
+          background: none;
+          border: none;
+          color: #666;
+          cursor: pointer;
+          transition: color 0.2s;
+        }
+
         .remove-btn:hover {
-          background-color: #cc0000;
+          color: #ff3333;
         }
 
         .item-column {
-          width: 45%;
+          width: 40%;
         }
 
         .price-column {
@@ -263,51 +354,126 @@ const AddToCartPage = () => {
           width: 15%;
         }
 
+        .subtotal-column {
+          width: 15%;
+        }
+
         .action-column {
-          width: 25%;
+          width: 15%;
           text-align: center;
         }
 
-        .cart-footer {
-          padding: 20px;
+        .cart-actions {
           display: flex;
           justify-content: space-between;
-          align-items: center;
+          padding: 20px;
+          border-top: 1px solid #e5e5e5;
         }
 
-        .cart-total {
-          text-align: right;
+        .coupon-section {
+          display: flex;
+          gap: 10px;
+        }
+
+        .coupon-input {
+          padding: 10px;
+          border: 1px solid #ddd;
+          border-radius: 4px;
+          font-size: 0.9rem;
+          width: 200px;
+        }
+
+        .apply-coupon-btn {
+          background-color: #0066cc;
+          color: white;
+          border: none;
+          padding: 10px 20px;
+          border-radius: 4px;
+          font-weight: 500;
+          cursor: pointer;
+          transition: background-color 0.2s;
+        }
+
+        .apply-coupon-btn:hover {
+          background-color: #0055b3;
+        }
+
+        .update-cart-btn {
+          background-color: #e0e0e0;
+          color: #333;
+          border: none;
+          padding: 10px 20px;
+          border-radius: 4px;
+          font-weight: 500;
+          cursor: pointer;
+          transition: background-color 0.2s;
+        }
+
+        .update-cart-btn:hover {
+          background-color: #d0d0d0;
+        }
+
+        .cart-summary {
+          width: 300px;
+          background-color: white;
+          border-radius: 3px;
+          box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+          padding: 20px;
+        }
+
+        .summary-title {
+          font-size: 1.25rem;
+          font-weight: bold;
+          margin-bottom: 20px;
+          color: #333;
+        }
+
+        .summary-item {
+          display: flex;
+          justify-content: space-between;
+          margin-bottom: 15px;
+          font-size: 0.9rem;
+          color: #333;
+        }
+
+        .summary-item span:last-child {
+          font-weight: 500;
+        }
+
+        .summary-item.total {
+          font-weight: bold;
+          font-size: 1rem;
+          border-top: 1px solid #e5e5e5;
+          padding-top: 15px;
+          margin-top: 15px;
         }
 
         .checkout-btn {
-          margin-top: 10px;
-          padding: 10px 20px;
-          font-weight: 500;
-        }
-
-        .continue-shopping {
-          display: flex;
-          justify-content: flex-end;
-        }
-
-        .continue-btn {
-          display: flex;
-          align-items: center;
-          gap: 5px;
-          background: none;
+          width: 100%;
+          background-color: #ff6200;
+          color: white;
           border: none;
-          color: #333;
+          padding: 12px;
+          border-radius: 4px;
           font-weight: 500;
           cursor: pointer;
-          padding: 5px 10px;
-          transition: color 0.2s;
+          transition: background-color 0.2s;
+          margin-top: 20px;
         }
 
-        .continue-btn:hover {
-          color: #0066cc;
+        .checkout-btn:hover {
+          background-color: #e55b00;
         }
 
         @media (max-width: 768px) {
+          .cart-content-wrapper {
+            flex-direction: column;
+          }
+
+          .cart-summary {
+            width: 100%;
+          }
+
           .cart-table th:not(:first-child),
           .cart-table td:not(:first-child) {
             display: none;
@@ -327,13 +493,23 @@ const AddToCartPage = () => {
             margin-bottom: 10px;
           }
 
-          .cart-footer {
+          .cart-actions {
             flex-direction: column;
-            gap: 20px;
+            gap: 15px;
           }
 
-          .cart-total {
-            text-align: center;
+          .coupon-section {
+            flex-direction: column;
+            width: 100%;
+          }
+
+          .coupon-input {
+            width: 100%;
+          }
+
+          .apply-coupon-btn,
+          .update-cart-btn {
+            width: 100%;
           }
         }
       `}</style>
