@@ -99,13 +99,30 @@ const TrackDelivery = () => {
     setError(null);
     try {
       const response = await axios.get(`http://localhost:5000/api/deliveries/track/${id}`);
-      setDelivery(response.data);
-      // Update URL if coming from state and not already in URL
-      if (deliveryIdFromState && !deliveryId) {
-        navigate(`/delivery/track/${id}`, { replace: true });
+      if (response.data && response.data._id) {
+        setDelivery(response.data);
+        // Update URL if coming from state and not already in URL
+        if (deliveryIdFromState && !deliveryId) {
+          navigate(`/delivery/track/${id}`, { replace: true });
+        }
+      } else {
+        setError('Delivery not found. Please check the ID and try again.');
       }
     } catch (err) {
-      setError('Delivery not found or error fetching delivery information.');
+      console.error('Error fetching delivery:', err);
+      let errorMessage = 'Error fetching delivery information';
+      if (err.response) {
+        if (err.response.status === 404) {
+          errorMessage = 'Delivery not found. Please check the ID and try again.';
+        } else if (err.response.status === 500) {
+          errorMessage = 'Server error. Please try again later.';
+        } else {
+          errorMessage = `Error: ${err.response.status} - ${err.response.data.message || 'Unknown error'}`;
+        }
+      } else if (err.request) {
+        errorMessage = 'Network error. Please check your connection.';
+      }
+      setError(errorMessage);
     } finally {
       setLoading(false);
     }
@@ -154,7 +171,6 @@ const TrackDelivery = () => {
     }
     
     setLoading(true);
- 
 
     try {
       const response = await axios.post(`http://localhost:5000/api/deliveries/${delivery._id}/events`, {
@@ -162,7 +178,7 @@ const TrackDelivery = () => {
         description: newEvent.description,
         location: newEvent.location,
         timestamp: new Date().toISOString()
-       });
+      });
       
       // Update local state with the new event
       setDelivery(response.data);
@@ -173,9 +189,14 @@ const TrackDelivery = () => {
         severity: 'success'
       });
     } catch (err) {
+      console.error('Error updating delivery:', err);
+      let errorMessage = 'Failed to update delivery status';
+      if (err.response) {
+        errorMessage = err.response.data.message || errorMessage;
+      }
       setNotification({
         open: true,
-        message: 'Failed to update delivery status',
+        message: errorMessage,
         severity: 'error'
       });
     } finally {
@@ -324,7 +345,7 @@ const TrackDelivery = () => {
                         </Typography>
                         <Typography variant="body1" gutterBottom sx={{ display: 'flex', alignItems: 'center' }}>
                           <ScheduleIcon fontSize="small" sx={{ mr: 1 }} />
-                          {formatDate(delivery.estimatedDelivery)}
+                          {delivery.estimatedDelivery ? formatDate(delivery.estimatedDelivery) : 'Not specified'}
                         </Typography>
                         
                         <Typography variant="subtitle2" color="text.secondary">
