@@ -3,7 +3,6 @@ import axios from "axios";
 import { useNavigate, useParams } from "react-router-dom";
 import "bootstrap/dist/css/bootstrap.min.css";
 import Header2 from "../../components/Header2";
-import Navbar2 from "../../components/Navbar2";
 import { storage } from "../Product/firebase";
 import { ref, uploadBytes, getDownloadURL } from "firebase/storage";
 
@@ -241,7 +240,6 @@ export default function EditProduct() {
   return (
     <div className="edit-products-page">
       <Header2 />
-      <Navbar2 />
 
       <div
         className="py-5"

@@ -6,7 +6,6 @@ import { useNavigate } from "react-router-dom"; // Import useNavigate
 import "bootstrap/dist/css/bootstrap.min.css";
 import logo from "../../components/images/logo.jpg";
 import Header2 from "../../components/Header2";
-import Navbar2 from "../../components/Navbar2";
 
 export default function ManageProducts() {
   const [products, setProducts] = useState([]);
@@ -249,7 +248,6 @@ export default function ManageProducts() {
   return (
     <div className="manage-products-page">
       <Header2 />
-      <Navbar2 />
 
       <div
         className="py-4"
