@@ -3,7 +3,6 @@ import axios from "axios";
 import { useNavigate } from "react-router-dom";
 import "bootstrap/dist/css/bootstrap.min.css";
 import Header2 from "../../components/Header2";
-import Navbar2 from "../../components/Navbar2";
 import { storage } from "../Product/firebase"; // Import Firebase storage
 import { ref, uploadBytes, getDownloadURL } from "firebase/storage";
 
@@ -216,7 +215,6 @@ export default function AddProducts() {
   return (
     <div className="add-products-page">
       <Header2 />
-      <Navbar2 />
 
       <div
         className="py-5"
