@@ -4,16 +4,19 @@ import { useParams, useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import Header2 from '../../components/Header2';
 import Navbar2 from '../../components/Navbar2';
-import { useWishlist } from '../../pages/Product/WishlistContext'; // Added import
+import { useWishlist } from '../../pages/Product/WishlistContext';
+import { useCart } from '../../pages/Product/CartContext';
 
 const BookDetails = () => {
   const { id } = useParams();
   const navigate = useNavigate();
-  const { addToWishlist, removeFromWishlist, isInWishlist } = useWishlist(); // Added
+  const { addToWishlist, removeFromWishlist, isInWishlist } = useWishlist();
+  const { addToCart } = useCart();
   const [book, setBook] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [selectedQuantity, setSelectedQuantity] = useState(1);
+  const [isCartLoading, setIsCartLoading] = useState(false); // New state for cart loading
 
   useEffect(() => {
     const fetchBookDetails = async () => {
@@ -38,14 +41,31 @@ const BookDetails = () => {
   };
 
   const handleAddToCart = () => {
-    console.log(`Added ${book.bookTitle} to cart with quantity: ${selectedQuantity}`);
+    if (book && book.bookQuantity > 0) {
+      setIsCartLoading(true); // Start loading animation
+      const cartItem = {
+        _id: book._id || id,
+        bookTitle: book.bookTitle,
+        price: book.price,
+        coverPage: book.coverPage,
+        authorName: book.authorName,
+        bookQuantity: book.bookQuantity,
+        quantity: selectedQuantity,
+      };
+      addToCart(cartItem, selectedQuantity);
+      console.log(`Added ${book.bookTitle} to cart with quantity: ${selectedQuantity}`);
+
+      // Simulate a delay (e.g., API call) and then stop loading
+      setTimeout(() => {
+        setIsCartLoading(false);
+      }, 1000); // 1-second delay for demo; adjust as needed
+    }
   };
 
   const handleBuyNow = () => {
     console.log(`Proceeding to buy ${book.bookTitle} with quantity: ${selectedQuantity}`);
   };
 
-  // Updated handleWishlist
   const handleWishlist = () => {
     if (isInWishlist(id)) {
       removeFromWishlist(id);
@@ -177,12 +197,15 @@ const BookDetails = () => {
                 </button>
               </div>
               <button
-                className="btn btn-primary text-uppercase"
+                className="btn btn-primary text-uppercase position-relative"
                 onClick={handleAddToCart}
-                disabled={book.bookQuantity === 0}
+                disabled={book.bookQuantity === 0 || isCartLoading}
                 style={{ backgroundColor: '#007bff', borderColor: '#007bff', padding: '10px 20px', fontWeight: 'bold' }}
               >
-                Add to Cart
+                {isCartLoading ? (
+                  <span className="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>
+                ) : null}
+                {isCartLoading ? 'Adding...' : 'Add to Cart'}
               </button>
               <button
                 className="btn btn-warning text-uppercase"
@@ -193,7 +216,6 @@ const BookDetails = () => {
                 Buy Now
               </button>
             </div>
-            {/* Updated Wishlist section */}
             <div className="mb-4">
               <button
                 className="btn p-0 d-flex align-items-center"
@@ -250,6 +272,10 @@ const BookDetails = () => {
         }
         ul {
           list-style-type: disc;
+        }
+        /* Ensure spinner aligns nicely */
+        .spinner-border-sm {
+          vertical-align: middle;
         }
       `}</style>
     </div>

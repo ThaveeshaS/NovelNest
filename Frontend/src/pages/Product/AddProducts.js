@@ -3,7 +3,6 @@ import axios from "axios";
 import { useNavigate } from "react-router-dom";
 import "bootstrap/dist/css/bootstrap.min.css";
 import Header2 from "../../components/Header2";
-import Navbar2 from "../../components/Navbar2";
 import { storage } from "../Product/firebase"; // Import Firebase storage
 import { ref, uploadBytes, getDownloadURL } from "firebase/storage";
 
@@ -57,14 +56,16 @@ export default function AddProducts() {
         } else if (value.length > 100) {
           fieldErrors.bookTitle = "Book title cannot exceed 100 characters";
         } else if (!/^[a-zA-Z\s]+$/.test(value)) {
-          fieldErrors.bookTitle = "Book title must contain only letters and spaces";
+          fieldErrors.bookTitle =
+            "Book title must contain only letters and spaces";
         } else {
           fieldErrors.bookTitle = "";
         }
         break;
       case "price":
         if (!/^\d+\.\d{2}$/.test(value)) {
-          fieldErrors.price = "Price must be a number with exactly two decimal places (e.g., 10.00)";
+          fieldErrors.price =
+            "Price must be a number with exactly two decimal places (e.g., 10.00)";
         } else {
           const priceValue = parseFloat(value);
           if (priceValue <= 0) {
@@ -80,9 +81,11 @@ export default function AddProducts() {
         if (!value.trim()) {
           fieldErrors.bookDescription = "Book description is required";
         } else if (value.length < 10) {
-          fieldErrors.bookDescription = "Description must be at least 10 characters";
-        } else if (value.length > 500) {
-          fieldErrors.bookDescription = "Description cannot exceed 500 characters";
+          fieldErrors.bookDescription =
+            "Description must be at least 10 characters";
+        } else if (value.length > 1000) {
+          fieldErrors.bookDescription =
+            "Description cannot exceed 500 characters";
         } else {
           fieldErrors.bookDescription = "";
         }
@@ -92,21 +95,27 @@ export default function AddProducts() {
           fieldErrors.authorName = "Author's name is required";
         } else if (value.length > 50) {
           fieldErrors.authorName = "Author's name cannot exceed 50 characters";
-        } else if (!/^[a-zA-Z\s]+$/.test(value)) {
-          fieldErrors.authorName = "Author's name must contain only letters and spaces";
+        } else if (!/^[a-zA-Z\s.]+$/.test(value)) {
+          fieldErrors.authorName =
+            "Author's name must contain only letters, spaces, and periods";
         } else {
           fieldErrors.authorName = "";
         }
         break;
       case "isbnNumber":
         if (!/^\d{10}$|^\d{13}$/.test(value)) {
-          fieldErrors.isbnNumber = "ISBN must be exactly 10 or 13 digits with no letters or symbols";
+          fieldErrors.isbnNumber =
+            "ISBN must be exactly 10 or 13 digits with no letters or symbols";
         } else {
-          fieldErrors.isbnNumber = validateISBN(value) ? "" : "Invalid ISBN checksum";
+          fieldErrors.isbnNumber = validateISBN(value)
+            ? ""
+            : "Invalid ISBN checksum";
         }
         break;
       case "bookQuantity":
-        fieldErrors.bookQuantity = /^\d+$/.test(value) ? "" : "Invalid quantity";
+        fieldErrors.bookQuantity = /^\d+$/.test(value)
+          ? ""
+          : "Invalid quantity";
         break;
       case "category":
         fieldErrors.category = value ? "" : "Category is required";
@@ -166,7 +175,10 @@ export default function AddProducts() {
 
     let coverPageUrl = "";
     if (formData.coverPage) {
-      const fileRef = ref(storage, `covers/${formData.coverPage.name}-${Date.now()}`);
+      const fileRef = ref(
+        storage,
+        `covers/${formData.coverPage.name}-${Date.now()}`
+      );
       await uploadBytes(fileRef, formData.coverPage);
       coverPageUrl = await getDownloadURL(fileRef);
     }
@@ -203,7 +215,6 @@ export default function AddProducts() {
   return (
     <div className="add-products-page">
       <Header2 />
-      <Navbar2 />
 
       <div
         className="py-5"
