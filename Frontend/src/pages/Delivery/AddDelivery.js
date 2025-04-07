@@ -53,7 +53,7 @@ import AssignmentIcon from '@mui/icons-material/Assignment';
 import GpsFixedIcon from '@mui/icons-material/GpsFixed';
 import { motion } from 'framer-motion';
 
-// Custom styled components
+// Custom styled components with enhanced decorations
 const StyledPaper = styled(Paper)(({ theme }) => ({
   padding: theme.spacing(4),
   borderRadius: theme.spacing(2),
@@ -69,6 +69,16 @@ const StyledPaper = styled(Paper)(({ theme }) => ({
     width: '100%',
     height: '6px',
     background: 'linear-gradient(90deg, #3f51b5, #2196f3)',
+  },
+  '&::after': {
+    content: '""',
+    position: 'absolute',
+    bottom: -50,
+    right: -50,
+    width: '150px',
+    height: '150px',
+    background: 'radial-gradient(circle, rgba(63,81,181,0.1) 0%, rgba(255,255,255,0) 70%)',
+    zIndex: 0,
   }
 }));
 
@@ -82,10 +92,42 @@ const StyledTextField = styled(TextField)(({ theme }) => ({
     },
     '&.Mui-focused': {
       boxShadow: '0 0 0 2px rgba(63, 81, 181, 0.3)',
+      '& fieldset': {
+        borderWidth: '2px',
+      }
+    },
+    '& fieldset': {
+      borderColor: '#e0e0e0',
+      transition: 'all 0.3s ease',
     }
   },
   '& .MuiInputLabel-root': {
     fontSize: '0.95rem',
+    transform: 'translate(14px, 16px) scale(1)',
+    '&.Mui-focused': {
+      color: theme.palette.primary.main,
+      fontWeight: 500,
+    }
+  },
+  '& .MuiInputLabel-shrink': {
+    transform: 'translate(14px, -9px) scale(0.75)',
+    backgroundColor: 'white',
+    padding: '0 4px',
+  },
+  position: 'relative',
+  '&:before': {
+    content: '""',
+    position: 'absolute',
+    left: 0,
+    bottom: 0,
+    width: '100%',
+    height: '2px',
+    background: 'linear-gradient(90deg, transparent, rgba(63,81,181,0.2), transparent)',
+    transform: 'scaleX(0)',
+    transition: 'transform 0.3s ease',
+  },
+  '&:hover:before': {
+    transform: 'scaleX(1)',
   }
 }));
 
@@ -95,10 +137,21 @@ const SummaryCard = styled(Card)(({ theme }) => ({
   padding: theme.spacing(1),
   boxShadow: '0 2px 10px rgba(0, 0, 0, 0.05)',
   marginBottom: theme.spacing(3),
-  transition: 'transform 0.3s ease',
+  transition: 'transform 0.3s ease, box-shadow 0.3s ease',
+  position: 'relative',
+  overflow: 'hidden',
   '&:hover': {
     transform: 'translateY(-3px)',
     boxShadow: '0 4px 20px rgba(0, 0, 0, 0.08)',
+  },
+  '&::before': {
+    content: '""',
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    width: '4px',
+    height: '100%',
+    background: 'linear-gradient(to bottom, #3f51b5, #2196f3)',
   }
 }));
 
@@ -137,11 +190,27 @@ const StatusChip = styled(Chip)(({ theme, status }) => {
     fontWeight: 600,
     borderRadius: '12px',
     padding: '4px 12px',
+    boxShadow: '0 2px 4px rgba(0,0,0,0.1)',
+    textTransform: 'uppercase',
+    letterSpacing: '0.5px',
+    fontSize: '0.75rem',
   };
 });
 
 // MotionBox component for animations
 const MotionBox = motion(Box);
+
+const AnimatedDivider = styled(Divider)(({ theme }) => ({
+  '&::before, &::after': {
+    borderColor: theme.palette.primary.light,
+  },
+  '& .MuiDivider-wrapper': {
+    padding: theme.spacing(0, 2),
+    backgroundColor: 'white',
+    position: 'relative',
+    zIndex: 1,
+  }
+}));
 
 const AddDelivery = () => {
   const [formData, setFormData] = useState({
@@ -330,8 +399,26 @@ const AddDelivery = () => {
         return (
           <Fade in={activeStep === 0} timeout={500}>
             <Box>
-              <Typography variant="h6" gutterBottom color="primary" sx={{ mb: 3 }}>
-                <PersonIcon sx={{ mr: 1, verticalAlign: 'middle' }} />
+              <Typography variant="h6" gutterBottom color="primary" sx={{ 
+                mb: 3,
+                display: 'flex',
+                alignItems: 'center',
+                '&:after': {
+                  content: '""',
+                  flex: 1,
+                  ml: 2,
+                  height: '1px',
+                  background: 'linear-gradient(to right, rgba(63,81,181,0.3), transparent)'
+                }
+              }}>
+                <PersonIcon sx={{ 
+                  mr: 1, 
+                  verticalAlign: 'middle',
+                  backgroundColor: 'rgba(63,81,181,0.1)',
+                  borderRadius: '50%',
+                  padding: '8px',
+                  fontSize: '32px'
+                }} />
                 Customer Details
               </Typography>
               
@@ -348,7 +435,14 @@ const AddDelivery = () => {
                   required
                   variant="outlined"
                   InputProps={{
-                    startAdornment: <PersonIcon color="action" sx={{ mr: 1 }} />,
+                    startAdornment: (
+                      <PersonIcon color="action" sx={{ 
+                        mr: 1,
+                        backgroundColor: 'rgba(63,81,181,0.05)',
+                        borderRadius: '50%',
+                        padding: '4px'
+                      }} />
+                    ),
                   }}
                   error={!!formErrors.customerName}
                   helperText={formErrors.customerName}
@@ -369,7 +463,14 @@ const AddDelivery = () => {
                   required
                   variant="outlined"
                   InputProps={{
-                    startAdornment: <EmailIcon color="action" sx={{ mr: 1 }} />,
+                    startAdornment: (
+                      <EmailIcon color="action" sx={{ 
+                        mr: 1,
+                        backgroundColor: 'rgba(63,81,181,0.05)',
+                        borderRadius: '50%',
+                        padding: '4px'
+                      }} />
+                    ),
                   }}
                   error={!!formErrors.email}
                   helperText={formErrors.email}
@@ -381,8 +482,24 @@ const AddDelivery = () => {
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: 0.3 }}
               >
-                <Typography variant="subtitle2" gutterBottom sx={{ mt: 2, display: 'flex', alignItems: 'center' }}>
-                  <PhoneIcon color="action" sx={{ mr: 1 }} />
+                <Typography variant="subtitle2" gutterBottom sx={{ 
+                  mt: 2, 
+                  display: 'flex', 
+                  alignItems: 'center',
+                  '&:after': {
+                    content: '""',
+                    flex: 1,
+                    ml: 2,
+                    height: '1px',
+                    background: 'linear-gradient(to right, rgba(63,81,181,0.3), transparent)'
+                  }
+                }}>
+                  <PhoneIcon color="action" sx={{ 
+                    mr: 1,
+                    backgroundColor: 'rgba(63,81,181,0.05)',
+                    borderRadius: '50%',
+                    padding: '4px'
+                  }} />
                   Contact Number *
                 </Typography>
                 <PhoneInput
@@ -393,11 +510,27 @@ const AddDelivery = () => {
                     width: '100%', 
                     height: '56px',
                     borderRadius: '8px',
-                    fontSize: '16px'
+                    fontSize: '16px',
+                    borderColor: formErrors.contactNumber ? theme.palette.error.main : '#e0e0e0',
+                    transition: 'all 0.3s ease',
+                    '&:hover': {
+                      borderColor: theme.palette.primary.main,
+                    },
+                    '&:focus': {
+                      borderColor: theme.palette.primary.main,
+                      boxShadow: `0 0 0 2px ${theme.palette.primary.light}`
+                    }
                   }}
                   buttonStyle={{
                     borderTopLeftRadius: '8px',
                     borderBottomLeftRadius: '8px',
+                    backgroundColor: 'rgba(63,81,181,0.05)',
+                    borderColor: formErrors.contactNumber ? theme.palette.error.main : '#e0e0e0',
+                    transition: 'all 0.3s ease',
+                  }}
+                  dropdownStyle={{
+                    borderRadius: '8px',
+                    boxShadow: '0 4px 20px rgba(0,0,0,0.1)'
                   }}
                   containerStyle={{
                     marginBottom: '24px'
@@ -413,7 +546,17 @@ const AddDelivery = () => {
                   }}
                 />
                 {formErrors.contactNumber && (
-                  <Typography color="error" variant="caption" sx={{ mt: -3, mb: 2, display: 'block' }}>
+                  <Typography color="error" variant="caption" sx={{ 
+                    mt: -3, 
+                    mb: 2, 
+                    display: 'block',
+                    animation: 'shake 0.5s ease',
+                    '@keyframes shake': {
+                      '0%, 100%': { transform: 'translateX(0)' },
+                      '25%': { transform: 'translateX(-3px)' },
+                      '75%': { transform: 'translateX(3px)' },
+                    }
+                  }}>
                     {formErrors.contactNumber}
                   </Typography>
                 )}
@@ -433,7 +576,35 @@ const AddDelivery = () => {
                       boxShadow: '0 6px 16px rgba(63, 81, 181, 0.4)',
                       transform: 'translateY(-2px)'
                     },
-                    transition: 'all 0.3s ease'
+                    transition: 'all 0.3s ease',
+                    position: 'relative',
+                    overflow: 'hidden',
+                    '&:after': {
+                      content: '""',
+                      position: 'absolute',
+                      top: '50%',
+                      left: '50%',
+                      width: '5px',
+                      height: '5px',
+                      background: 'rgba(255, 255, 255, 0.5)',
+                      opacity: 0,
+                      borderRadius: '100%',
+                      transform: 'scale(1, 1) translate(-50%)',
+                      transformOrigin: '50% 50%',
+                    },
+                    '&:focus:not(:active)::after': {
+                      animation: 'ripple 1s ease-out',
+                    },
+                    '@keyframes ripple': {
+                      '0%': {
+                        transform: 'scale(0, 0)',
+                        opacity: 0.5,
+                      },
+                      '100%': {
+                        transform: 'scale(20, 20)',
+                        opacity: 0,
+                      },
+                    }
                   }}
                 >
                   Next
@@ -446,8 +617,26 @@ const AddDelivery = () => {
         return (
           <Fade in={activeStep === 1} timeout={500}>
             <Box>
-              <Typography variant="h6" gutterBottom color="primary" sx={{ mb: 3 }}>
-                <LocalShippingIcon sx={{ mr: 1, verticalAlign: 'middle' }} />
+              <Typography variant="h6" gutterBottom color="primary" sx={{ 
+                mb: 3,
+                display: 'flex',
+                alignItems: 'center',
+                '&:after': {
+                  content: '""',
+                  flex: 1,
+                  ml: 2,
+                  height: '1px',
+                  background: 'linear-gradient(to right, rgba(63,81,181,0.3), transparent)'
+                }
+              }}>
+                <LocalShippingIcon sx={{ 
+                  mr: 1, 
+                  verticalAlign: 'middle',
+                  backgroundColor: 'rgba(63,81,181,0.1)',
+                  borderRadius: '50%',
+                  padding: '8px',
+                  fontSize: '32px'
+                }} />
                 Shipment Information
               </Typography>
               
@@ -464,7 +653,14 @@ const AddDelivery = () => {
                   required
                   variant="outlined"
                   InputProps={{
-                    startAdornment: <InventoryIcon color="action" sx={{ mr: 1 }} />,
+                    startAdornment: (
+                      <InventoryIcon color="action" sx={{ 
+                        mr: 1,
+                        backgroundColor: 'rgba(63,81,181,0.05)',
+                        borderRadius: '50%',
+                        padding: '4px'
+                      }} />
+                    ),
                   }}
                   error={!!formErrors.orderId}
                   helperText={formErrors.orderId}
@@ -481,7 +677,14 @@ const AddDelivery = () => {
                   value={formData.deliveryId}
                   InputProps={{
                     readOnly: true,
-                    startAdornment: <AssignmentIcon color="action" sx={{ mr: 1 }} />,
+                    startAdornment: (
+                      <AssignmentIcon color="action" sx={{ 
+                        mr: 1,
+                        backgroundColor: 'rgba(63,81,181,0.05)',
+                        borderRadius: '50%',
+                        padding: '4px'
+                      }} />
+                    ),
                   }}
                   fullWidth
                   variant="outlined"
@@ -503,7 +706,16 @@ const AddDelivery = () => {
                   multiline
                   rows={3}
                   InputProps={{
-                    startAdornment: <HomeIcon color="action" sx={{ mr: 1, alignSelf: 'flex-start', mt: 1 }} />,
+                    startAdornment: (
+                      <HomeIcon color="action" sx={{ 
+                        mr: 1, 
+                        alignSelf: 'flex-start', 
+                        mt: 1,
+                        backgroundColor: 'rgba(63,81,181,0.05)',
+                        borderRadius: '50%',
+                        padding: '4px'
+                      }} />
+                    ),
                   }}
                   error={!!formErrors.deliveryAddress}
                   helperText={formErrors.deliveryAddress}
@@ -524,6 +736,16 @@ const AddDelivery = () => {
                   multiline
                   rows={2}
                   placeholder="E.g., Leave with doorman, Call before delivery, etc."
+                  InputProps={{
+                    sx: {
+                      '& textarea': {
+                        backgroundImage: 'linear-gradient(to bottom, rgba(63,81,181,0.05) 0%, rgba(255,255,255,0) 20%)',
+                        backgroundRepeat: 'no-repeat',
+                        backgroundSize: '100% 1.5em',
+                        backgroundPosition: '0 0.8em',
+                      }
+                    }
+                  }}
                 />
               </MotionBox>
               
@@ -538,7 +760,28 @@ const AddDelivery = () => {
                     value={formData.deliveryStatus}
                     onChange={(e) => setFormData({ ...formData, deliveryStatus: e.target.value })}
                     label="Delivery Status"
-                    sx={{ borderRadius: '8px' }}
+                    sx={{ 
+                      borderRadius: '8px',
+                      '& .MuiSelect-select': {
+                        display: 'flex',
+                        alignItems: 'center',
+                      }
+                    }}
+                    MenuProps={{
+                      PaperProps: {
+                        sx: {
+                          borderRadius: '8px',
+                          boxShadow: '0 4px 20px rgba(0,0,0,0.1)',
+                          marginTop: '8px',
+                          '& .MuiMenuItem-root': {
+                            padding: '10px 16px',
+                            '&.Mui-selected': {
+                              backgroundColor: 'rgba(63,81,181,0.08)',
+                            }
+                          }
+                        }
+                      }
+                    }}
                   >
                     <MenuItem value="Pending">Pending</MenuItem>
                     <MenuItem value="Processing">Processing</MenuItem>
@@ -557,7 +800,12 @@ const AddDelivery = () => {
                   startIcon={<ArrowBackIcon />}
                   sx={{ 
                     borderRadius: '8px',
-                    padding: '10px 24px' 
+                    padding: '10px 24px',
+                    position: 'relative',
+                    overflow: 'hidden',
+                    '&:hover': {
+                      backgroundColor: 'rgba(63,81,181,0.04)',
+                    }
                   }}
                 >
                   Back
@@ -575,7 +823,7 @@ const AddDelivery = () => {
                       boxShadow: '0 6px 16px rgba(63, 81, 181, 0.4)',
                       transform: 'translateY(-2px)'
                     },
-                    transition: 'all 0.3s ease'
+                    transition: 'all 0.3s ease',
                   }}
                 >
                   Next
@@ -588,8 +836,26 @@ const AddDelivery = () => {
         return (
           <Fade in={activeStep === 2} timeout={500}>
             <Box>
-              <Typography variant="h6" gutterBottom color="primary" sx={{ mb: 3 }}>
-                <CalendarTodayIcon sx={{ mr: 1, verticalAlign: 'middle' }} />
+              <Typography variant="h6" gutterBottom color="primary" sx={{ 
+                mb: 3,
+                display: 'flex',
+                alignItems: 'center',
+                '&:after': {
+                  content: '""',
+                  flex: 1,
+                  ml: 2,
+                  height: '1px',
+                  background: 'linear-gradient(to right, rgba(63,81,181,0.3), transparent)'
+                }
+              }}>
+                <CalendarTodayIcon sx={{ 
+                  mr: 1, 
+                  verticalAlign: 'middle',
+                  backgroundColor: 'rgba(63,81,181,0.1)',
+                  borderRadius: '50%',
+                  padding: '8px',
+                  fontSize: '32px'
+                }} />
                 Delivery Schedule & Pricing
               </Typography>
               
@@ -608,7 +874,14 @@ const AddDelivery = () => {
                   required
                   variant="outlined"
                   InputProps={{
-                    startAdornment: <CalendarTodayIcon color="action" sx={{ mr: 1 }} />,
+                    startAdornment: (
+                      <CalendarTodayIcon color="action" sx={{ 
+                        mr: 1,
+                        backgroundColor: 'rgba(63,81,181,0.05)',
+                        borderRadius: '50%',
+                        padding: '4px'
+                      }} />
+                    ),
                   }}
                   error={!!formErrors.estimatedDeliveryDate}
                   helperText={formErrors.estimatedDeliveryDate}
@@ -629,6 +902,13 @@ const AddDelivery = () => {
                   variant="outlined"
                   placeholder="Optional"
                   inputProps={{ min: 0, step: 0.1 }}
+                  InputProps={{
+                    endAdornment: (
+                      <Typography variant="body2" color="text.secondary" sx={{ ml: 1 }}>
+                        kg
+                      </Typography>
+                    ),
+                  }}
                 />
               </MotionBox>
               
@@ -646,7 +926,14 @@ const AddDelivery = () => {
                   required
                   variant="outlined"
                   InputProps={{
-                    startAdornment: <AttachMoneyIcon color="action" sx={{ mr: 1 }} />,
+                    startAdornment: (
+                      <AttachMoneyIcon color="action" sx={{ 
+                        mr: 1,
+                        backgroundColor: 'rgba(63,81,181,0.05)',
+                        borderRadius: '50%',
+                        padding: '4px'
+                      }} />
+                    ),
                   }}
                   inputProps={{ min: 0, step: 0.01 }}
                   error={!!formErrors.deliveryFee}
@@ -654,9 +941,13 @@ const AddDelivery = () => {
                 />
               </MotionBox>
               
-              <Divider sx={{ my: 4 }}>
-                <Chip label="ORDER SUMMARY" sx={{ fontWeight: 'bold' }} />
-              </Divider>
+              <AnimatedDivider sx={{ my: 4 }}>
+                <Chip label="ORDER SUMMARY" sx={{ 
+                  fontWeight: 'bold',
+                  letterSpacing: '1px',
+                  backgroundColor: 'rgba(63,81,181,0.1)'
+                }} />
+              </AnimatedDivider>
               
               <MotionBox
                 initial={{ opacity: 0, scale: 0.95 }}
@@ -700,7 +991,11 @@ const AddDelivery = () => {
                         </Typography>
                       </Box>
                       
-                      <Divider />
+                      <Divider sx={{ 
+                        borderColor: 'rgba(63,81,181,0.1)',
+                        borderBottomWidth: '2px',
+                        borderStyle: 'dashed'
+                      }} />
                       
                       <Box display="flex" justifyContent="space-between" alignItems="center">
                         <Typography variant="subtitle1" fontWeight="bold">Delivery Fee</Typography>
@@ -724,7 +1019,12 @@ const AddDelivery = () => {
                     sx={{ 
                       borderRadius: '8px',
                       padding: '10px 24px',
-                      height: '48px'
+                      height: '48px',
+                      position: 'relative',
+                      overflow: 'hidden',
+                      '&:hover': {
+                        backgroundColor: 'rgba(63,81,181,0.04)',
+                      }
                     }}
                   >
                     Back
@@ -747,7 +1047,13 @@ const AddDelivery = () => {
                         transform: 'translateY(-2px)'
                       },
                       transition: 'all 0.3s ease',
-                      height: '48px'
+                      height: '48px',
+                      position: 'relative',
+                      overflow: 'hidden',
+                      '&:disabled': {
+                        backgroundColor: theme.palette.primary.main,
+                        opacity: 0.7
+                      }
                     }}
                     startIcon={loading ? <CircularProgress size={20} color="inherit" /> : 
                                isSubmitted ? <CheckCircleIcon /> : <SaveIcon />}
@@ -772,7 +1078,8 @@ const AddDelivery = () => {
                       },
                       transition: 'all 0.3s ease',
                       height: '48px',
-                      mt: 1
+                      mt: 1,
+                      background: 'linear-gradient(45deg, #ff6b6b, #ff8e53)',
                     }}
                   >
                     Track This Delivery
@@ -802,8 +1109,14 @@ const AddDelivery = () => {
                 p: 1,
                 borderRadius: '50%',
                 backgroundColor: 'rgba(63, 81, 181, 0.1)',
+                boxShadow: '0 4px 8px rgba(63,81,181,0.2)'
               }} />
-              <Typography variant="h4" component="h1" fontWeight="600">
+              <Typography variant="h4" component="h1" fontWeight="600" sx={{
+                background: 'linear-gradient(45deg, #3f51b5, #2196f3)',
+                WebkitBackgroundClip: 'text',
+                WebkitTextFillColor: 'transparent',
+                textShadow: '0 2px 4px rgba(0,0,0,0.1)'
+              }}>
                 Delivery Management
               </Typography>
             </Box>
@@ -812,13 +1125,38 @@ const AddDelivery = () => {
               activeStep={activeStep} 
               alternativeLabel={!isMobile}
               orientation={isMobile ? 'vertical' : 'horizontal'}
-              sx={{ mb: 4 }}
+              sx={{ 
+                mb: 4,
+                '& .MuiStepConnector-line': {
+                  borderColor: theme.palette.primary.light,
+                  borderTopWidth: '2px',
+                }
+              }}
             >
               {steps.map((label, index) => (
                 <Step key={label}>
-                  <StepLabel StepIconProps={{
-                    sx: { color: getStepIconColor(index) }
-                  }}>
+                  <StepLabel 
+                    StepIconProps={{
+                      sx: { 
+                        color: getStepIconColor(index),
+                        '& .MuiStepIcon-text': {
+                          fontWeight: 'bold',
+                          fontSize: '0.8rem'
+                        }
+                      }
+                    }}
+                    sx={{
+                      '& .MuiStepLabel-label': {
+                        fontWeight: 600,
+                        color: activeStep === index ? theme.palette.primary.main : 
+                              activeStep > index ? theme.palette.success.main : 
+                              theme.palette.text.secondary,
+                        '&.Mui-completed': {
+                          color: theme.palette.success.main,
+                        }
+                      }
+                    }}
+                  >
                     {label}
                   </StepLabel>
                   {isMobile && activeStep === index && (
@@ -831,7 +1169,21 @@ const AddDelivery = () => {
             </Stepper>
             
             {!isMobile && (
-              <Box sx={{ mt: 2, minHeight: '400px' }}>
+              <Box sx={{ 
+                mt: 2, 
+                minHeight: '400px',
+                position: 'relative',
+                '&:before': {
+                  content: '""',
+                  position: 'absolute',
+                  top: 0,
+                  left: 0,
+                  width: '100%',
+                  height: '100%',
+                  background: 'radial-gradient(circle at 20% 50%, rgba(63,81,181,0.03) 0%, rgba(255,255,255,0) 50%)',
+                  zIndex: 0,
+                }
+              }}>
                 {renderStepContent(activeStep)}
               </Box>
             )}
@@ -854,8 +1206,11 @@ const AddDelivery = () => {
             borderRadius: '10px',
             '& .MuiAlert-icon': {
               fontSize: '24px'
-            }
+            },
+            backdropFilter: 'blur(4px)',
+            backgroundColor: 'rgba(255,255,255,0.9)'
           }}
+          elevation={6}
         >
           {notification.message}
         </Alert>
@@ -888,10 +1243,32 @@ const AddDelivery = () => {
               textAlign: 'center',
               maxWidth: '400px',
               width: '80%',
+              boxShadow: '0 10px 30px rgba(0,0,0,0.2)',
+              position: 'relative',
+              overflow: 'hidden',
+              '&:before': {
+                content: '""',
+                position: 'absolute',
+                top: 0,
+                left: 0,
+                right: 0,
+                height: '4px',
+                background: 'linear-gradient(90deg, #4caf50, #8bc34a)',
+              }
             }}
           >
-            <CheckCircleIcon color="success" sx={{ fontSize: 80 }} />
-            <Typography variant="h5" sx={{ mt: 2, mb: 1, fontWeight: 600 }}>
+            <CheckCircleIcon color="success" sx={{ 
+              fontSize: 80,
+              filter: 'drop-shadow(0 4px 8px rgba(76, 175, 80, 0.3))'
+            }} />
+            <Typography variant="h5" sx={{ 
+              mt: 2, 
+              mb: 1, 
+              fontWeight: 600,
+              background: 'linear-gradient(45deg, #4caf50, #8bc34a)',
+              WebkitBackgroundClip: 'text',
+              WebkitTextFillColor: 'transparent'
+            }}>
               Success!
             </Typography>
             <Typography variant="body1" color="text.secondary" sx={{ mb: 3 }}>
