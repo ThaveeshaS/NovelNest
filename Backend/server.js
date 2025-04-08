@@ -12,6 +12,9 @@ const { router: analysisRoutes, updateAllAnalytics } = require('./routes/analysi
 const socketIO = require('./socket');
 const productRoutes = require('./routes/product.js');
 
+const { router: transactionAnalysisRoutes, updateAllTransactionAnalytics } = require('./routes/transactionAnalysis');
+
+
 dotenv.config();
 const app = express();
 const server = http.createServer(app);  // Create HTTP server for Socket.io
@@ -37,9 +40,13 @@ mongoose.connect(process.env.MONGO_URI || process.env.MONGO_URL, {
       
       // Initial data push
       updateAllAnalytics();
+
+      updateAllTransactionAnalytics();
       
       // Periodic updates every 5 minutes
       const updateInterval = setInterval(updateAllAnalytics, 5 * 60 * 1000);
+
+      const transactionUpdateInterval = setInterval(updateAllTransactionAnalytics, 5 * 60 * 1000);
       
       socket.on('disconnect', () => {
         console.log('Client disconnected');
@@ -66,6 +73,8 @@ app.use('/api/feedback', feedbackRoutes);
 app.use('/api/analysis', analysisRoutes);       
 app.use("/api/deliveries", deliveryRoute);
 app.use('/api/product', productRoutes);
+
+app.use('/api/transaction-analysis', transactionAnalysisRoutes);
 
 // Health check endpoint
 app.get('/health', (req, res) => {

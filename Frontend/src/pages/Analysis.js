@@ -41,6 +41,9 @@ const Analysis = () => {
   const [loading, setLoading] = useState(true);
   const [socket, setSocket] = useState(null);
   const navigate = useNavigate();
+  // 👇 Added state for transaction data
+  const [transactionAmountData, setTransactionAmountData] = useState(null);
+  const [transactionTimelineData, setTransactionTimelineData] = useState(null);
 
   useEffect(() => {
     // Initialize socket connection
@@ -176,7 +179,50 @@ const Analysis = () => {
       }
     };
 
+    // 👇 Added handler for transaction updates
+    const handleTransactionUpdate = (data) => {
+      switch (data.type) {
+        case 'amount':
+          setTransactionAmountData({
+            labels: data.labels,
+            datasets: [{
+              label: 'Transaction Amount Distribution',
+              data: data.data,
+              backgroundColor: 'rgba(255, 159, 64, 0.7)',
+              borderColor: 'rgba(255, 159, 64, 1)',
+              borderWidth: 1
+            }]
+          });
+          break;
+        case 'timeline':
+          setTransactionTimelineData({
+            labels: data.labels,
+            datasets: [
+              {
+                label: 'Number of Transactions',
+                data: data.countData,
+                borderColor: 'rgb(75, 192, 192)',
+                tension: 0.1,
+                yAxisID: 'y'
+              },
+              {
+                label: 'Total Amount',
+                data: data.amountData,
+                borderColor: 'rgb(255, 99, 132)',
+                tension: 0.1,
+                yAxisID: 'y1'
+              }
+            ]
+          });
+          break;
+        default:
+          break;
+      }
+    };
+
     socket.on('dataUpdate', handleDataUpdate);
+    // 👇 Added socket listener for transaction updates
+    socket.on('transactionUpdate', handleTransactionUpdate);
 
     // Initial data fetch
     const fetchData = async () => {
@@ -187,14 +233,20 @@ const Analysis = () => {
           registrationRes,
           ratingRes,
           sentimentRes,
-          topicsRes
+          topicsRes,
+          // 👇 Added transaction API calls
+          transactionAmountRes,
+          transactionTimelineRes
         ] = await Promise.all([
           axios.get('/api/analysis/gender-distribution'),
           axios.get('/api/analysis/age-distribution'),
           axios.get('/api/analysis/registration-timeline'),
           axios.get('/api/feedback/ratings'),
           axios.get('/api/feedback/sentiment'),
-          axios.get('/api/feedback/topics')
+          axios.get('/api/feedback/topics'),
+          // 👇 Added transaction endpoints
+          axios.get('/api/transaction-analysis/amount-distribution'),
+          axios.get('/api/transaction-analysis/timeline')
         ]);
 
         setGenderData({
@@ -305,6 +357,38 @@ const Analysis = () => {
           }]
         });
 
+        // 👇 Added transaction data setting
+        setTransactionAmountData({
+          labels: transactionAmountRes.data.labels,
+          datasets: [{
+            label: 'Transaction Amount Distribution',
+            data: transactionAmountRes.data.datasets[0].data,
+            backgroundColor: 'rgba(255, 159, 64, 0.7)',
+            borderColor: 'rgba(255, 159, 64, 1)',
+            borderWidth: 1
+          }]
+        });
+
+        setTransactionTimelineData({
+          labels: transactionTimelineRes.data.labels,
+          datasets: [
+            {
+              label: 'Number of Transactions',
+              data: transactionTimelineRes.data.datasets[0].data,
+              borderColor: 'rgb(75, 192, 192)',
+              tension: 0.1,
+              yAxisID: 'y'
+            },
+            {
+              label: 'Total Amount',
+              data: transactionTimelineRes.data.datasets[1].data,
+              borderColor: 'rgb(255, 99, 132)',
+              tension: 0.1,
+              yAxisID: 'y1'
+            }
+          ]
+        });
+
         setLoading(false);
       } catch (err) {
         console.error('Error fetching initial data:', err);
@@ -316,6 +400,8 @@ const Analysis = () => {
 
     return () => {
       socket.off('dataUpdate', handleDataUpdate);
+      // 👇 Added cleanup for transaction updates
+      socket.off('transactionUpdate', handleTransactionUpdate);
     };
   }, [socket]);
 
@@ -437,7 +523,7 @@ const Analysis = () => {
             </div>
           </div>
           
-          {/* Registration Timeline 
+          {/* Registration Timeline */}
           <div className="col-lg-4 col-md-12">
             <div className="card shadow-sm h-100">
               <div className="card-header bg-white border-bottom-0">
@@ -487,7 +573,7 @@ const Analysis = () => {
                 )}
               </div>
             </div>
-          </div> */}
+          </div>
         </div>
         
         {/* Feedback Analytics Section */}
@@ -626,6 +712,123 @@ const Analysis = () => {
             </div>
           </div>
         </div>
+
+        {/* 👇 Added Transaction Analytics Section */}
+        <div className="row mb-4">
+          <div className="col-12">
+            <h3 className="display-5 fw-bold text-primary mb-0">Transaction Analytics</h3>
+          </div>
+        </div>
+        
+        <div className="row g-4 mb-5">
+          {/* Transaction Amount Distribution */}
+          <div className="col-lg-6 col-md-6">
+            <div className="card shadow-sm h-100">
+              <div className="card-header bg-white border-bottom-0">
+                <h4 className="card-title mb-0 text-primary">
+                  <i className="bi bi-currency-dollar me-2"></i>
+                  Transaction Amount Distribution
+                </h4>
+              </div>
+              <div className="card-body">
+                {transactionAmountData && (
+                  <Bar 
+                    data={transactionAmountData} 
+                    options={{
+                      responsive: true,
+                      maintainAspectRatio: false,
+                      scales: {
+                        y: { 
+                          beginAtZero: true,
+                          grid: {
+                            color: 'rgba(0,0,0,0.05)'
+                          }
+                        },
+                        x: {
+                          grid: {
+                            display: false
+                          }
+                        }
+                      },
+                      plugins: { 
+                        legend: { display: false },
+                        tooltip: {
+                          backgroundColor: 'rgba(0,0,0,0.8)',
+                          titleFont: { size: 14 },
+                          bodyFont: { size: 12 },
+                          padding: 10
+                        }
+                      }
+                    }} 
+                    height={300}
+                  />
+                )}
+              </div>
+            </div>
+          </div>
+          
+          {/* Transaction Timeline */}
+          <div className="col-lg-6 col-md-12">
+            <div className="card shadow-sm h-100">
+              <div className="card-header bg-white border-bottom-0">
+                <h4 className="card-title mb-0 text-primary">
+                  <i className="bi bi-graph-up me-2"></i>
+                  Transaction Timeline
+                </h4>
+              </div>
+              <div className="card-body">
+                {transactionTimelineData && (
+                  <Line 
+                    data={transactionTimelineData} 
+                    options={{
+                      responsive: true,
+                      maintainAspectRatio: false,
+                      scales: {
+                        y: { 
+                          position: 'left',
+                          beginAtZero: true,
+                          grid: {
+                            color: 'rgba(0,0,0,0.05)'
+                          }
+                        },
+                        y1: { 
+                          position: 'right',
+                          beginAtZero: true,
+                          grid: {
+                            drawOnChartArea: false
+                          }
+                        },
+                        x: {
+                          grid: {
+                            display: false
+                          }
+                        }
+                      },
+                      plugins: { 
+                        legend: { 
+                          position: 'bottom',
+                          labels: {
+                            padding: 20,
+                            usePointStyle: true
+                          }
+                        },
+                        tooltip: {
+                          backgroundColor: 'rgba(0,0,0,0.8)',
+                          titleFont: { size: 14 },
+                          bodyFont: { size: 12 },
+                          padding: 10
+                        }
+                      }
+                    }} 
+                    height={300}
+                  />
+                )}
+              </div>
+            </div>
+          </div>
+        </div>
+        {/* 👆 End of Transaction Analytics Section */}
+
       </div>
 
       {/* Back to Dashboard Button */}
