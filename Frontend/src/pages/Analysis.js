@@ -1,8 +1,6 @@
 /* eslint-disable no-unused-vars */
 import React, { useState, useEffect } from 'react';
 import { Bar, Pie, Line, Doughnut } from 'react-chartjs-2';
-import React, { useState, useEffect } from "react";
-import { Bar, Pie, Line, Doughnut } from "react-chartjs-2";
 import {
   Chart as ChartJS,
   CategoryScale,
