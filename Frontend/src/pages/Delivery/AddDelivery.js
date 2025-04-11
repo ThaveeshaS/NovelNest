@@ -918,7 +918,7 @@ const AddDelivery = () => {
                 transition={{ delay: 0.3 }}
               >
                 <StyledTextField
-                  label="Delivery Fee"
+                  label="Delivery Fee (₹)"
                   type="number"
                   value={formData.deliveryFee}
                   onChange={(e) => setFormData({ ...formData, deliveryFee: parseFloat(e.target.value) || 0 })}
@@ -927,12 +927,9 @@ const AddDelivery = () => {
                   variant="outlined"
                   InputProps={{
                     startAdornment: (
-                      <AttachMoneyIcon color="action" sx={{ 
-                        mr: 1,
-                        backgroundColor: 'rgba(63,81,181,0.05)',
-                        borderRadius: '50%',
-                        padding: '4px'
-                      }} />
+                      <Typography variant="body2" color="text.secondary" sx={{ mr: 1 }}>
+                        ₹
+                      </Typography>
                     ),
                   }}
                   inputProps={{ min: 0, step: 0.01 }}
@@ -1000,7 +997,7 @@ const AddDelivery = () => {
                       <Box display="flex" justifyContent="space-between" alignItems="center">
                         <Typography variant="subtitle1" fontWeight="bold">Delivery Fee</Typography>
                         <Typography variant="h6" fontWeight="bold" color="primary">
-                          ${Number(formData.deliveryFee).toFixed(2)}
+                          ₹{Number(formData.deliveryFee).toFixed(2)}
                         </Typography>
                       </Box>
                     </Box>
