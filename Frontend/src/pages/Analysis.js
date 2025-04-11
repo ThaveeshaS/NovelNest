@@ -16,6 +16,8 @@ import {
 } from "chart.js";
 import axios from "axios";
 import { io } from "socket.io-client";
+import { jsPDF } from "jspdf";
+import autoTable from "jspdf-autotable";
 import Header2 from "../components/Header2";
 import Navbar2 from "../components/Navbar2";
 import { useNavigate } from "react-router-dom";
@@ -23,6 +25,7 @@ import { motion } from "framer-motion";
 import { FaBook, FaUsers, FaComments, FaMoneyBillWave, FaExchangeAlt, FaTruck, FaArrowLeft, FaChartLine } from "react-icons/fa";
 import { GiBookshelf } from "react-icons/gi";
 import { BsGraphUp, BsGenderMale, BsPersonBoundingBox, BsStarFill, BsEmojiSmile, BsTagsFill } from "react-icons/bs";
+import logo from "../components/images/logo.jpg"; // Import the logo
 
 // Register ChartJS components with additional plugins
 ChartJS.register(
@@ -74,6 +77,48 @@ const emptyChartData = {
     borderColor: [],
     borderWidth: 1
   }]
+};
+
+// Common chart options for pie charts to ensure consistency
+const pieChartOptions = {
+  responsive: true,
+  maintainAspectRatio: false,
+  plugins: {
+    legend: {
+      position: "bottom",
+      labels: {
+        padding: 20,
+        usePointStyle: true,
+        pointStyle: "circle",
+        font: {
+          family: "'Poppins', sans-serif",
+          size: 12,
+          weight: "bold"
+        }
+      },
+    },
+    tooltip: {
+      backgroundColor: "rgba(0,0,0,0.9)",
+      titleFont: { 
+        family: "'Poppins', sans-serif",
+        size: 14,
+        weight: "bold"
+      },
+      bodyFont: { 
+        family: "'Poppins', sans-serif",
+        size: 12 
+      },
+      padding: 12,
+      usePointStyle: true,
+      cornerRadius: 8,
+      displayColors: true,
+      boxPadding: 6,
+    },
+  },
+  animation: {
+    animateScale: true,
+    animateRotate: true
+  }
 };
 
 const Analysis = () => {
@@ -402,23 +447,23 @@ const Analysis = () => {
         });
 
         setFeedbackSentimentData({
-          labels: sentimentRes.data?.labels || [],
+          labels: sentimentRes.data?.labels || ["Positive", "Neutral", "Negative"],
           datasets: [
             {
               label: "Feedback Sentiment",
               data: sentimentRes.data?.datasets?.[0]?.data || [],
               backgroundColor: [
-                "rgba(75, 192, 192, 0.8)",
-                "rgba(255, 99, 132, 0.8)",
-                "rgba(255, 206, 86, 0.8)",
+                "rgba(75, 192, 192, 0.8)", // Teal for Positive
+                "rgba(255, 182, 193, 0.8)", // Pink for Neutral
+                "rgba(255, 206, 86, 0.8)", // Yellow for Negative
               ],
               borderColor: [
                 "rgba(75, 192, 192, 1)",
-                "rgba(255, 99, 132, 1)",
+                "rgba(255, 182, 193, 1)",
                 "rgba(255, 206, 86, 1)",
               ],
               borderWidth: 2,
-              spacing: 5,
+              hoverOffset: 20,
             },
           ],
         });
@@ -646,6 +691,236 @@ const Analysis = () => {
     };
   }, [socket, timeRange]);
 
+  const generateReport = () => {
+    const doc = new jsPDF();
+    const pageWidth = doc.internal.pageSize.width;
+    const pageHeight = doc.internal.pageSize.height;
+    const margin = 15;
+
+    // Set background color
+    doc.setFillColor(255, 252, 255); // Light background
+    doc.rect(0, 0, pageWidth, pageHeight, "F");
+
+    // Add borders to the entire page
+    doc.setDrawColor(0, 71, 171); // Company blue color
+    doc.setLineWidth(1);
+    doc.rect(margin, margin, pageWidth - 2 * margin, pageHeight - 2 * margin);
+
+    // Add decorative header bar
+    doc.setFillColor(0, 71, 171);
+    doc.rect(margin, margin, pageWidth - 2 * margin, 12, "F");
+
+    // Add company logo
+    if (logo) {
+      doc.addImage(logo, "JPEG", pageWidth / 2 - 20, margin + 18, 40, 40);
+    }
+
+    // Add Company Name
+    doc.setFontSize(20);
+    doc.setFont("helvetica", "bold");
+    doc.setTextColor(0, 71, 171);
+    doc.text("NOVEL NEST BOOK STORE", pageWidth / 2, margin + 70, {
+      align: "center",
+    });
+
+    // Add company details
+    doc.setFontSize(10);
+    doc.setFont("helvetica", "normal");
+    doc.setTextColor(0, 0, 0);
+    doc.text("123 Book Street, Colombo, Sri Lanka", pageWidth / 2, margin + 80, {
+      align: "center",
+    });
+    doc.text(
+      "Phone: +94 123 456 789 | Email: info@bookstore.com",
+      pageWidth / 2,
+      margin + 88,
+      { align: "center" }
+    );
+    doc.text("www.novelnest.com", pageWidth / 2, margin + 96, {
+      align: "center",
+    });
+
+    // Add horizontal separator
+    doc.setDrawColor(0, 71, 171);
+    doc.setLineWidth(0.5);
+    doc.line(margin + 10, margin + 105, pageWidth - margin - 10, margin + 105);
+
+    // Add report title and date
+    doc.setFontSize(16);
+    doc.setFont("helvetica", "bold");
+    doc.text("ANALYTICS REPORT", pageWidth / 2, margin + 120, {
+      align: "center",
+    });
+
+    const today = new Date();
+    doc.setFontSize(10);
+    doc.setFont("helvetica", "normal");
+    doc.text(
+      `Report Generated: ${today.toLocaleDateString()} at ${today.toLocaleTimeString()}`,
+      pageWidth / 2,
+      margin + 130,
+      { align: "center" }
+    );
+
+    // Prepare data for the table
+    const tableData = [];
+
+    // Customer Analytics
+    if (activeTab === "all" || activeTab === "customers") {
+      const genderSummary = genderData.labels.map((label, index) => `${label}: ${genderData.datasets[0].data[index] || 0}`).join(", ");
+      const ageSummary = ageData.labels.map((label, index) => `${label}: ${ageData.datasets[0].data[index] || 0}`).join(", ");
+      tableData.push(["Customer Analytics", "Gender Distribution", genderSummary]);
+      tableData.push(["", "Age Distribution", ageSummary]);
+    }
+
+    // Feedback Analytics
+    if (activeTab === "all" || activeTab === "customers") {
+      const sentimentSummary = feedbackSentimentData.labels.map((label, index) => `${label}: ${feedbackSentimentData.datasets[0].data[index] || 0}`).join(", ");
+      const ratingSummary = ratingData.labels.map((label, index) => `${label}: ${ratingData.datasets[0].data[index] || 0}`).join(", ");
+      const topicsSummary = feedbackTopicsData.labels.map((label, index) => `${label}: ${feedbackTopicsData.datasets[0].data[index] || 0}`).join(", ");
+      tableData.push(["Feedback Analytics", "Sentiment Distribution", sentimentSummary]);
+      tableData.push(["", "Customer Ratings", ratingSummary]);
+      tableData.push(["", "Feedback Topics", topicsSummary]);
+    }
+
+    // Product Analytics
+    if (activeTab === "all" || activeTab === "products") {
+      const priceSummary = priceData.labels.map((label, index) => `${label}: ${priceData.datasets[0].data[index] || 0}`).join(", ");
+      const categorySummary = categoryData.labels.map((label, index) => `${label}: ${categoryData.datasets[0].data[index] || 0}`).join(", ");
+      const quantitySummary = quantityData.labels.map((label, index) => `${label}: ${quantityData.datasets[0].data[index] || 0}`).join(", ");
+      tableData.push(["Product Analytics", "Price Distribution", priceSummary]);
+      tableData.push(["", "Category Popularity", categorySummary]);
+      tableData.push(["", "Quantity Availability", quantitySummary]);
+    }
+
+    // Transaction Analytics
+    if (activeTab === "all" || activeTab === "transactions") {
+      const transactionAmountSummary = transactionAmountData.labels.map((label, index) => `${label}: ${transactionAmountData.datasets[0].data[index] || 0}`).join(", ");
+      const transactionTimelineSummary = transactionTimelineData.labels.map((label, index) => `${label}: Transactions: ${transactionTimelineData.datasets[0].data[index] || 0}, Amount: $${transactionTimelineData.datasets[1].data[index] || 0}`).join("; ");
+      tableData.push(["Transaction Analytics", "Amount Distribution", transactionAmountSummary]);
+      tableData.push(["", "Transaction Timeline", transactionTimelineSummary]);
+    }
+
+    // Delivery Analytics
+    if (activeTab === "all" || activeTab === "delivery") {
+      const deliveryStatusSummary = deliveryStatusData.labels.map((label, index) => `${label}: ${deliveryStatusData.datasets[0].data[index] || 0}`).join(", ");
+      const deliveryFeeSummary = deliveryFeeData.labels.map((label, index) => `${label}: Fee: $${deliveryFeeData.datasets[0].data[index] || 0}, Deliveries: ${deliveryFeeData.datasets[1].data[index] || 0}`).join("; ");
+      tableData.push(["Delivery Analytics", "Delivery Status", deliveryStatusSummary]);
+      tableData.push(["", "Delivery Fee Timeline", deliveryFeeSummary]);
+    }
+
+    // Add table with styling
+    autoTable(doc, {
+      startY: margin + 140,
+      head: [["Section", "Metric", "Details"]],
+      body: tableData,
+      headStyles: {
+        fillColor: [0, 71, 171],
+        textColor: [255, 255, 255],
+        fontStyle: "bold",
+      },
+      alternateRowStyles: {
+        fillColor: [240, 240, 240],
+      },
+      margin: {
+        top: margin,
+        right: margin + 5,
+        bottom: margin + 40,
+        left: margin + 5,
+      },
+      styles: {
+        cellPadding: 3,
+        fontSize: 9,
+        overflow: "linebreak",
+        lineWidth: 0.1,
+      },
+      columnStyles: {
+        0: { cellWidth: 40 },
+        1: { cellWidth: 40 },
+        2: { cellWidth: "auto" },
+      },
+    });
+
+    // Add summary section
+    const finalY = doc.lastAutoTable.finalY + 10;
+    doc.setFontSize(11);
+    doc.setFont("helvetica", "bold");
+    doc.text("Summary:", margin + 5, finalY);
+
+    doc.setFont("helvetica", "normal");
+    doc.setFontSize(10);
+    let summaryY = finalY + 8;
+    if (activeTab === "all" || activeTab === "customers") {
+      doc.text(`• Total Gender Categories: ${genderData.labels.length}`, margin + 10, summaryY);
+      summaryY += 5;
+      doc.text(`• Total Age Groups: ${ageData.labels.length}`, margin + 10, summaryY);
+      summaryY += 5;
+      doc.text(`• Total Feedback Sentiments: ${feedbackSentimentData.labels.length}`, margin + 10, summaryY);
+      summaryY += 5;
+      doc.text(`• Total Rating Levels: ${ratingData.labels.length}`, margin + 10, summaryY);
+      summaryY += 5;
+      doc.text(`• Total Feedback Topics: ${feedbackTopicsData.labels.length}`, margin + 10, summaryY);
+      summaryY += 5;
+    }
+    if (activeTab === "all" || activeTab === "products") {
+      doc.text(`• Total Price Ranges: ${priceData.labels.length}`, margin + 10, summaryY);
+      summaryY += 5;
+      doc.text(`• Total Categories: ${categoryData.labels.length}`, margin + 10, summaryY);
+      summaryY += 5;
+      doc.text(`• Total Quantity Periods: ${quantityData.labels.length}`, margin + 10, summaryY);
+      summaryY += 5;
+    }
+    if (activeTab === "all" || activeTab === "transactions") {
+      doc.text(`• Total Transaction Amount Ranges: ${transactionAmountData.labels.length}`, margin + 10, summaryY);
+      summaryY += 5;
+      doc.text(`• Total Transaction Periods: ${transactionTimelineData.labels.length}`, margin + 10, summaryY);
+      summaryY += 5;
+    }
+    if (activeTab === "all" || activeTab === "delivery") {
+      doc.text(`• Total Delivery Statuses: ${deliveryStatusData.labels.length}`, margin + 10, summaryY);
+      summaryY += 5;
+      doc.text(`• Total Delivery Fee Periods: ${deliveryFeeData.labels.length}`, margin + 10, summaryY);
+      summaryY += 5;
+    }
+
+    // Add signature section with dotted lines
+    const signY = pageHeight - margin - 22; // Position near the bottom
+    doc.setDrawColor(0); // Black color
+    doc.setLineWidth(0.5);
+
+    // Draw dotted lines for signatures
+    doc.setLineDash([1, 1]); // Dotted line pattern
+    doc.line(margin + 10, signY, margin + 60, signY); // Left dotted line
+    doc.line(pageWidth - margin - 60, signY, pageWidth - margin - 10, signY); // Right dotted line
+    doc.setLineDash([]); // Reset to solid line
+
+    // Add labels for the signature section
+    doc.setFontSize(9);
+    doc.text("Prepared By", margin + 10, signY + 5); // Left label
+    doc.text("Analytics Manager Signature", pageWidth - margin - 60, signY + 5); // Right label
+
+    // Add footer
+    doc.setFontSize(8);
+    doc.setTextColor(100, 100, 100);
+    doc.text(
+      `© ${today.getFullYear()} Novel Nest Book Store. All Rights Reserved.`,
+      pageWidth / 2,
+      pageHeight - margin - 5,
+      { align: "center" }
+    );
+
+    // Add page number
+    doc.text(
+      `Page ${doc.getCurrentPageInfo().pageNumber} of ${doc.getNumberOfPages()}`,
+      pageWidth - margin - 5,
+      pageHeight - margin - 5,
+      { align: "right" }
+    );
+
+    // Save the document
+    doc.save("Novel Nest Analytics Report.pdf");
+  };
+
   if (loading) {
     return (
       <div className="d-flex justify-content-center align-items-center vh-100 bg-light">
@@ -730,27 +1005,35 @@ const Analysis = () => {
                       Delivery
                     </button>
                   </div>
-                  <div className="btn-group" role="group">
+                  <div className="d-flex align-items-center">
+                    <div className="btn-group me-2" role="group">
+                      <button
+                        type="button"
+                        className={`btn ${timeRange === "weekly" ? "btn-info" : "btn-outline-info"}`}
+                        onClick={() => setTimeRange("weekly")}
+                      >
+                        Weekly
+                      </button>
+                      <button
+                        type="button"
+                        className={`btn ${timeRange === "monthly" ? "btn-info" : "btn-outline-info"}`}
+                        onClick={() => setTimeRange("monthly")}
+                      >
+                        Monthly
+                      </button>
+                      <button
+                        type="button"
+                        className={`btn ${timeRange === "yearly" ? "btn-info" : "btn-outline-info"}`}
+                        onClick={() => setTimeRange("yearly")}
+                      >
+                        Yearly
+                      </button>
+                    </div>
                     <button
-                      type="button"
-                      className={`btn ${timeRange === "weekly" ? "btn-info" : "btn-outline-info"}`}
-                      onClick={() => setTimeRange("weekly")}
+                      className="btn btn-success"
+                      onClick={generateReport}
                     >
-                      Weekly
-                    </button>
-                    <button
-                      type="button"
-                      className={`btn ${timeRange === "monthly" ? "btn-info" : "btn-outline-info"}`}
-                      onClick={() => setTimeRange("monthly")}
-                    >
-                      Monthly
-                    </button>
-                    <button
-                      type="button"
-                      className={`btn ${timeRange === "yearly" ? "btn-info" : "btn-outline-info"}`}
-                      onClick={() => setTimeRange("yearly")}
-                    >
-                      Yearly
+                      <i className="fas fa-file-pdf me-2"></i> Generate Report
                     </button>
                   </div>
                 </div>
@@ -786,46 +1069,7 @@ const Analysis = () => {
                   {genderData && (
                     <Pie
                       data={genderData}
-                      options={{
-                        responsive: true,
-                        maintainAspectRatio: false,
-                        plugins: {
-                          legend: {
-                            position: "bottom",
-                            labels: {
-                              padding: 20,
-                              usePointStyle: true,
-                              pointStyle: "circle",
-                              font: {
-                                family: "'Poppins', sans-serif",
-                                size: 12,
-                                weight: "bold"
-                              }
-                            },
-                          },
-                          tooltip: {
-                            backgroundColor: "rgba(0,0,0,0.9)",
-                            titleFont: { 
-                              family: "'Poppins', sans-serif",
-                              size: 14,
-                              weight: "bold"
-                            },
-                            bodyFont: { 
-                              family: "'Poppins', sans-serif",
-                              size: 12 
-                            },
-                            padding: 12,
-                            usePointStyle: true,
-                            cornerRadius: 8,
-                            displayColors: true,
-                            boxPadding: 6,
-                          },
-                        },
-                        animation: {
-                          animateScale: true,
-                          animateRotate: true
-                        }
-                      }}
+                      options={pieChartOptions}
                       height={300}
                     />
                   )}
@@ -902,77 +1146,6 @@ const Analysis = () => {
                 </div>
               </div>
             </motion.div>
-
-            {/* <motion.div variants={cardVariants} className="col-lg-4 col-md-12 mb-4">
-              <div className="card shadow-sm h-100 border-info border-2">
-                <div className="card-header bg-white border-bottom-0">
-                  <h4 className="card-title mb-0 text-primary">
-                    <FaChartLine className="me-2" />
-                    Registration Timeline
-                  </h4>
-                </div>
-                <div className="card-body">
-                  {registrationData && (
-                    <Line
-                      data={registrationData}
-                      options={{
-                        responsive: true,
-                        maintainAspectRatio: false,
-                        scales: {
-                          y: {
-                            beginAtZero: true,
-                            grid: { 
-                              color: "rgba(0,0,0,0.05)",
-                              drawBorder: false
-                            },
-                            ticks: {
-                              font: {
-                                family: "'Poppins', sans-serif"
-                              }
-                            }
-                          },
-                          x: { 
-                            grid: { display: false },
-                            ticks: {
-                              font: {
-                                family: "'Poppins', sans-serif"
-                              }
-                            }
-                          },
-                        },
-                        plugins: {
-                          legend: {
-                            position: "bottom",
-                            labels: { 
-                              padding: 20, 
-                              usePointStyle: true,
-                              font: {
-                                family: "'Poppins', sans-serif"
-                              }
-                            },
-                          },
-                          tooltip: {
-                            backgroundColor: "rgba(0,0,0,0.9)",
-                            titleFont: { 
-                              family: "'Poppins', sans-serif",
-                              size: 14,
-                              weight: "bold"
-                            },
-                            bodyFont: { 
-                              family: "'Poppins', sans-serif",
-                              size: 12 
-                            },
-                            padding: 12,
-                            cornerRadius: 8,
-                          },
-                        },
-                      }}
-                      height={300}
-                    />
-                  )}
-                </div>
-              </div>
-            </motion.div> */}
           </motion.div>
         )}
 
@@ -1054,46 +1227,11 @@ const Analysis = () => {
                     Feedback Sentiment
                   </h4>
                 </div>
-                <div className="card-body">
+                <div className="card-body d-flex align-items-center justify-content-center">
                   {feedbackSentimentData && (
                     <Pie
                       data={feedbackSentimentData}
-                      options={{
-                        responsive: true,
-                        maintainAspectRatio: false,
-                        plugins: {
-                          legend: {
-                            position: "bottom",
-                            labels: {
-                              padding: 20,
-                              usePointStyle: true,
-                              pointStyle: "circle",
-                              font: {
-                                family: "'Poppins', sans-serif"
-                              }
-                            },
-                          },
-                          tooltip: {
-                            backgroundColor: "rgba(0,0,0,0.9)",
-                            titleFont: { 
-                              family: "'Poppins', sans-serif",
-                              size: 14,
-                              weight: "bold"
-                            },
-                            bodyFont: { 
-                              family: "'Poppins', sans-serif",
-                              size: 12 
-                            },
-                            padding: 12,
-                            usePointStyle: true,
-                            cornerRadius: 8,
-                          },
-                        },
-                        animation: {
-                          animateScale: true,
-                          animateRotate: true
-                        }
-                      }}
+                      options={pieChartOptions}
                       height={300}
                     />
                   )}
@@ -1254,42 +1392,7 @@ const Analysis = () => {
                   {categoryData && (
                     <Pie
                       data={categoryData}
-                      options={{
-                        responsive: true,
-                        maintainAspectRatio: false,
-                        plugins: {
-                          legend: {
-                            position: "bottom",
-                            labels: {
-                              padding: 20,
-                              usePointStyle: true,
-                              pointStyle: "circle",
-                              font: {
-                                family: "'Poppins', sans-serif"
-                              }
-                            },
-                          },
-                          tooltip: {
-                            backgroundColor: "rgba(0,0,0,0.9)",
-                            titleFont: { 
-                              family: "'Poppins', sans-serif",
-                              size: 14,
-                              weight: "bold"
-                            },
-                            bodyFont: { 
-                              family: "'Poppins', sans-serif",
-                              size: 12 
-                            },
-                            padding: 12,
-                            usePointStyle: true,
-                            cornerRadius: 8,
-                          },
-                        },
-                        animation: {
-                          animateScale: true,
-                          animateRotate: true
-                        }
-                      }}
+                      options={pieChartOptions}
                       height={300}
                     />
                   )}
@@ -1581,42 +1684,7 @@ const Analysis = () => {
                   {deliveryStatusData && (
                     <Pie
                       data={deliveryStatusData}
-                      options={{
-                        responsive: true,
-                        maintainAspectRatio: false,
-                        plugins: {
-                          legend: {
-                            position: "bottom",
-                            labels: {
-                              padding: 20,
-                              usePointStyle: true,
-                              pointStyle: "circle",
-                              font: {
-                                family: "'Poppins', sans-serif"
-                              }
-                            },
-                          },
-                          tooltip: {
-                            backgroundColor: "rgba(0,0,0,0.9)",
-                            titleFont: { 
-                              family: "'Poppins', sans-serif",
-                              size: 14,
-                              weight: "bold"
-                            },
-                            bodyFont: { 
-                              family: "'Poppins', sans-serif",
-                              size: 12 
-                            },
-                            padding: 12,
-                            usePointStyle: true,
-                            cornerRadius: 8,
-                          },
-                        },
-                        animation: {
-                          animateScale: true,
-                          animateRotate: true
-                        }
-                      }}
+                      options={pieChartOptions}
                       height={300}
                     />
                   )}
