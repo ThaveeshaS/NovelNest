@@ -913,12 +913,12 @@ const AddDelivery = () => {
               </MotionBox>
               
               <MotionBox
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: 0.3 }}
-              >
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: 0.3 }}
+>
                 <StyledTextField
-                  label="Delivery Fee (₹)"
+                  label="Delivery Fee"
                   type="number"
                   value={formData.deliveryFee}
                   onChange={(e) => setFormData({ ...formData, deliveryFee: parseFloat(e.target.value) || 0 })}
@@ -927,8 +927,18 @@ const AddDelivery = () => {
                   variant="outlined"
                   InputProps={{
                     startAdornment: (
-                      <Typography variant="body2" color="text.secondary" sx={{ mr: 1 }}>
-                        ₹
+                      <Typography 
+                        color="text.secondary" 
+                        sx={{ 
+                          mr: 1,
+                          backgroundColor: 'rgba(63,81,181,0.05)',
+                          borderRadius: '50%',
+                          padding: '4px',
+                          fontSize: '0.875rem',
+                          fontWeight: 500
+                        }}
+                      >
+                        Rs.
                       </Typography>
                     ),
                   }}
@@ -997,7 +1007,7 @@ const AddDelivery = () => {
                       <Box display="flex" justifyContent="space-between" alignItems="center">
                         <Typography variant="subtitle1" fontWeight="bold">Delivery Fee</Typography>
                         <Typography variant="h6" fontWeight="bold" color="primary">
-                          ₹{Number(formData.deliveryFee).toFixed(2)}
+                          Rs. {Number(formData.deliveryFee).toFixed(2)}
                         </Typography>
                       </Box>
                     </Box>
