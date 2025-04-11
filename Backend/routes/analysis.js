@@ -1,7 +1,8 @@
 const express = require("express");
 const router = express.Router();
 const Customer = require("../models/Customer");
-const Product = require("../models/Product"); // Added Product model import
+const Product = require("../models/Product");
+const Delivery = require("../models/Delivery"); // Added Delivery model import
 const socketIO = require("../socket");
 
 // Helper function to emit updates
@@ -293,6 +294,129 @@ router.get("/quantity-availability", async (req, res) => {
   }
 });
 
+// Delivery Status Distribution
+router.get("/delivery-status", async (req, res) => {
+  try {
+    const deliveries = await Delivery.find({});
+
+    const today = new Date();
+    const statusCounts = {
+      Delayed: 0,
+      Soon: 0,
+      "On Track": 0,
+      Completed: 0,
+    };
+
+    deliveries.forEach((delivery) => {
+      const deliveryDate = new Date(delivery.estimatedDeliveryDate);
+      const difference = Math.ceil((deliveryDate - today) / (1000 * 60 * 60 * 24));
+
+      if (delivery.status === "completed") {
+        statusCounts.Completed++;
+      } else if (difference < 0) {
+        statusCounts.Delayed++;
+      } else if (difference <= 2) {
+        statusCounts.Soon++;
+      } else {
+        statusCounts["On Track"]++;
+      }
+    });
+
+    const responseData = {
+      labels: Object.keys(statusCounts),
+      datasets: [
+        {
+          label: "Delivery Status",
+          data: Object.values(statusCounts),
+          backgroundColor: [
+            "rgba(255, 99, 132, 0.7)", // Delayed
+            "rgba(255, 206, 86, 0.7)", // Soon
+            "rgba(75, 192, 192, 0.7)", // On Track
+            "rgba(54, 162, 235, 0.7)", // Completed
+          ],
+          borderColor: [
+            "rgba(255, 99, 132, 1)",
+            "rgba(255, 206, 86, 1)",
+            "rgba(75, 192, 192, 1)",
+            "rgba(54, 162, 235, 1)",
+          ],
+          borderWidth: 1,
+        },
+      ],
+    };
+
+    res.json(responseData);
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ message: "Server error" });
+  }
+});
+
+// Delivery Fee Timeline
+router.get("/delivery-fee-timeline", async (req, res) => {
+  try {
+    const deliveries = await Delivery.aggregate([
+      {
+        $group: {
+          _id: {
+            year: { $year: "$createdAt" },
+            month: { $month: "$createdAt" },
+          },
+          totalFee: { $sum: "$deliveryFee" },
+          count: { $sum: 1 },
+        },
+      },
+      { $sort: { "_id.year": 1, "_id.month": 1 } },
+    ]);
+
+    const labels = deliveries.map((item) => {
+      const monthNames = [
+        "Jan",
+        "Feb",
+        "Mar",
+        "Apr",
+        "May",
+        "Jun",
+        "Jul",
+        "Aug",
+        "Sep",
+        "Oct",
+        "Nov",
+        "Dec",
+      ];
+      return `${monthNames[item._id.month - 1]} ${item._id.year}`;
+    });
+
+    const feeData = deliveries.map((item) => item.totalFee);
+    const countData = deliveries.map((item) => item.count);
+
+    const responseData = {
+      labels,
+      datasets: [
+        {
+          label: "Total Delivery Fee",
+          data: feeData,
+          borderColor: "rgb(255, 99, 132)",
+          tension: 0.1,
+          yAxisID: "y",
+        },
+        {
+          label: "Number of Deliveries",
+          data: countData,
+          borderColor: "rgb(75, 192, 192)",
+          tension: 0.1,
+          yAxisID: "y1",
+        },
+      ],
+    };
+
+    res.json(responseData);
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ message: "Server error" });
+  }
+});
+
 // Function to update all analytics data
 const updateAllAnalytics = async () => {
   try {
@@ -462,6 +586,78 @@ const updateAllAnalytics = async () => {
     emitUpdate("quantity", {
       labels: quantityLabels,
       data: quantityValues,
+    });
+
+    // Delivery Analytics
+    // Delivery Status Distribution
+    const deliveries = await Delivery.find({});
+    const statusCounts = {
+      Delayed: 0,
+      Soon: 0,
+      "On Track": 0,
+      Completed: 0,
+    };
+
+    deliveries.forEach((delivery) => {
+      const deliveryDate = new Date(delivery.estimatedDeliveryDate);
+      const difference = Math.ceil((deliveryDate - now) / (1000 * 60 * 60 * 24));
+
+      if (delivery.status === "completed") {
+        statusCounts.Completed++;
+      } else if (difference < 0) {
+        statusCounts.Delayed++;
+      } else if (difference <= 2) {
+        statusCounts.Soon++;
+      } else {
+        statusCounts["On Track"]++;
+      }
+    });
+
+    emitUpdate("deliveryStatus", {
+      labels: Object.keys(statusCounts),
+      data: Object.values(statusCounts),
+    });
+
+    // Delivery Fee Timeline
+    const deliveryFeeData = await Delivery.aggregate([
+      {
+        $group: {
+          _id: {
+            year: { $year: "$createdAt" },
+            month: { $month: "$createdAt" },
+          },
+          totalFee: { $sum: "$deliveryFee" },
+          count: { $sum: 1 },
+        },
+      },
+      { $sort: { "_id.year": 1, "_id.month": 1 } },
+    ]);
+
+    const deliveryLabels = deliveryFeeData.map((item) => {
+      const monthNames = [
+        "Jan",
+        "Feb",
+        "Mar",
+        "Apr",
+        "May",
+        "Jun",
+        "Jul",
+        "Aug",
+        "Sep",
+        "Oct",
+        "Nov",
+        "Dec",
+      ];
+      return `${monthNames[item._id.month - 1]} ${item._id.year}`;
+    });
+
+    const feeData = deliveryFeeData.map((item) => item.totalFee);
+    const countData = deliveryFeeData.map((item) => item.count);
+
+    emitUpdate("deliveryFee", {
+      labels: deliveryLabels,
+      feeData,
+      countData,
     });
 
     console.log("Analytics data updated");
