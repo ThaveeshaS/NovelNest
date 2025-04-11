@@ -19,7 +19,7 @@ import Header2 from "../components/Header2";
 import Navbar2 from "../components/Navbar2";
 import { useNavigate } from "react-router-dom";
 
-// Register ChartJS components (unchanged)
+// Register ChartJS components
 ChartJS.register(
   CategoryScale,
   LinearScale,
@@ -40,13 +40,14 @@ const Analysis = () => {
   const [ratingData, setRatingData] = useState(null);
   const [feedbackSentimentData, setFeedbackSentimentData] = useState(null);
   const [feedbackTopicsData, setFeedbackTopicsData] = useState(null);
-  // New state variables for product analytics
   const [priceData, setPriceData] = useState(null);
   const [categoryData, setCategoryData] = useState(null);
   const [quantityData, setQuantityData] = useState(null);
-  // 👇 Added state for transaction data
   const [transactionAmountData, setTransactionAmountData] = useState(null);
   const [transactionTimelineData, setTransactionTimelineData] = useState(null);
+  // New state variables for delivery analytics
+  const [deliveryStatusData, setDeliveryStatusData] = useState(null);
+  const [deliveryFeeData, setDeliveryFeeData] = useState(null);
 
   const [loading, setLoading] = useState(true);
   const [socket, setSocket] = useState(null);
@@ -243,14 +244,6 @@ const Analysis = () => {
             ],
           });
           break;
-        default:
-          break;
-      }
-    };
-
-    // 👇 Added handler for transaction updates
-    const handleTransactionUpdate = (data) => {
-      switch (data.type) {
         case "amount":
           setTransactionAmountData({
             labels: data.labels,
@@ -286,14 +279,57 @@ const Analysis = () => {
             ],
           });
           break;
+        case "deliveryStatus":
+          setDeliveryStatusData({
+            labels: data.labels,
+            datasets: [
+              {
+                label: "Delivery Status",
+                data: data.data,
+                backgroundColor: [
+                  "rgba(255, 99, 132, 0.7)", // Delayed
+                  "rgba(255, 206, 86, 0.7)", // Soon
+                  "rgba(75, 192, 192, 0.7)", // On Track
+                  "rgba(54, 162, 235, 0.7)", // Completed
+                ],
+                borderColor: [
+                  "rgba(255, 99, 132, 1)",
+                  "rgba(255, 206, 86, 1)",
+                  "rgba(75,120, 192, 192, 1)",
+                  "rgba(54, 162, 235, 1)",
+                ],
+                borderWidth: 1,
+              },
+            ],
+          });
+          break;
+        case "deliveryFee":
+          setDeliveryFeeData({
+            labels: data.labels,
+            datasets: [
+              {
+                label: "Total Delivery Fee",
+                data: data.feeData,
+                borderColor: "rgb(255, 99, 132)",
+                tension: 0.1,
+                yAxisID: "y",
+              },
+              {
+                label: "Number of Deliveries",
+                data: data.countData,
+                borderColor: "rgb(75, 192, 192)",
+                tension: 0.1,
+                yAxisID: "y1",
+              },
+            ],
+          });
+          break;
         default:
           break;
       }
     };
 
     socket.on("dataUpdate", handleDataUpdate);
-    // 👇 Added socket listener for transaction updates
-    socket.on("transactionUpdate", handleTransactionUpdate);
 
     const fetchData = async () => {
       try {
@@ -307,9 +343,10 @@ const Analysis = () => {
           priceRes,
           categoryRes,
           quantityRes,
-          // 👇 Added transaction API calls
           transactionAmountRes,
           transactionTimelineRes,
+          deliveryStatusRes,
+          deliveryFeeRes,
         ] = await Promise.all([
           axios.get("/api/analysis/gender-distribution"),
           axios.get("/api/analysis/age-distribution"),
@@ -320,12 +357,13 @@ const Analysis = () => {
           axios.get("/api/analysis/price-distribution"),
           axios.get("/api/analysis/category-popularity"),
           axios.get("/api/analysis/quantity-availability"),
-          // 👇 Added transaction endpoints
           axios.get("/api/transaction-analysis/amount-distribution"),
           axios.get("/api/transaction-analysis/timeline"),
+          axios.get("/api/analysis/delivery-status"),
+          axios.get("/api/analysis/delivery-fee-timeline"),
         ]);
 
-        // Existing data setup (unchanged)
+        // Existing data setup
         setGenderData({
           labels: genderRes.data.labels,
           datasets: [
@@ -495,7 +533,6 @@ const Analysis = () => {
           ],
         });
 
-        // 👇 Added transaction data setting
         setTransactionAmountData({
           labels: transactionAmountRes.data.labels,
           datasets: [
@@ -529,6 +566,50 @@ const Analysis = () => {
           ],
         });
 
+        // New delivery data setup
+        setDeliveryStatusData({
+          labels: deliveryStatusRes.data.labels,
+          datasets: [
+            {
+              label: "Delivery Status",
+              data: deliveryStatusRes.data.datasets[0].data,
+              backgroundColor: [
+                "rgba(255, 99, 132, 0.7)", // Delayed
+                "rgba(255, 206, 86, 0.7)", // Soon
+                "rgba(75, 192, 192, 0.7)", // On Track
+                "rgba(54, 162, 235, 0.7)", // Completed
+              ],
+              borderColor: [
+                "rgba(255, 99, 132, 1)",
+                "rgba(255, 206, 86, 1)",
+                "rgba(75, 192, 192, 1)",
+                "rgba(54, 162, 235, 1)",
+              ],
+              borderWidth: 1,
+            },
+          ],
+        });
+
+        setDeliveryFeeData({
+          labels: deliveryFeeRes.data.labels,
+          datasets: [
+            {
+              label: "Total Delivery Fee",
+              data: deliveryFeeRes.data.datasets[0].data,
+              borderColor: "rgb(255, 99, 132)",
+              tension: 0.1,
+              yAxisID: "y",
+            },
+            {
+              label: "Number of Deliveries",
+              data: deliveryFeeRes.data.datasets[1].data,
+              borderColor: "rgb(75, 192, 192)",
+              tension: 0.1,
+              yAxisID: "y1",
+            },
+          ],
+        });
+
         setLoading(false);
       } catch (err) {
         console.error("Error fetching initial data:", err);
@@ -539,8 +620,6 @@ const Analysis = () => {
     fetchData();
     return () => {
       socket.off("dataUpdate", handleDataUpdate);
-      // 👇 Added cleanup for transaction updates
-      socket.off("transactionUpdate", handleTransactionUpdate);
     };
   }, [socket]);
 
@@ -573,7 +652,7 @@ const Analysis = () => {
           </div>
         </div>
 
-        {/* Customer Analytics Section (unchanged) */}
+        {/* Customer Analytics Section */}
         <div className="row mb-4">
           <div className="col-12">
             <h3 className="display-5 fw-bold text-primary mb-0">
@@ -663,7 +742,7 @@ const Analysis = () => {
           </div>
         </div>
 
-        {/* Feedback Analytics Section (unchanged) */}
+        {/* Feedback Analytics Section */}
         <div className="row mb-4">
           <div className="col-12">
             <h3 className="display-5 fw-bold text-primary mb-0">
@@ -793,7 +872,7 @@ const Analysis = () => {
           </div>
         </div>
 
-        {/* New Product Analytics Section */}
+        {/* Product Analytics Section */}
         <div className="row mb-4">
           <div className="col-12">
             <h3 className="display-5 fw-bold text-primary mb-0">
@@ -803,7 +882,6 @@ const Analysis = () => {
         </div>
 
         <div className="row g-4 mb-5">
-          {/* Price Distribution */}
           <div className="col-lg-4 col-md-6">
             <div className="card shadow-sm h-100">
               <div className="card-header bg-white border-bottom-0">
@@ -843,7 +921,6 @@ const Analysis = () => {
             </div>
           </div>
 
-          {/* Category Popularity */}
           <div className="col-lg-4 col-md-6">
             <div className="card shadow-sm h-100">
               <div className="card-header bg-white border-bottom-0">
@@ -884,7 +961,6 @@ const Analysis = () => {
             </div>
           </div>
 
-          {/* Quantity Availability */}
           <div className="col-lg-4 col-md-12">
             <div className="card shadow-sm h-100">
               <div className="card-header bg-white border-bottom-0">
@@ -928,7 +1004,7 @@ const Analysis = () => {
           </div>
         </div>
 
-        {/* 👇 Added Transaction Analytics Section */}
+        {/* Transaction Analytics Section */}
         <div className="row mb-4">
           <div className="col-12">
             <h3 className="display-5 fw-bold text-primary mb-0">
@@ -938,7 +1014,6 @@ const Analysis = () => {
         </div>
 
         <div className="row g-4 mb-5">
-          {/* Transaction Amount Distribution */}
           <div className="col-lg-6 col-md-6">
             <div className="card shadow-sm h-100">
               <div className="card-header bg-white border-bottom-0">
@@ -978,7 +1053,6 @@ const Analysis = () => {
             </div>
           </div>
 
-          {/* Transaction Timeline */}
           <div className="col-lg-6 col-md-12">
             <div className="card shadow-sm h-100">
               <div className="card-header bg-white border-bottom-0">
@@ -1027,16 +1101,122 @@ const Analysis = () => {
             </div>
           </div>
         </div>
-        {/* 👆 End of Transaction Analytics Section */}
-      </div>
 
-      <div className="d-flex justify-content-end mt-3 me-3 mb-3">
-        <button
-          className="btn btn-primary"
-          onClick={() => navigate("/admindashboard")}
-        >
-          <i className="fas fa-arrow-left me-2"></i> Back to Dashboard
-        </button>
+        {/* Delivery Analytics Section */}
+        <div className="row mb-4">
+          <div className="col-12">
+            <h3 className="display-5 fw-bold text-primary mb-0">
+              Delivery Analytics
+            </h3>
+          </div>
+        </div>
+
+        <div className="row g-4 mb-5">
+          <div className="col-lg-6 col-md-6">
+            <div className="card shadow-sm h-100">
+              <div className="card-header bg-white border-bottom-0">
+                <h4 className="card-title mb-0 text-primary">
+                  <i className="bi bi-truck me-2"></i>
+                  Delivery Status Distribution
+                </h4>
+              </div>
+              <div className="card-body d-flex align-items-center justify-content-center">
+                {deliveryStatusData && (
+                  <Pie
+                    data={deliveryStatusData}
+                    options={{
+                      responsive: true,
+                      maintainAspectRatio: false,
+                      plugins: {
+                        legend: {
+                          position: "bottom",
+                          labels: {
+                            padding: 20,
+                            usePointStyle: true,
+                            pointStyle: "circle",
+                          },
+                        },
+                        tooltip: {
+                          backgroundColor: "rgba(0,0,0,0.8)",
+                          titleFont: { size: 14 },
+                          bodyFont: { size: 12 },
+                          padding: 10,
+                          usePointStyle: true,
+                        },
+                      },
+                    }}
+                    height={300}
+                  />
+                )}
+              </div>
+            </div>
+          </div>
+
+          <div className="col-lg-6 col-md-12">
+            <div className="card shadow-sm h-100">
+              <div className="card-header bg-white border-bottom-0">
+                <h4 className="card-title mb-0 text-primary">
+                  <i className="bi bi-graph-up me-2"></i>
+                  Delivery Fee Timeline
+                </h4>
+              </div>
+              <div className="card-body">
+                {deliveryFeeData && (
+                  <Line
+                    data={deliveryFeeData}
+                    options={{
+                      responsive: true,
+                      maintainAspectRatio: false,
+                      scales: {
+                        y: {
+                          position: "left",
+                          beginAtZero: true,
+                          grid: { color: "rgba(0,0,0,0.05)" },
+                          title: {
+                            display: true,
+                            text: "Total Fee ($)",
+                          },
+                        },
+                        y1: {
+                          position: "right",
+                          beginAtZero: true,
+                          grid: { drawOnChartArea: false },
+                          title: {
+                            display: true,
+                            text: "Number of Deliveries",
+                          },
+                        },
+                        x: { grid: { display: false } },
+                      },
+                      plugins: {
+                        legend: {
+                          position: "bottom",
+                          labels: { padding: 20, usePointStyle: true },
+                        },
+                        tooltip: {
+                          backgroundColor: "rgba(0,0,0,0.8)",
+                          titleFont: { size: 14 },
+                          bodyFont: { size: 12 },
+                          padding: 10,
+                        },
+                      },
+                    }}
+                    height={300}
+                  />
+                )}
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div className="d-flex justify-content-end mt-3 me-3 mb-3">
+          <button
+            className="btn btn-primary"
+            onClick={() => navigate("/admindashboard")}
+          >
+            <i className="fas fa-arrow-left me-2"></i> Back to Dashboard
+          </button>
+        </div>
       </div>
     </div>
   );
