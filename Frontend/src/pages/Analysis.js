@@ -903,7 +903,7 @@ const Analysis = () => {
               </div>
             </motion.div>
 
-            <motion.div variants={cardVariants} className="col-lg-4 col-md-12 mb-4">
+            {/* <motion.div variants={cardVariants} className="col-lg-4 col-md-12 mb-4">
               <div className="card shadow-sm h-100 border-info border-2">
                 <div className="card-header bg-white border-bottom-0">
                   <h4 className="card-title mb-0 text-primary">
@@ -972,7 +972,7 @@ const Analysis = () => {
                   )}
                 </div>
               </div>
-            </motion.div>
+            </motion.div> */}
           </motion.div>
         )}
 
