@@ -18,6 +18,7 @@ import axios from "axios";
 import { io } from "socket.io-client";
 import { jsPDF } from "jspdf";
 import autoTable from "jspdf-autotable";
+import html2canvas from "html2canvas"; // Import html2canvas
 import Header2 from "../components/Header2";
 import Navbar2 from "../components/Navbar2";
 import { useNavigate } from "react-router-dom";
@@ -475,18 +476,18 @@ const Analysis = () => {
               label: "Feedback Topics",
               data: topicsRes.data?.datasets?.[0]?.data || [],
               backgroundColor: [
-                "rgba(153, 102, 255, 0.8)",
-                "rgba(54, 162, 235, 0.8)",
-                "rgba(255, 159, 64, 0.8)",
-                "rgba(75, 192, 192, 0.8)",
-                "rgba(255, 99, 132, 0.8)",
+                "rgba(9, 175, 87, 0.7)",
+                "rgba(9, 175, 87, 0.7)",
+                "rgba(9, 175, 87, 0.7)",
+                "rgba(9, 175, 87, 0.7)",
+                "rgba(9, 175, 87, 0.7)",
               ],
               borderColor: [
-                "rgba(153, 102, 255, 1)",
-                "rgba(54, 162, 235, 1)",
-                "rgba(255, 159, 64, 1)",
-                "rgba(75, 192, 192, 1)",
-                "rgba(255, 99, 132, 1)",
+                "rgba(9, 175, 87, 1)",
+                "rgba(9, 175, 87, 1)",
+                "rgba(9, 175, 87, 1)",
+                "rgba(9, 175, 87, 1)",
+                "rgba(9, 175, 87, 1)",
               ],
               borderWidth: 2,
               borderRadius: 6,
@@ -691,234 +692,369 @@ const Analysis = () => {
     };
   }, [socket, timeRange]);
 
-  const generateReport = () => {
-    const doc = new jsPDF();
-    const pageWidth = doc.internal.pageSize.width;
-    const pageHeight = doc.internal.pageSize.height;
+  const generateReport = async () => {
+    const doc = new jsPDF({ orientation: "portrait", unit: "mm", format: "a4" });
+    const pageWidth = doc.internal.pageSize.width; // 210mm
+    const pageHeight = doc.internal.pageSize.height; // 297mm
     const margin = 15;
+    const today = new Date();
+    const reportDate = `${today.toLocaleDateString()} at ${today.toLocaleTimeString()}`;
 
-    // Set background color
-    doc.setFillColor(255, 252, 255); // Light background
-    doc.rect(0, 0, pageWidth, pageHeight, "F");
+    // Helper function to capture chart as image
+    const captureChart = async (chartId) => {
+      const chartElement = document.getElementById(chartId);
+      if (!chartElement) {
+        console.warn(`Chart with ID ${chartId} not found`);
+        return null;
+      }
+      try {
+        const canvas = await html2canvas(chartElement, {
+          scale: 2, // Increase resolution
+          backgroundColor: "#ffffff",
+          useCORS: true,
+        });
+        return canvas.toDataURL("image/png");
+      } catch (err) {
+        console.error(`Error capturing chart ${chartId}:`, err);
+        return null;
+      }
+    };
 
-    // Add borders to the entire page
-    doc.setDrawColor(0, 71, 171); // Company blue color
-    doc.setLineWidth(1);
-    doc.rect(margin, margin, pageWidth - 2 * margin, pageHeight - 2 * margin);
+    // Capture all chart images
+    const chartImages = {};
+    const chartIds = [
+      "genderChart",
+      "ageChart",
+      "ratingChart",
+      "sentimentChart",
+      "topicsChart",
+      "priceChart",
+      "categoryChart",
+      "quantityChart",
+      "transactionAmountChart",
+      "transactionTimelineChart",
+      "deliveryStatusChart",
+      "deliveryFeeChart",
+    ];
 
-    // Add decorative header bar
-    doc.setFillColor(0, 71, 171);
-    doc.rect(margin, margin, pageWidth - 2 * margin, 12, "F");
-
-    // Add company logo
-    if (logo) {
-      doc.addImage(logo, "JPEG", pageWidth / 2 - 20, margin + 18, 40, 40);
+    for (const chartId of chartIds) {
+      const imageData = await captureChart(chartId);
+      if (imageData) {
+        chartImages[chartId] = imageData;
+      }
     }
 
-    // Add Company Name
-    doc.setFontSize(20);
+    // Helper function to add header
+    const addHeader = () => {
+      doc.setFillColor(0, 71, 171);
+      doc.rect(0, 0, pageWidth, 20, "F");
+      doc.setFontSize(12);
+      doc.setFont("helvetica", "bold");
+      doc.setTextColor(255, 255, 255);
+      doc.text("NOVEL NEST BOOK STORE", margin, 12);
+      doc.setFontSize(8);
+      doc.setFont("helvetica", "normal");
+      doc.text("Analytics Report", pageWidth - margin, 12, { align: "right" });
+    };
+
+    // Helper function to add footer
+    const addFooter = (pageNumber, totalPages) => {
+      doc.setFillColor(240, 240, 240);
+      doc.rect(0, pageHeight - 15, pageWidth, 15, "F");
+      doc.setFontSize(8);
+      doc.setTextColor(100, 100, 100);
+      doc.text(
+        `© ${today.getFullYear()} Novel Nest Book Store. All Rights Reserved.`,
+        margin,
+        pageHeight - 5
+      );
+      doc.text(
+        `Page ${pageNumber} of ${totalPages}`,
+        pageWidth - margin,
+        pageHeight - 5,
+        { align: "right" }
+      );
+    };
+
+    // Cover Page
+    doc.setFillColor(255, 255, 255);
+    doc.rect(0, 0, pageWidth, pageHeight, "F");
+    if (logo) {
+      doc.addImage(logo, "JPEG", pageWidth / 2 - 30, 40, 60, 60);
+    }
+    doc.setFontSize(28);
     doc.setFont("helvetica", "bold");
     doc.setTextColor(0, 71, 171);
-    doc.text("NOVEL NEST BOOK STORE", pageWidth / 2, margin + 70, {
-      align: "center",
-    });
+    doc.text("Analytics Report", pageWidth / 2, 120, { align: "center" });
+    doc.setFontSize(16);
+    doc.text("Novel Nest Book Store", pageWidth / 2, 140, { align: "center" });
+    doc.setFontSize(12);
+    doc.setFont("helvetica", "normal");
+    doc.setTextColor(0, 0, 0);
+    doc.text("123 Book Street, Colombo, Sri Lanka", pageWidth / 2, 160, { align: "center" });
+    doc.text("Phone: +94 123 456 789 | Email: info@bookstore.com", pageWidth / 2, 170, { align: "center" });
+    doc.text("www.novelnest.com", pageWidth / 2, 180, { align: "center" });
+    doc.text(`Generated on: ${reportDate}`, pageWidth / 2, 200, { align: "center" });
+    addFooter(1, "TBD");
 
-    // Add company details
+    // Introduction Page
+    doc.addPage();
+    addHeader();
+    doc.setFontSize(16);
+    doc.setFont("helvetica", "bold");
+    doc.setTextColor(0, 71, 171);
+    doc.text("Introduction", margin, 30);
     doc.setFontSize(10);
     doc.setFont("helvetica", "normal");
     doc.setTextColor(0, 0, 0);
-    doc.text("123 Book Street, Colombo, Sri Lanka", pageWidth / 2, margin + 80, {
-      align: "center",
+    const introText = [
+      "Welcome to the Novel Nest Book Store Analytics Report. This document provides a comprehensive overview of our bookstore's performance across various metrics, including customer demographics, feedback, product trends, transactions, and delivery operations. Our goal is to leverage data-driven insights to enhance customer satisfaction, optimize inventory, streamline transactions, and improve delivery efficiency. This report is generated based on the selected time range and analytics tab, ensuring relevance and accuracy. The following sections detail each analytic category with data summaries, visualizations, and key observations to guide strategic decision-making."
+    ];
+    let yPos = 40;
+    introText.forEach(line => {
+      doc.text(line, margin, yPos, { maxWidth: pageWidth - 2 * margin });
+      yPos += 10;
     });
-    doc.text(
-      "Phone: +94 123 456 789 | Email: info@bookstore.com",
-      pageWidth / 2,
-      margin + 88,
-      { align: "center" }
-    );
-    doc.text("www.novelnest.com", pageWidth / 2, margin + 96, {
-      align: "center",
-    });
+    addFooter(2, "TBD");
 
-    // Add horizontal separator
-    doc.setDrawColor(0, 71, 171);
-    doc.setLineWidth(0.5);
-    doc.line(margin + 10, margin + 105, pageWidth - margin - 10, margin + 105);
+    // Analytics Sections
+    let currentPage = 3;
+    let figureCounter = 1;
 
-    // Add report title and date
-    doc.setFontSize(16);
-    doc.setFont("helvetica", "bold");
-    doc.text("ANALYTICS REPORT", pageWidth / 2, margin + 120, {
-      align: "center",
-    });
+    const addAnalyticsSection = (title, dataSets, description, chartIds, startY) => {
+      doc.addPage();
+      addHeader();
+      doc.setFontSize(14);
+      doc.setFont("helvetica", "bold");
+      doc.setTextColor(0, 71, 171);
+      doc.text(title, margin, 30);
+      doc.setFontSize(10);
+      doc.setFont("helvetica", "normal");
+      doc.setTextColor(0, 0, 0);
+      doc.text(description, margin, 40, { maxWidth: pageWidth - 2 * margin });
+      let tableY = 50;
 
-    const today = new Date();
-    doc.setFontSize(10);
-    doc.setFont("helvetica", "normal");
-    doc.text(
-      `Report Generated: ${today.toLocaleDateString()} at ${today.toLocaleTimeString()}`,
-      pageWidth / 2,
-      margin + 130,
-      { align: "center" }
-    );
+      // Add charts and tables side by side
+      dataSets.forEach(({ subtitle, data }, index) => {
+        // Add subtitle
+        doc.setFontSize(12);
+        doc.setFont("helvetica", "bold");
+        doc.text(subtitle, margin, tableY);
+        tableY += 7;
 
-    // Prepare data for the table
-    const tableData = [];
+        // Add chart if available
+        const chartId = chartIds[index];
+        if (chartImages[chartId]) {
+          const imgWidth = 80; // Small chart width (mm)
+          const imgHeight = imgWidth * 0.75; // Maintain aspect ratio (adjust as needed)
+          doc.addImage(chartImages[chartId], "PNG", margin, tableY, imgWidth, imgHeight);
+          doc.setFontSize(8);
+          doc.setFont("helvetica", "italic");
+          doc.text(`Figure ${figureCounter}: ${subtitle}`, margin, tableY + imgHeight + 5);
+          figureCounter++;
+          tableY += imgHeight + 10; // Space after chart and caption
+        }
+
+        // Add table to the right of the chart
+        if (tableY > pageHeight - 50) {
+          addFooter(currentPage, "TBD");
+          doc.addPage();
+          addHeader();
+          tableY = 30;
+          currentPage++;
+          // Repeat subtitle on new page
+          doc.setFontSize(12);
+          doc.setFont("helvetica", "bold");
+          doc.text(subtitle, margin, tableY);
+          tableY += 7;
+        }
+
+        autoTable(doc, {
+          startY: tableY,
+          head: [["Category", "Value"]],
+          body: data,
+          headStyles: {
+            fillColor: [0, 71, 171],
+            textColor: [255, 255, 255],
+            fontStyle: "bold",
+          },
+          alternateRowStyles: {
+            fillColor: [240, 240, 240],
+          },
+          margin: { left: margin, right: margin },
+          styles: {
+            cellPadding: 3,
+            fontSize: 9,
+            font: "helvetica",
+            overflow: "linebreak",
+            lineWidth: 0.1,
+          },
+          columnStyles: {
+            0: { cellWidth: (pageWidth - 2 * margin) * 0.6 },
+            1: { cellWidth: (pageWidth - 2 * margin) * 0.4 },
+          },
+        });
+        tableY = doc.lastAutoTable.finalY + 10;
+
+        if (tableY > pageHeight - 30) {
+          addFooter(currentPage, "TBD");
+          doc.addPage();
+          addHeader();
+          tableY = 30;
+          currentPage++;
+        }
+      });
+      addFooter(currentPage, "TBD");
+      currentPage++;
+    };
 
     // Customer Analytics
     if (activeTab === "all" || activeTab === "customers") {
-      const genderSummary = genderData.labels.map((label, index) => `${label}: ${genderData.datasets[0].data[index] || 0}`).join(", ");
-      const ageSummary = ageData.labels.map((label, index) => `${label}: ${ageData.datasets[0].data[index] || 0}`).join(", ");
-      tableData.push(["Customer Analytics", "Gender Distribution", genderSummary]);
-      tableData.push(["", "Age Distribution", ageSummary]);
+      const genderTable = genderData.labels.map((label, index) => [label, genderData.datasets[0].data[index] || 0]);
+      const ageTable = ageData.labels.map((label, index) => [label, ageData.datasets[0].data[index] || 0]);
+      addAnalyticsSection(
+        "Customer Analytics",
+        [
+          { subtitle: "Gender Distribution", data: genderTable },
+          { subtitle: "Age Distribution", data: ageTable },
+        ],
+        "This section analyzes the demographic profile of our customers, focusing on gender and age distributions. Understanding these metrics helps tailor marketing strategies and inventory to meet customer preferences.",
+        ["genderChart", "ageChart"],
+        30
+      );
     }
 
     // Feedback Analytics
     if (activeTab === "all" || activeTab === "customers") {
-      const sentimentSummary = feedbackSentimentData.labels.map((label, index) => `${label}: ${feedbackSentimentData.datasets[0].data[index] || 0}`).join(", ");
-      const ratingSummary = ratingData.labels.map((label, index) => `${label}: ${ratingData.datasets[0].data[index] || 0}`).join(", ");
-      const topicsSummary = feedbackTopicsData.labels.map((label, index) => `${label}: ${feedbackTopicsData.datasets[0].data[index] || 0}`).join(", ");
-      tableData.push(["Feedback Analytics", "Sentiment Distribution", sentimentSummary]);
-      tableData.push(["", "Customer Ratings", ratingSummary]);
-      tableData.push(["", "Feedback Topics", topicsSummary]);
+      const sentimentTable = feedbackSentimentData.labels.map((label, index) => [label, feedbackSentimentData.datasets[0].data[index] || 0]);
+      const ratingTable = ratingData.labels.map((label, index) => [label, ratingData.datasets[0].data[index] || 0]);
+      const topicsTable = feedbackTopicsData.labels.map((label, index) => [label, feedbackTopicsData.datasets[0].data[index] || 0]);
+      addAnalyticsSection(
+        "Feedback Analytics",
+        [
+          { subtitle: "Sentiment Distribution", data: sentimentTable },
+          { subtitle: "Customer Ratings", data: ratingTable },
+          { subtitle: "Feedback Topics", data: topicsTable },
+        ],
+        "Feedback analytics provide insights into customer satisfaction and areas for improvement. This section covers sentiment analysis, ratings, and common feedback topics.",
+        ["sentimentChart", "ratingChart", "topicsChart"],
+        30
+      );
     }
 
     // Product Analytics
     if (activeTab === "all" || activeTab === "products") {
-      const priceSummary = priceData.labels.map((label, index) => `${label}: ${priceData.datasets[0].data[index] || 0}`).join(", ");
-      const categorySummary = categoryData.labels.map((label, index) => `${label}: ${categoryData.datasets[0].data[index] || 0}`).join(", ");
-      const quantitySummary = quantityData.labels.map((label, index) => `${label}: ${quantityData.datasets[0].data[index] || 0}`).join(", ");
-      tableData.push(["Product Analytics", "Price Distribution", priceSummary]);
-      tableData.push(["", "Category Popularity", categorySummary]);
-      tableData.push(["", "Quantity Availability", quantitySummary]);
+      const priceTable = priceData.labels.map((label, index) => [label, priceData.datasets[0].data[index] || 0]);
+      const categoryTable = categoryData.labels.map((label, index) => [label, categoryData.datasets[0].data[index] || 0]);
+      const quantityTable = quantityData.labels.map((label, index) => [label, quantityData.datasets[0].data[index] || 0]);
+      addAnalyticsSection(
+        "Product Analytics",
+        [
+          { subtitle: "Price Distribution", data: priceTable },
+          { subtitle: "Category Popularity", data: categoryTable },
+          { subtitle: "Quantity Availability", data: quantityTable },
+        ],
+        "Product analytics highlight pricing trends, popular categories, and stock availability. These metrics guide inventory management and pricing strategies.",
+        ["priceChart", "categoryChart", "quantityChart"],
+        30
+      );
     }
 
     // Transaction Analytics
     if (activeTab === "all" || activeTab === "transactions") {
-      const transactionAmountSummary = transactionAmountData.labels.map((label, index) => `${label}: ${transactionAmountData.datasets[0].data[index] || 0}`).join(", ");
-      const transactionTimelineSummary = transactionTimelineData.labels.map((label, index) => `${label}: Transactions: ${transactionTimelineData.datasets[0].data[index] || 0}, Amount: $${transactionTimelineData.datasets[1].data[index] || 0}`).join("; ");
-      tableData.push(["Transaction Analytics", "Amount Distribution", transactionAmountSummary]);
-      tableData.push(["", "Transaction Timeline", transactionTimelineSummary]);
+      const amountTable = transactionAmountData.labels.map((label, index) => [label, transactionAmountData.datasets[0].data[index] || 0]);
+      const timelineTable = transactionTimelineData.labels.map((label, index) => [
+        label,
+        `Transactions: ${transactionTimelineData.datasets[0].data[index] || 0}, Amount: $${transactionTimelineData.datasets[1].data[index] || 0}`
+      ]);
+      addAnalyticsSection(
+        "Transaction Analytics",
+        [
+          { subtitle: "Amount Distribution", data: amountTable },
+          { subtitle: "Transaction Timeline", data: timelineTable },
+        ],
+        "Transaction analytics track sales performance over time, including the distribution of transaction amounts and activity trends.",
+        ["transactionAmountChart", "transactionTimelineChart"],
+        30
+      );
     }
 
     // Delivery Analytics
     if (activeTab === "all" || activeTab === "delivery") {
-      const deliveryStatusSummary = deliveryStatusData.labels.map((label, index) => `${label}: ${deliveryStatusData.datasets[0].data[index] || 0}`).join(", ");
-      const deliveryFeeSummary = deliveryFeeData.labels.map((label, index) => `${label}: Fee: $${deliveryFeeData.datasets[0].data[index] || 0}, Deliveries: ${deliveryFeeData.datasets[1].data[index] || 0}`).join("; ");
-      tableData.push(["Delivery Analytics", "Delivery Status", deliveryStatusSummary]);
-      tableData.push(["", "Delivery Fee Timeline", deliveryFeeSummary]);
+      const statusTable = deliveryStatusData.labels.map((label, index) => [label, deliveryStatusData.datasets[0].data[index] || 0]);
+      const feeTable = deliveryFeeData.labels.map((label, index) => [
+        label,
+        `Fee: $${deliveryFeeData.datasets[0].data[index] || 0}, Deliveries: ${deliveryFeeData.datasets[1].data[index] || 0}`
+      ]);
+      addAnalyticsSection(
+        "Delivery Analytics",
+        [
+          { subtitle: "Delivery Status", data: statusTable },
+          { subtitle: "Delivery Fee Timeline", data: feeTable },
+        ],
+        "Delivery analytics monitor the efficiency and cost of our delivery operations, focusing on status updates and fee trends.",
+        ["deliveryStatusChart", "deliveryFeeChart"],
+        30
+      );
     }
 
-    // Add table with styling
-    autoTable(doc, {
-      startY: margin + 140,
-      head: [["Section", "Metric", "Details"]],
-      body: tableData,
-      headStyles: {
-        fillColor: [0, 71, 171],
-        textColor: [255, 255, 255],
-        fontStyle: "bold",
-      },
-      alternateRowStyles: {
-        fillColor: [240, 240, 240],
-      },
-      margin: {
-        top: margin,
-        right: margin + 5,
-        bottom: margin + 40,
-        left: margin + 5,
-      },
-      styles: {
-        cellPadding: 3,
-        fontSize: 9,
-        overflow: "linebreak",
-        lineWidth: 0.1,
-      },
-      columnStyles: {
-        0: { cellWidth: 40 },
-        1: { cellWidth: 40 },
-        2: { cellWidth: "auto" },
-      },
-    });
-
-    // Add summary section
-    const finalY = doc.lastAutoTable.finalY + 10;
-    doc.setFontSize(11);
+    // Conclusion Page
+    doc.addPage();
+    addHeader();
+    doc.setFontSize(16);
     doc.setFont("helvetica", "bold");
-    doc.text("Summary:", margin + 5, finalY);
-
-    doc.setFont("helvetica", "normal");
+    doc.setTextColor(0, 71, 171);
+    doc.text("Conclusion", margin, 30);
     doc.setFontSize(10);
-    let summaryY = finalY + 8;
-    if (activeTab === "all" || activeTab === "customers") {
-      doc.text(`• Total Gender Categories: ${genderData.labels.length}`, margin + 10, summaryY);
-      summaryY += 5;
-      doc.text(`• Total Age Groups: ${ageData.labels.length}`, margin + 10, summaryY);
-      summaryY += 5;
-      doc.text(`• Total Feedback Sentiments: ${feedbackSentimentData.labels.length}`, margin + 10, summaryY);
-      summaryY += 5;
-      doc.text(`• Total Rating Levels: ${ratingData.labels.length}`, margin + 10, summaryY);
-      summaryY += 5;
-      doc.text(`• Total Feedback Topics: ${feedbackTopicsData.labels.length}`, margin + 10, summaryY);
-      summaryY += 5;
-    }
-    if (activeTab === "all" || activeTab === "products") {
-      doc.text(`• Total Price Ranges: ${priceData.labels.length}`, margin + 10, summaryY);
-      summaryY += 5;
-      doc.text(`• Total Categories: ${categoryData.labels.length}`, margin + 10, summaryY);
-      summaryY += 5;
-      doc.text(`• Total Quantity Periods: ${quantityData.labels.length}`, margin + 10, summaryY);
-      summaryY += 5;
-    }
-    if (activeTab === "all" || activeTab === "transactions") {
-      doc.text(`• Total Transaction Amount Ranges: ${transactionAmountData.labels.length}`, margin + 10, summaryY);
-      summaryY += 5;
-      doc.text(`• Total Transaction Periods: ${transactionTimelineData.labels.length}`, margin + 10, summaryY);
-      summaryY += 5;
-    }
-    if (activeTab === "all" || activeTab === "delivery") {
-      doc.text(`• Total Delivery Statuses: ${deliveryStatusData.labels.length}`, margin + 10, summaryY);
-      summaryY += 5;
-      doc.text(`• Total Delivery Fee Periods: ${deliveryFeeData.labels.length}`, margin + 10, summaryY);
-      summaryY += 5;
-    }
-
-    // Add signature section with dotted lines
-    const signY = pageHeight - margin - 22; // Position near the bottom
-    doc.setDrawColor(0); // Black color
+    doc.setFont("helvetica", "normal");
+    doc.setTextColor(0, 0, 0);
+    const conclusionText = [
+      "The Novel Nest Book Store Analytics Report provides a holistic view of our operations, highlighting strengths and identifying opportunities for growth.",
+      "Key insights include a balanced gender distribution among customers, a predominance of positive feedback, strong demand for fiction and non-fiction categories, limited transaction activity indicating potential for sales growth, and delivery challenges with a high number of 'Soon' statuses. Moving forward, we recommend focusing on targeted marketing to younger age groups, enhancing website usability based on feedback, optimizing pricing for high-demand categories, and improving delivery timelines to boost customer satisfaction. This data-driven approach will ensure Novel Nest continues to thrive as a leading bookstore in Colombo."
+    ];
+    yPos = 40;
+    conclusionText.forEach(line => {
+      doc.text(line, margin, yPos, { maxWidth: pageWidth - 2 * margin });
+      yPos += 10;
+    });
+    doc.setFontSize(12);
+    doc.setFont("helvetica", "bold");
+    doc.text("Prepared By:", margin, yPos + 22);
+    doc.setFontSize(10);
+    doc.setFont("helvetica", "normal");
+    doc.text("Analytics Team, Novel Nest Book Store", margin, yPos + 29);
     doc.setLineWidth(0.5);
+    doc.line(margin, yPos + 210, margin + 50, yPos + 210);
+    doc.text("Analytics Manager Signature", margin, yPos + 215);
+    addFooter(currentPage, "TBD");
+    currentPage++;
 
-    // Draw dotted lines for signatures
-    doc.setLineDash([1, 1]); // Dotted line pattern
-    doc.line(margin + 10, signY, margin + 60, signY); // Left dotted line
-    doc.line(pageWidth - margin - 60, signY, pageWidth - margin - 10, signY); // Right dotted line
-    doc.setLineDash([]); // Reset to solid line
+    // End Page
+    doc.addPage();
+    addHeader();
+    doc.setFontSize(16);
+    doc.setFont("helvetica", "bold");
+    doc.setTextColor(0, 71, 171);
+    doc.text("Thank You", pageWidth / 2, 100, { align: "center" });
+    doc.setFontSize(12);
+    doc.setFont("helvetica", "normal");
+    doc.setTextColor(0, 0, 0);
+    doc.text("For inquiries or further details, please contact:", pageWidth / 2, 120, { align: "center" });
+    doc.text("Novel Nest Book Store", pageWidth / 2, 130, { align: "center" });
+    doc.text("Email: info@bookstore.com", pageWidth / 2, 140, { align: "center" });
+    doc.text("Phone: +94 123 456 789", pageWidth / 2, 150, { align: "center" });
+    doc.text("www.novelnest.com", pageWidth / 2, 160, { align: "center" });
+    addFooter(currentPage, "TBD");
 
-    // Add labels for the signature section
-    doc.setFontSize(9);
-    doc.text("Prepared By", margin + 10, signY + 5); // Left label
-    doc.text("Analytics Manager Signature", pageWidth - margin - 60, signY + 5); // Right label
-
-    // Add footer
-    doc.setFontSize(8);
-    doc.setTextColor(100, 100, 100);
-    doc.text(
-      `© ${today.getFullYear()} Novel Nest Book Store. All Rights Reserved.`,
-      pageWidth / 2,
-      pageHeight - margin - 5,
-      { align: "center" }
-    );
-
-    // Add page number
-    doc.text(
-      `Page ${doc.getCurrentPageInfo().pageNumber} of ${doc.getNumberOfPages()}`,
-      pageWidth - margin - 5,
-      pageHeight - margin - 5,
-      { align: "right" }
-    );
+    // Update all footers with total pages
+    const totalPages = doc.getNumberOfPages();
+    for (let i = 1; i <= totalPages; i++) {
+      doc.setPage(i);
+      addFooter(i, totalPages);
+    }
 
     // Save the document
-    doc.save("Novel Nest Analytics Report.pdf");
+    doc.save("Novel_Nest_Analytics_Report.pdf");
   };
 
   if (loading) {
@@ -1071,6 +1207,7 @@ const Analysis = () => {
                       data={genderData}
                       options={pieChartOptions}
                       height={300}
+                      id="genderChart"
                     />
                   )}
                 </div>
@@ -1141,6 +1278,7 @@ const Analysis = () => {
                         }
                       }}
                       height={300}
+                      id="ageChart"
                     />
                   )}
                 </div>
@@ -1213,6 +1351,7 @@ const Analysis = () => {
                         }
                       }}
                       height={300}
+                      id="ratingChart"
                     />
                   )}
                 </div>
@@ -1233,6 +1372,7 @@ const Analysis = () => {
                       data={feedbackSentimentData}
                       options={pieChartOptions}
                       height={300}
+                      id="sentimentChart"
                     />
                   )}
                 </div>
@@ -1295,6 +1435,7 @@ const Analysis = () => {
                         },
                       }}
                       height={300}
+                      id="topicsChart"
                     />
                   )}
                 </div>
@@ -1374,6 +1515,7 @@ const Analysis = () => {
                         },
                       }}
                       height={300}
+                      id="priceChart"
                     />
                   )}
                 </div>
@@ -1394,6 +1536,7 @@ const Analysis = () => {
                       data={categoryData}
                       options={pieChartOptions}
                       height={300}
+                      id="categoryChart"
                     />
                   )}
                 </div>
@@ -1465,6 +1608,7 @@ const Analysis = () => {
                         },
                       }}
                       height={300}
+                      id="quantityChart"
                     />
                   )}
                 </div>
@@ -1544,6 +1688,7 @@ const Analysis = () => {
                         },
                       }}
                       height={300}
+                      id="transactionAmountChart"
                     />
                   )}
                 </div>
@@ -1649,6 +1794,7 @@ const Analysis = () => {
                         },
                       }}
                       height={300}
+                      id="transactionTimelineChart"
                     />
                   )}
                 </div>
@@ -1686,6 +1832,7 @@ const Analysis = () => {
                       data={deliveryStatusData}
                       options={pieChartOptions}
                       height={300}
+                      id="deliveryStatusChart"
                     />
                   )}
                 </div>
@@ -1791,6 +1938,7 @@ const Analysis = () => {
                         },
                       }}
                       height={300}
+                      id="deliveryFeeChart"
                     />
                   )}
                 </div>
