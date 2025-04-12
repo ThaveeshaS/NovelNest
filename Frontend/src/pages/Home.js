@@ -4,6 +4,7 @@ import 'bootstrap/dist/css/bootstrap.min.css';
 import Slider from 'react-slick';
 import 'slick-carousel/slick/slick.css';
 import 'slick-carousel/slick/slick-theme.css';
+import { useNavigate } from 'react-router-dom'; // Import useNavigate
 
 import slideVideo1 from '../components/images/SlideVideo1.mp4';
 import Bookimage1 from '../components/images/Bookimage1.jpeg';
@@ -24,6 +25,8 @@ import Bookimage15 from '../components/images/Bookimage15.jpg';
 import Bookimage16 from '../components/images/Bookimage16.jpg';
 
 const Home = () => {
+  const navigate = useNavigate(); // Initialize useNavigate
+
   // Product data divided into two sets
   const featuredProducts = [
     {
@@ -161,123 +164,128 @@ const Home = () => {
     ]
   };
 
-  const ProductCard = ({ product }) => (
-    <div className="px-2">
-      <div
-        className="card shadow-sm mx-auto product-card-container"
-        style={{
-          border: 'none',
-          padding: '5px',
-          height: '340px', // Adjusted height
-          width: '220px',
-          display: 'flex',
-          flexDirection: 'column',
-          justifyContent: 'space-between',
-          marginBottom: '20px',
-          transition: 'transform 0.3s ease, box-shadow 0.3s ease',
-          position: 'relative', // Important for absolute positioning of hover elements
-          overflow: 'hidden', // To contain the hover elements
-        }}
-      >
-        {/* Product Image - Centered */}
-        <div 
-          style={{ 
-            padding: '10px', 
-            textAlign: 'center', 
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            height: '200px', // Adjusted height
-            position: 'relative', // For hover overlay
-          }}
-          className="product-image-container"
-        >
-          <img
-            src={product.image}
-            className="card-img-top"
-            alt={product.title}
-            style={{
-              maxHeight: '200px', // Increased size
-              width: 'auto',
-              maxWidth: '160px', // Increased size
-              objectFit: 'contain',
-              borderRadius: '10px 10px 0 0',
-              transition: 'transform 0.3s ease',
-            }}
-          />
-          
-          {/* Hover overlay with icons - initially hidden */}
-          <div className="hover-overlay">
-            <div className="add-to-cart-icon">
-              <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                <path d="M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"></path>
-                <line x1="3" y1="6" x2="21" y2="6"></line>
-                <path d="M16 10a4 4 0 0 1-8 0"></path>
-              </svg>
-            </div>
-            <div className="wishlist-icon">
-              <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78L12 21.23l8.84-8.84a5.5 5.5 0 0 0 0-7.78z"></path>
-              </svg>
-            </div>
-          </div>
-        </div>
-        
-        {/* Product Information - All Text Centered */}
+  const ProductCard = ({ product }) => {
+    const handleCardClick = (e) => {
+      // Prevent navigation if clicking on the hover overlay (cart or wishlist icons)
+      if (e.target.closest('.hover-overlay')) return;
+      navigate('/login'); // Navigate to Login page
+    };
+
+    return (
+      <div className="px-2">
         <div
-          className="card-body text-center"
-          style={{ 
-            padding: '10px',
+          className="card shadow-sm mx-auto product-card-container"
+          style={{
+            border: 'none',
+            padding: '5px',
+            height: '340px',
+            width: '220px',
             display: 'flex',
             flexDirection: 'column',
-            justifyContent: 'center',
-            height: '120px',
+            justifyContent: 'space-between',
+            marginBottom: '20px',
+            transition: 'transform 0.3s ease, box-shadow 0.3s ease',
+            position: 'relative',
+            overflow: 'hidden',
+            cursor: 'pointer', // Indicate clickable area
           }}
+          onClick={handleCardClick} // Add click handler
         >
-          <h5
-            className="card-title text-center"
+          <div 
             style={{ 
-              fontSize: '1rem', 
-              fontWeight: 'bold', 
-              marginBottom: '5px',
-              overflow: 'hidden',
-              textOverflow: 'ellipsis',
-              display: '-webkit-box',
-              WebkitLineClamp: 2,
-              WebkitBoxOrient: 'vertical',
-              color: '#0066cc', // Blue text color for title
+              padding: '10px', 
+              textAlign: 'center', 
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              height: '200px',
+              position: 'relative',
+            }}
+            className="product-image-container"
+          >
+            <img
+              src={product.image}
+              className="card-img-top"
+              alt={product.title}
+              style={{
+                maxHeight: '200px',
+                width: 'auto',
+                maxWidth: '160px',
+                objectFit: 'contain',
+                borderRadius: '10px 10px 0 0',
+                transition: 'transform 0.3s ease',
+              }}
+            />
+            <div className="hover-overlay">
+              <div className="add-to-cart-icon">
+                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                  <path d="M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"></path>
+                  <line x1="3" y1="6" x2="21" y2="6"></line>
+                  <path d="M16 10a4 4 0 0 1-8 0"></path>
+                </svg>
+              </div>
+              <div className="wishlist-icon">
+                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                  <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78L12 21.23l8.84-8.84a5.5 5.5 0 0 0 0-7.78z"></path>
+                </svg>
+              </div>
+            </div>
+          </div>
+          <div
+            className="card-body text-center"
+            style={{ 
+              padding: '10px',
+              display: 'flex',
+              flexDirection: 'column',
+              justifyContent: 'center',
+              height: '120px',
             }}
           >
-            {product.title}
-          </h5>
-          <p
-            className="card-text text-center"
-            style={{ 
-              fontSize: '0.9rem', 
-              color: '#004080', // Darker blue for author
-              marginBottom: '5px',
-              overflow: 'hidden',
-              textOverflow: 'ellipsis',
-              display: '-webkit-box',
-              WebkitLineClamp: 1,
-              WebkitBoxOrient: 'vertical'
-            }}
-          >
-            {product.author}
-          </p>
-          <p
-            className="card-text text-center"
-            style={{ fontSize: '0.9rem', color: '#0066cc', fontWeight: 'bold' }}
-          >
-            {product.price}
-          </p>
+            <h5
+              className="card-title text-center"
+              style={{ 
+                fontSize: '1rem', 
+                fontWeight: 'bold', 
+                marginBottom: '5px',
+                overflow: 'hidden',
+                textOverflow: 'ellipsis',
+                display: '-webkit-box',
+                WebkitLineClamp: 2,
+                WebkitBoxOrient: 'vertical',
+                color: '#0066cc',
+              }}
+            >
+              {product.title}
+            </h5>
+            <p
+              className="card-text text-center"
+              style={{ 
+                fontSize: '0.9rem', 
+                color: '#004080',
+                marginBottom: '5px',
+                overflow: 'hidden',
+                textOverflow: 'ellipsis',
+                display: '-webkit-box',
+                WebkitLineClamp: 1,
+                WebkitBoxOrient: 'vertical'
+              }}
+            >
+              {product.author}
+            </p>
+            <p
+              className="card-text text-center"
+              style={{ fontSize: '0.9rem', color: '#0066cc', fontWeight: 'bold' }}
+            >
+              {product.price}
+            </p>
+          </div>
         </div>
       </div>
-    </div>
-  );
+    );
+  };
+
   return (
     <div style={{ padding: "20px", textAlign: "center" }}>
-      {/* Carousel Section */}
       <div
         id="carouselExampleAutoplaying"
         className="carousel slide carousel-fade"
@@ -286,7 +294,6 @@ const Home = () => {
         aria-label="Homepage Carousel"
       >
         <div className="carousel-inner">
-          {/* First Slide - VIDEO */}
           <div className="carousel-item active">
             <video
               className="d-block w-100 rounded-3"
@@ -299,7 +306,6 @@ const Home = () => {
             >
               <source src={slideVideo1} type="video/mp4" />
               Your browser does not support the video tag.
-              {/* Fallback Image */}
               <img
                 src="path/to/fallback-image.jpg"
                 alt="Fallback Image"
@@ -310,13 +316,11 @@ const Home = () => {
         </div>
       </div>
 
-      {/* Text Below the Carousel */}
       <div className="my-5">
         <h2 className="display-4 fw-bold text-primary mb-3">Welcome to NovelNest</h2>
         <p className="lead text-secondary">Explore Our Featured Arrivals</p>
       </div>
 
-      {/* First Set of Products - Featured Books */}
       <div className="container mt-4">
         <h3 className="text-start mb-3 ps-2">Featured Books</h3>
         <div className="slider-container">
@@ -328,7 +332,6 @@ const Home = () => {
         </div>
       </div>
 
-      {/* Second Set of Products - New Arrivals */}
       <div className="container mt-5 mb-4">
         <h3 className="text-start mb-3 ps-2">New Arrivals</h3>
         <div className="slider-container">
@@ -340,7 +343,6 @@ const Home = () => {
         </div>
       </div>
 
-      {/* Add some custom CSS to ensure slider uniformity and proper spacing */}
       <style jsx>{`
         .slider-container {
           margin-bottom: 40px;
@@ -369,14 +371,12 @@ const Home = () => {
           padding-bottom: 40px;
         }
         
-        /* Add hover effect for product cards */
         .card:hover {
           transform: translateY(-5px);
           box-shadow: 0 10px 20px rgba(0, 102, 204, 0.37) !important;
           cursor: pointer;
         }
         
-        /* Hover overlay styles */
         .product-image-container {
           position: relative;
         }
@@ -390,12 +390,12 @@ const Home = () => {
           gap: 10px;
           opacity: 0;
           transition: opacity 0.3s ease;
-          pointer-events: none; /* Initially non-interactive */
+          pointer-events: none;
         }
         
         .product-card-container:hover .hover-overlay {
           opacity: 1;
-          pointer-events: auto; /* Make interactive on hover */
+          pointer-events: auto;
         }
         
         .add-to-cart-icon,
