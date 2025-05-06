@@ -16,7 +16,8 @@ const BookDetails = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [selectedQuantity, setSelectedQuantity] = useState(1);
-  const [isCartLoading, setIsCartLoading] = useState(false); // New state for cart loading
+  const [isCartLoading, setIsCartLoading] = useState(false);
+  const [showAddedMessage, setShowAddedMessage] = useState(false);
 
   useEffect(() => {
     const fetchBookDetails = async () => {
@@ -42,7 +43,7 @@ const BookDetails = () => {
 
   const handleAddToCart = () => {
     if (book && book.bookQuantity > 0) {
-      setIsCartLoading(true); // Start loading animation
+      setIsCartLoading(true);
       const cartItem = {
         _id: book._id || id,
         bookTitle: book.bookTitle,
@@ -53,17 +54,21 @@ const BookDetails = () => {
         quantity: selectedQuantity,
       };
       addToCart(cartItem, selectedQuantity);
-      console.log(`Added ${book.bookTitle} to cart with quantity: ${selectedQuantity}`);
-
-      // Simulate a delay (e.g., API call) and then stop loading
+      
+      // Show success message
       setTimeout(() => {
         setIsCartLoading(false);
-      }, 1000); // 1-second delay for demo; adjust as needed
+        setShowAddedMessage(true);
+        setTimeout(() => {
+          setShowAddedMessage(false);
+        }, 3000);
+      }, 1000);
     }
   };
 
   const handleBuyNow = () => {
     console.log(`Proceeding to buy ${book.bookTitle} with quantity: ${selectedQuantity}`);
+    // Add your buy now functionality here
   };
 
   const handleWishlist = () => {
@@ -88,194 +93,736 @@ const BookDetails = () => {
 
   const getStockStatus = (quantity) => {
     if (quantity === 0) {
-      return { text: 'Out of Stock', color: 'red' };
+      return { text: 'Out of Stock', color: 'red', bgColor: '#ffebee' };
     } else if (quantity >= 1 && quantity <= 5) {
-      return { text: 'Limited Stock', color: 'orange' };
-    } else if (quantity > 10) {
-      return { text: 'In Stock', color: 'green' };
+      return { text: 'Limited Stock', color: '#ff6d00', bgColor: '#fff3e0' };
     } else {
-      return { text: 'In Stock', color: 'green' };
+      return { text: 'In Stock', color: '#2e7d32', bgColor: '#e8f5e9' };
     }
   };
 
   if (loading) {
     return (
-      <div className="d-flex justify-content-center my-5">
-        <div className="spinner-border text-primary" role="status">
-          <span className="visually-hidden">Loading...</span>
+      <div className="loading-container">
+        <div className="book">
+          <div className="book__page"></div>
+          <div className="book__page"></div>
+          <div className="book__page"></div>
         </div>
+        <p>Loading book details...</p>
       </div>
     );
   }
 
   if (error) {
     return (
-      <div className="alert alert-danger" role="alert">
-        {error}
+      <div className="error-container">
+        <div className="error-icon">
+          <i className="bi bi-exclamation-triangle"></i>
+        </div>
+        <h3>Oops! Something went wrong</h3>
+        <p>{error}</p>
+        <button className="btn btn-primary" onClick={handleBack}>
+          Return to Books
+        </button>
       </div>
     );
   }
 
   if (!book) {
-    return <div>Book not found.</div>;
+    return (
+      <div className="error-container">
+        <div className="error-icon">
+          <i className="bi bi-question-circle"></i>
+        </div>
+        <h3>Book Not Found</h3>
+        <p>We couldn't find the book you're looking for.</p>
+        <button className="btn btn-primary" onClick={handleBack}>
+          Return to Books
+        </button>
+      </div>
+    );
   }
 
   const stockStatus = getStockStatus(book.bookQuantity);
 
   return (
-    <div>
+    <div className="book-details-page">
       <Header2 />
       <Navbar2 />
-      <div className="container my-5">
-        <div className="row">
-          <div className="col-md-4 text-center mb-4 mb-md-0">
-            <img
-              src={book.coverPage}
-              alt={book.bookTitle}
-              style={{
-                maxHeight: '400px',
-                width: 'auto',
-                maxWidth: '100%',
-                objectFit: 'contain',
-                borderRadius: '10px',
-                boxShadow: '0 4px 8px rgba(0,0,0,0.1)',
-              }}
-              onError={(e) => (e.target.src = 'https://via.placeholder.com/200x300?text=No+Image')}
-            />
-          </div>
-
-          <div className="col-md-8">
-            <h1 className="mb-3" style={{ fontSize: '2.5rem', fontWeight: 'bold', color: '#333' }}>
-              {book.bookTitle}
-            </h1>
-            <p className="mb-1" style={{ fontSize: '1.8rem', fontWeight: 'bold', color: '#e60000' }}>
-              RS. {book.price || 'N/A'}
-            </p>
-            <div className="mb-3">
-              <p className="mb-1" style={{ fontSize: '0.9rem', color: stockStatus.color }}>
-                {stockStatus.text}
-              </p>
-              {book.bookQuantity > 0 && book.bookQuantity <= 5 && (
-                <p className="text-danger" style={{ fontSize: '0.9rem' }}>
-                  Hurry, Only {book.bookQuantity} left!
-                </p>
-              )}
-            </div>
-            <div className="mb-4">
-              <p style={{ fontSize: '1rem', color: '#555', lineHeight: '1.6' }}>
-                {book.bookDescription || 'No description available.'}
-              </p>
-              <ul style={{ fontSize: '1rem', color: '#555', lineHeight: '1.6', paddingLeft: '20px' }}>
-                <li>The inner game of selling.</li>
-                <li>How to eliminate the fear of rejection.</li>
-                <li>How to build unshakeable confidence.</li>
-              </ul>
-            </div>
-            <div className="d-flex align-items-center gap-3 mb-4">
-              <div className="d-flex align-items-center gap-2">
-                <button
-                  className="btn btn-outline-secondary rounded-circle"
-                  onClick={handleDecrement}
-                  disabled={selectedQuantity <= 1 || book.bookQuantity === 0}
-                  style={{ width: '40px', height: '40px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}
-                >
-                  <span style={{ fontSize: '1.5rem', lineHeight: '1' }}>-</span>
-                </button>
-                <div
-                  className="border rounded text-center"
-                  style={{ width: '50px', height: '40px', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '1.2rem' }}
-                >
-                  {selectedQuantity}
-                </div>
-                <button
-                  className="btn btn-outline-secondary rounded-circle"
-                  onClick={handleIncrement}
-                  disabled={selectedQuantity >= book.bookQuantity || book.bookQuantity === 0}
-                  style={{ width: '40px', height: '40px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}
-                >
-                  <span style={{ fontSize: '1.5rem', lineHeight: '1' }}>+</span>
-                </button>
-              </div>
-              <button
-                className="btn btn-primary text-uppercase position-relative"
-                onClick={handleAddToCart}
-                disabled={book.bookQuantity === 0 || isCartLoading}
-                style={{ backgroundColor: '#007bff', borderColor: '#007bff', padding: '10px 20px', fontWeight: 'bold' }}
-              >
-                {isCartLoading ? (
-                  <span className="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>
-                ) : null}
-                {isCartLoading ? 'Adding...' : 'Add to Cart'}
-              </button>
-              <button
-                className="btn btn-warning text-uppercase"
-                onClick={handleBuyNow}
-                disabled={book.bookQuantity === 0}
-                style={{ backgroundColor: '#ff6200', borderColor: '#ff6200', padding: '10px 20px', fontWeight: 'bold', color: '#fff' }}
-              >
-                Buy Now
-              </button>
-            </div>
-            <div className="mb-4">
-              <button
-                className="btn p-0 d-flex align-items-center"
-                onClick={handleWishlist}
-                style={{ color: isInWishlist(id) ? '#ff0000' : '#007bff', fontSize: '0.9rem', border: 'none', background: 'none' }}
-              >
-                <svg
-                  xmlns="http://www.w3.org/2000/svg"
-                  width="16"
-                  height="16"
-                  viewBox="0 0 24 24"
-                  fill={isInWishlist(id) ? '#ff0000' : 'none'}
-                  stroke="currentColor"
-                  strokeWidth="2"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  className="me-1"
-                >
-                  <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78L12 21.23l8.84-8.84a5.5 5.5 0 0 0 0-7.78z"></path>
-                </svg>
-                {isInWishlist(id) ? 'Remove from Wishlist' : 'Add to Wishlist'}
-              </button>
-            </div>
-            <div>
-              <p className="mb-1" style={{ fontSize: '0.9rem', color: '#555' }}>
-                <strong>Author:</strong> {book.authorName || 'Unknown'}
-              </p>
-              <p className="mb-1" style={{ fontSize: '0.9rem', color: '#555' }}>
-                <strong>ISBN:</strong> {book.isbnNumber || 'N/A'}
-              </p>
-              <p className="mb-3" style={{ fontSize: '0.9rem', color: '#555' }}>
-                <strong>Category:</strong> {book.category || 'N/A'}
-              </p>
-            </div>
-            <button className="btn btn-secondary" onClick={handleBack}>
-              Back to Book List
-            </button>
-          </div>
+      
+      <div className="book-details-breadcrumb">
+        <div className="container">
+          <nav aria-label="breadcrumb">
+            <ol className="breadcrumb">
+              <li className="breadcrumb-item"><a href="/" className="text-decoration-none">Home</a></li>
+              <li className="breadcrumb-item"><a href="/bookslist" className="text-decoration-none">Books</a></li>
+              <li className="breadcrumb-item active" aria-current="page">{book.bookTitle}</li>
+            </ol>
+          </nav>
         </div>
       </div>
-
+      
+      <div className="container my-4">
+        <div className="book-details-card">
+          <div className="row g-0">
+            <div className="col-lg-4 book-image-container">
+              <div className="image-wrapper">
+                <img
+                  src={book.coverPage}
+                  alt={book.bookTitle}
+                  className="book-cover"
+                  onError={(e) => (e.target.src = 'https://via.placeholder.com/300x450?text=No+Image')}
+                />
+                {book.bookQuantity === 0 && (
+                  <div className="out-of-stock-overlay">
+                    <span>Out of Stock</span>
+                  </div>
+                )}
+                {book.discount > 0 && (
+                  <div className="ribbon">
+                    -{book.discount}%
+                  </div>
+                )}
+              </div>
+            </div>
+            
+            <div className="col-lg-8">
+              <div className="book-info-container">
+                <div className="book-header">
+                  <h1 className="book-title">{book.bookTitle}</h1>
+                </div>
+                
+                <div className="price-section">
+                  <div className="price">RS. {book.price || 'N/A'}</div>
+                  {book.originalPrice && book.originalPrice > book.price && (
+                    <span className="original-price">Rs. {book.originalPrice}</span>
+                  )}
+                  <div className={`stock-badge ${stockStatus.text.toLowerCase().replace(/\s+/g, '-')}`} style={{ backgroundColor: stockStatus.bgColor, color: stockStatus.color }}>
+                    {stockStatus.text}
+                    {book.bookQuantity > 0 && book.bookQuantity <= 5 && (
+                      <span> - Only {book.bookQuantity} left!</span>
+                    )}
+                  </div>
+                </div>
+                
+                <div className="book-description">
+                  <p>{book.bookDescription || 'No description available.'}</p>
+                </div>
+                
+                <div className="actions-section">
+                  <div className="quantity-selector">
+                    <button
+                      className="btn quantity-btn"
+                      onClick={handleDecrement}
+                      disabled={selectedQuantity <= 1 || book.bookQuantity === 0}
+                    >
+                      −
+                    </button>
+                    <div className="quantity-display">
+                      {selectedQuantity}
+                    </div>
+                    <button
+                      className="btn quantity-btn"
+                      onClick={handleIncrement}
+                      disabled={selectedQuantity >= book.bookQuantity || book.bookQuantity === 0}
+                    >
+                      +
+                    </button>
+                  </div>
+                  
+                  <div className="main-actions">
+                    <button
+                      className={`btn add-to-cart-btn ${book.bookQuantity === 0 ? 'disabled' : ''}`}
+                      onClick={handleAddToCart}
+                      disabled={book.bookQuantity === 0 || isCartLoading}
+                    >
+                      {isCartLoading ? (
+                        <>
+                          <span className="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
+                          <span className="ms-2">Adding...</span>
+                        </>
+                      ) : (
+                        <>
+                          <i className="bi bi-cart-plus me-2"></i>
+                          Add to Cart
+                        </>
+                      )}
+                    </button>
+                    
+                    <button
+                      className={`btn buy-now-btn ${book.bookQuantity === 0 ? 'disabled' : ''}`}
+                      onClick={handleBuyNow}
+                      disabled={book.bookQuantity === 0}
+                    >
+                      <i className="bi bi-lightning-charge-fill me-2"></i>
+                      Buy Now
+                    </button>
+                  </div>
+                  
+                  <button
+                    className={`btn wishlist-btn ${isInWishlist(id) ? 'in-wishlist' : ''}`}
+                    onClick={handleWishlist}
+                  >
+                    <i className={`bi ${isInWishlist(id) ? 'bi-heart-fill' : 'bi-heart'}`}></i>
+                    <span className="ms-2">
+                      {isInWishlist(id) ? 'Remove from Wishlist' : 'Add to Wishlist'}
+                    </span>
+                  </button>
+                </div>
+                
+                {showAddedMessage && (
+                  <div className="added-to-cart-message">
+                    <i className="bi bi-check-circle-fill me-2"></i>
+                    Added to cart successfully!
+                  </div>
+                )}
+                
+                <div className="book-metadata">
+                  <div className="metadata-item">
+                    <span className="metadata-label">Author:</span>
+                    <span className="metadata-value">{book.authorName || 'Unknown Author'}</span>
+                  </div>
+                  <div className="metadata-item">
+                    <span className="metadata-label">ISBN:</span>
+                    <span className="metadata-value">{book.isbnNumber || 'N/A'}</span>
+                  </div>
+                  <div className="metadata-item">
+                    <span className="metadata-label">Category:</span>
+                    <span className="metadata-value">{book.category || 'N/A'}</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+        
+        <div className="back-button-container mt-4">
+          <button className="btn btn-outline-primary" onClick={handleBack}>
+            <i className="bi bi-arrow-left me-2"></i>
+            Back to Book List
+          </button>
+        </div>
+      </div>
+      
       <style jsx>{`
-        .btn-primary, .btn-warning {
-          transition: transform 0.2s ease;
+        /* General Styling */
+        .book-details-page {
+          font-family: 'Poppins', sans-serif;
+          background-color: #f8f9fa;
+          color: #333;
         }
-        .btn-primary:hover, .btn-warning:hover {
+        
+        .book-details-breadcrumb {
+          background-color: white;
+          padding: 10px 0;
+          box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+          margin-bottom: 20px;
+        }
+        
+        .breadcrumb {
+          margin-bottom: 0;
+          font-size: 0.85rem;
+        }
+        
+        .breadcrumb-item a {
+          color: #0066cc;
+          text-decoration: none;
+          transition: color 0.2s ease;
+        }
+        
+        .breadcrumb-item a:hover {
+          color: #004c99;
+        }
+        
+        .breadcrumb-item.active {
+          color: #343a40;
+          font-weight: 500;
+        }
+        
+        /* Book Details Card */
+        .book-details-card {
+          background-color: white;
+          border-radius: 12px;
+          overflow: hidden;
+          box-shadow: 0 5px 20px rgba(0,0,0,0.1);
+          transition: all 0.3s ease;
+        }
+        
+        .book-details-card:hover {
+          box-shadow: 0 8px 30px rgba(0, 102, 204, 0.15);
+          transform: translateY(-5px);
+        }
+        
+        /* Book Image Section */
+        .book-image-container {
+          position: relative;
+          background-color: #f8f9fa;
+          min-height: 500px;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          padding: 30px;
+          border-right: 1px solid #eee;
+        }
+        
+        .image-wrapper {
+          position: relative;
+          height: 100%;
+          width: 100%;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+        }
+        
+        .book-cover {
+          max-height: 450px;
+          max-width: 100%;
+          object-fit: contain;
+          box-shadow: 0 10px 25px rgba(0,0,0,0.15);
+          border-radius: 8px;
+          transition: transform 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        }
+        
+        .book-cover:hover {
           transform: scale(1.05);
         }
-        .btn-outline-secondary:disabled,
-        .btn-primary:disabled,
-        .btn-warning:disabled {
-          opacity: 0.5;
+        
+        .out-of-stock-overlay {
+          position: absolute;
+          top: 0;
+          left: 0;
+          right: 0;
+          bottom: 0;
+          background-color: rgba(255,255,255,0.8);
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          border-radius: 8px;
+        }
+        
+        .out-of-stock-overlay span {
+          background-color: #ff0000;
+          color: white;
+          padding: 8px 20px;
+          border-radius: 30px;
+          font-weight: bold;
+          font-size: 1.2rem;
+          transform: rotate(-15deg);
+          box-shadow: 0 4px 10px rgba(0,0,0,0.2);
+        }
+        
+        .ribbon {
+          position: absolute;
+          top: 20px;
+          left: 0;
+          background: #ff3e3e;
+          color: white;
+          padding: 5px 15px;
+          font-size: 0.9rem;
+          font-weight: 600;
+          border-radius: 0 4px 4px 0;
+          box-shadow: 2px 2px 10px rgba(0,0,0,0.2);
+          z-index: 2;
+        }
+        
+        /* Book Info Section */
+        .book-info-container {
+          padding: 30px;
+          height: 100%;
+          display: flex;
+          flex-direction: column;
+        }
+        
+        .book-header {
+          margin-bottom: 20px;
+        }
+        
+        .book-title {
+          font-size: 2.5rem;
+          font-weight: 700;
+          margin-bottom: 10px;
+          color: #212529;
+          line-height: 1.2;
+        }
+        
+        /* Price Section */
+        .price-section {
+          display: flex;
+          align-items: center;
+          margin-bottom: 25px;
+          padding-bottom: 20px;
+          border-bottom: 1px solid #eee;
+        }
+        
+        .price {
+          font-size: 2rem;
+          font-weight: 700;
+          color: #0066cc;
+          margin-right: 15px;
+        }
+        
+        .original-price {
+          font-size: 1.2rem;
+          color: #999;
+          text-decoration: line-through;
+          margin-right: 15px;
+        }
+        
+        .stock-badge {
+          display: inline-block;
+          padding: 5px 12px;
+          border-radius: 20px;
+          font-size: 0.85rem;
+          font-weight: 500;
+        }
+        
+        .stock-badge.in-stock {
+          background-color: #e8f5e9;
+          color: #2e7d32;
+        }
+        
+        .stock-badge.limited-stock {
+          background-color: #fff3e0;
+          color: #ff6d00;
+        }
+        
+        .stock-badge.out-of-stock {
+          background-color: #ffebee;
+          color: #c62828;
+        }
+        
+        /* Book Description */
+        .book-description {
+          margin-bottom: 30px;
+        }
+        
+        .book-description p {
+          font-size: 1rem;
+          line-height: 1.6;
+          color: #495057;
+          margin-bottom: 15px;
+        }
+        
+        /* Actions Section */
+        .actions-section {
+          margin-bottom: 20px;
+        }
+        
+        .quantity-selector {
+          display: flex;
+          align-items: center;
+          margin-bottom: 15px;
+          background-color: #f8f9fa;
+          border-radius: 8px;
+          padding: 5px;
+          width: fit-content;
+        }
+        
+        .quantity-btn {
+          width: 40px;
+          height: 40px;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          font-size: 1.5rem;
+          font-weight: bold;
+          background-color: white;
+          border: none;
+          border-radius: 6px;
+          transition: all 0.2s ease;
+          color: #495057;
+          box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+        }
+        
+        .quantity-btn:hover:not(:disabled) {
+          background-color: #e9ecef;
+          transform: translateY(-2px);
+        }
+        
+        .quantity-btn:disabled {
+          opacity: 0.3;
           cursor: not-allowed;
         }
-        ul {
-          list-style-type: disc;
+        
+        .quantity-display {
+          width: 50px;
+          height: 40px;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          font-size: 1.2rem;
+          font-weight: 500;
+          color: #212529;
+          margin: 0 5px;
         }
-        /* Ensure spinner aligns nicely */
-        .spinner-border-sm {
-          vertical-align: middle;
+        
+        .main-actions {
+          display: flex;
+          gap: 15px;
+          margin-bottom: 15px;
+        }
+        
+        .add-to-cart-btn, .buy-now-btn {
+          padding: 12px 25px;
+          font-size: 1rem;
+          font-weight: 600;
+          border-radius: 8px;
+          transition: all 0.3s ease;
+        }
+        
+        .add-to-cart-btn {
+          background-color: #0066cc;
+          border-color: #0066cc;
+          color: white;
+        }
+        
+        .add-to-cart-btn:hover:not(:disabled) {
+          background-color: #004c99;
+          transform: translateY(-3px);
+          box-shadow: 0 8px 15px rgba(0, 102, 204, 0.3);
+        }
+        
+        .buy-now-btn {
+          background-color: #ff6b00;
+          border-color: #ff6b00;
+          color: white;
+        }
+        
+        .buy-now-btn:hover:not(:disabled) {
+          background-color: #e55f00;
+          transform: translateY(-3px);
+          box-shadow: 0 8px 15px rgba(255, 107, 0, 0.3);
+        }
+        
+        .wishlist-btn {
+          background-color: transparent;
+          border: 1px solid #ced4da;
+          color: #6c757d;
+          border-radius: 8px;
+          padding: 10px 15px;
+          font-size: 0.9rem;
+          transition: all 0.3s ease;
+        }
+        
+        .wishlist-btn:hover {
+          background-color: #f8f9fa;
+          transform: translateY(-2px);
+        }
+        
+        .wishlist-btn.in-wishlist {
+          color: #ff3e3e;
+          border-color: #ff3e3e;
+        }
+        
+        .wishlist-btn.in-wishlist:hover {
+          background-color: #ffebee;
+        }
+        
+        /* Added to Cart Message */
+        .added-to-cart-message {
+          display: flex;
+          align-items: center;
+          padding: 12px 15px;
+          background-color: #e8f5e9;
+          border-left: 4px solid #4caf50;
+          color: #2e7d32;
+          border-radius: 4px;
+          margin-top: 15px;
+          margin-bottom: 15px;
+          animation: fadeInUp 0.5s ease-out;
+          box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+        }
+        
+        @keyframes fadeInUp {
+          from { 
+            opacity: 0; 
+            transform: translateY(10px); 
+          }
+          to { 
+            opacity: 1; 
+            transform: translateY(0); 
+          }
+        }
+        
+        /* Book Metadata */
+        .book-metadata {
+          margin-top: auto;
+          padding-top: 20px;
+          border-top: 1px solid #eee;
+        }
+        
+        .metadata-item {
+          display: flex;
+          margin-bottom: 8px;
+        }
+        
+        .metadata-label {
+          font-weight: 600;
+          color: #6c757d;
+          width: 100px;
+        }
+        
+        .metadata-value {
+          color: #212529;
+        }
+        
+        /* Back Button */
+        .back-button-container {
+          text-align: center;
+        }
+        
+        .btn-outline-primary {
+          color: #0066cc;
+          border-color: #0066cc;
+          transition: all 0.3s ease;
+        }
+        
+        .btn-outline-primary:hover {
+          background-color: #0066cc;
+          color: white;
+          transform: translateY(-2px);
+          box-shadow: 0 4px 10px rgba(0, 102, 204, 0.2);
+        }
+        
+        /* Loading Animation */
+        .loading-container {
+          display: flex;
+          flex-direction: column;
+          align-items: center;
+          justify-content: center;
+          height: 60vh;
+        }
+        
+        .book {
+          --color: #0066cc;
+          --duration: 6.8s;
+          width: 32px;
+          height: 12px;
+          position: relative;
+          margin: 32px 0 0 0;
+          zoom: 1.5;
+        }
+        
+        .book .book__page {
+          width: 32px;
+          height: 44px;
+          background: var(--color);
+          position: absolute;
+          top: 0;
+          right: 0;
+          animation: pages var(--duration) infinite;
+        }
+        
+        .book .book__page:nth-child(1) {
+          --delay: 0.36s;
+        }
+        .book .book__page:nth-child(2) {
+          --delay: 0.72s;
+        }
+        .book .book__page:nth-child(3) {
+          --delay: 1.08s;
+        }
+        
+        @keyframes pages {
+          0% {
+            transform: rotateY(0deg);
+            right: 0;
+          }
+          20% {
+            background: var(--color);
+          }
+          40% {
+            transform: rotateY(-180deg);
+            background: #e6f0ff;
+            right: 32px;
+            z-index: 1;
+          }
+          80% {
+            transform: rotateY(-180deg);
+            right: 32px;
+            z-index: 1;
+            background: #e6f0ff;
+          }
+          100% {
+            transform: rotateY(0deg);
+            right: 0;
+          }
+        }
+        
+        .loading-container p {
+          color: #6c757d;
+          margin-top: 20px;
+          font-size: 1.1rem;
+        }
+        
+        /* Error Container */
+        .error-container {
+          text-align: center;
+          padding: 50px 20px;
+          max-width: 500px;
+          margin: 0 auto;
+        }
+        
+        .error-icon {
+          font-size: 3rem;
+          color: #ff3e3e;
+          margin-bottom: 20px;
+        }
+        
+        .error-container h3 {
+          margin-bottom: 15px;
+          color: #343a40;
+        }
+        
+        .error-container p {
+          color: #6c757d;
+          margin-bottom: 25px;
+        }
+        
+        /* Responsive Styles */
+        @media (max-width: 991.98px) {
+          .book-image-container {
+            padding: 20px;
+            min-height: 400px;
+            border-right: none;
+            border-bottom: 1px solid #eee;
+          }
+          
+          .book-info-container {
+            padding: 20px;
+          }
+          
+          .book-title {
+            font-size: 2rem;
+          }
+          
+          .price {
+            font-size: 1.8rem;
+          }
+          
+          .main-actions {
+            flex-direction: column;
+            gap: 10px;
+          }
+          
+          .add-to-cart-btn, .buy-now-btn {
+            width: 100%;
+          }
+        }
+        
+        @media (max-width: 767.98px) {
+          .book-image-container {
+            min-height: 300px;
+          }
+          
+          .book-cover {
+            max-height: 300px;
+          }
+          
+          .book-title {
+            font-size: 1.5rem;
+          }
         }
       `}</style>
     </div>
