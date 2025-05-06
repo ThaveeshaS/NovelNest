@@ -7,6 +7,7 @@ import Slider from 'react-slick';
 import 'slick-carousel/slick/slick.css';
 import 'slick-carousel/slick/slick-theme.css';
 import slideVideo1 from '../../components/images/SlideVideo1.mp4';
+import logo2 from '../../components/images/logo2.png';
 import axios from 'axios';
 import { useWishlist } from '../../pages/Product/WishlistContext';
 import { useCart } from '../../pages/Product/CartContext';
@@ -258,23 +259,69 @@ const CustomerDashboard = () => {
         >
           <div className="carousel-inner">
             <div className="carousel-item active">
-              <video
-                className="d-block w-100 rounded-3"
-                autoPlay
-                muted
-                loop
-                playsInline
-                style={{ maxHeight: '600px', objectFit: 'cover' }}
-                aria-label="Background video showcasing our product"
-              >
-                <source src={slideVideo1} type="video/mp4" />
-                Your browser does not support the video tag.
-                <img
-                  src="path/to/fallback-image.jpg"
-                  alt="Fallback Image"
-                  className="d-block w-100"
-                />
-              </video>
+              <div style={{ position: 'relative' }}>
+                <video
+                  className="d-block w-100 rounded-3"
+                  autoPlay
+                  muted
+                  loop
+                  playsInline
+                  style={{ maxHeight: '600px', objectFit: 'cover' }}
+                  aria-label="Background video showcasing our product"
+                >
+                  <source src={slideVideo1} type="video/mp4" />
+                  Your browser does not support the video tag.
+                  <img
+                    src="path/to/fallback-image.jpg"
+                    alt="Fallback Image"
+                    className="d-block w-100"
+                  />
+                </video>
+                <div
+                  style={{
+                    position: 'absolute',
+                    top: '50%',
+                    left: '50%',
+                    transform: 'translate(-50%, -60%)',
+                    display: 'flex',
+                    flexDirection: 'column',
+                    alignItems: 'center',
+                    zIndex: 10,
+                  }}
+                >
+                  <img
+                    src={logo2}
+                    alt="NovelNest Logo"
+                    style={{
+                      width: '200px',
+                      height: 'auto',
+                      marginBottom: '0px',
+                    }}
+                  />
+                  <div
+                    style={{
+                      color: '#ffffff',
+                      fontSize: '5rem',
+                      fontFamily: "'Arial Black', 'Gotham Bold', sans-serif",
+                      fontWeight: 'bold',
+                      textShadow: '2px 2px 4px rgba(0, 0, 0, 0.7)',
+                      marginBottom: '10px',
+                    }}
+                  >
+                    NovelNest
+                  </div>
+                  <div
+                    style={{
+                      color: '#ffffff',
+                      fontSize: '2.0rem',
+                      fontFamily: "'Dancing Script', 'Romance Valley', cursive",
+                      textShadow: '1px 1px 3px rgba(0, 0, 0, 0.5)',
+                    }}
+                  >
+                    Turn the Page to Endless Possibilities!
+                  </div>
+                </div>
+              </div>
             </div>
           </div>
         </div>

@@ -4,9 +4,9 @@ import 'bootstrap/dist/css/bootstrap.min.css';
 import Slider from 'react-slick';
 import 'slick-carousel/slick/slick.css';
 import 'slick-carousel/slick/slick-theme.css';
-import { useNavigate } from 'react-router-dom'; // Import useNavigate
-
+import { useNavigate } from 'react-router-dom';
 import slideVideo1 from '../components/images/SlideVideo1.mp4';
+import logo2 from '../components/images/logo2.png';
 import Bookimage1 from '../components/images/Bookimage1.jpeg';
 import Bookimage2 from '../components/images/Bookimage2.jpg';
 import Bookimage3 from '../components/images/Bookimage3.jpg';
@@ -25,9 +25,8 @@ import Bookimage15 from '../components/images/Bookimage15.jpg';
 import Bookimage16 from '../components/images/Bookimage16.jpg';
 
 const Home = () => {
-  const navigate = useNavigate(); // Initialize useNavigate
+  const navigate = useNavigate();
 
-  // Product data divided into two sets
   const featuredProducts = [
     {
       image: Bookimage1,
@@ -130,7 +129,6 @@ const Home = () => {
     }
   ];
 
-  // Slick slider settings with added paddingBottom for spacing
   const sliderSettings = {
     dots: true,
     infinite: true,
@@ -166,9 +164,8 @@ const Home = () => {
 
   const ProductCard = ({ product }) => {
     const handleCardClick = (e) => {
-      // Prevent navigation if clicking on the hover overlay (cart or wishlist icons)
       if (e.target.closest('.hover-overlay')) return;
-      navigate('/login'); // Navigate to Login page
+      navigate('/login');
     };
 
     return (
@@ -187,9 +184,9 @@ const Home = () => {
             transition: 'transform 0.3s ease, box-shadow 0.3s ease',
             position: 'relative',
             overflow: 'hidden',
-            cursor: 'pointer', // Indicate clickable area
+            cursor: 'pointer',
           }}
-          onClick={handleCardClick} // Add click handler
+          onClick={handleCardClick}
         >
           <div 
             style={{ 
@@ -295,23 +292,69 @@ const Home = () => {
       >
         <div className="carousel-inner">
           <div className="carousel-item active">
-            <video
-              className="d-block w-100 rounded-3"
-              autoPlay
-              muted
-              loop
-              playsInline
-              style={{ maxHeight: '600px', objectFit: 'cover' }}
-              aria-label="Background video showcasing our product"
-            >
-              <source src={slideVideo1} type="video/mp4" />
-              Your browser does not support the video tag.
-              <img
-                src="path/to/fallback-image.jpg"
-                alt="Fallback Image"
-                className="d-block w-100"
-              />
-            </video>
+            <div style={{ position: 'relative' }}>
+              <video
+                className="d-block w-100 rounded-3"
+                autoPlay
+                muted
+                loop
+                playsInline
+                style={{ maxHeight: '600px', objectFit: 'cover' }}
+                aria-label="Background video showcasing our product"
+              >
+                <source src={slideVideo1} type="video/mp4" />
+                Your browser does not support the video tag.
+                <img
+                  src="path/to/fallback-image.jpg"
+                  alt="Fallback Image"
+                  className="d-block w-100"
+                />
+              </video>
+              <div
+                style={{
+                  position: 'absolute',
+                  top: '50%',
+                  left: '50%',
+                  transform: 'translate(-50%, -60%)',
+                  display: 'flex',
+                  flexDirection: 'column',
+                  alignItems: 'center',
+                  zIndex: 10,
+                }}
+              >
+                <img
+                  src={logo2}
+                  alt="NovelNest Logo"
+                  style={{
+                    width: '200px',
+                    height: 'auto',
+                    marginBottom: '0px',
+                  }}
+                />
+                <div
+                  style={{
+                    color: '#ffffff',
+                    fontSize: '5rem',
+                    fontFamily: "'Arial Black', 'Gotham Bold', sans-serif",
+                    fontWeight: 'bold',
+                    textShadow: '2px 2px 4px rgba(0, 0, 0, 0.7)',
+                    marginBottom: '10px',
+                  }}
+                >
+                  NovelNest
+                </div>
+                <div
+                  style={{
+                    color: '#ffffff',
+                    fontSize: '2.0rem',
+                    fontFamily: "'Dancing Script', 'Romance Valley', cursive",
+                    textShadow: '1px 1px 3px rgba(0, 0, 0, 0.5)',
+                  }}
+                >
+                  Turn the Page to Endless Possibilities!
+                </div>
+              </div>
+            </div>
           </div>
         </div>
       </div>

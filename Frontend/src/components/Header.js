@@ -1,5 +1,5 @@
 import React from 'react';
-import logo from './images/logo.jpg'; // Adjust the path to your logo image
+import logo2 from './images/logo2.png'; // Adjust the path to your logo image
 import { Link } from 'react-router-dom';
 import 'bootstrap/dist/css/bootstrap.min.css';
 import 'bootstrap/dist/js/bootstrap.bundle.min';
@@ -10,7 +10,7 @@ function Header() {
       <div className="container-fluid">
         {/* Company Logo and Name */}
         <Link className="navbar-brand d-flex align-items-center" to="/">
-          <img src={logo} alt="Company Logo" style={{ height: '55px' }} />
+          <img src={logo2} alt="Company Logo" style={{ height: '55px' }} />
           <span className="ms-2" style={{ fontSize: '1.4rem', fontWeight: 'bold' }}> NovelNest Book Store</span>
         </Link>
 
