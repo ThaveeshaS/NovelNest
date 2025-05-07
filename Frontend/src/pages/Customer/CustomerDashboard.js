@@ -209,6 +209,56 @@ const CustomerDashboard = () => {
   return (
     <div className="dashboard-container">
       <Header2 />
+
+      <div className="announcement-bar" style={{ position: 'relative', zIndex: 10 }}>
+        <marquee-text
+          scrolling-speed="13"
+          className="announcement-bar__scrolling-list"
+          style={{ ['--marquee-animation-duration']: '30s' }}
+        >
+          <span className="announcement-bar__item">
+            <p className="bold text-xxs">FREE SL SHIPPING ON ORDERS OVER RS.10,000</p>
+            <span className="shape-circle shape--sm"></span>
+            <p className="bold text-xxs">ISLANDWIDE SHIPPING AVAILABLE</p>
+            <span className="shape-circle shape--sm"></span>
+            <p className="bold text-xxs">NEW ARRIVALS</p>
+            <span className="shape-circle shape--sm"></span>
+          </span>
+          <span className="announcement-bar__item">
+            <p className="bold text-xxs">FREE SL SHIPPING ON ORDERS OVER RS.10,000</p>
+            <span className="shape-circle shape--sm"></span>
+            <p className="bold text-xxs">ISLANDWIDE SHIPPING AVAILABLE</p>
+            <span className="shape-circle shape--sm"></span>
+            <p className="bold text-xxs">NEW ARRIVALS</p>
+            <span className="shape-circle shape--sm"></span>
+          </span>
+          <span className="announcement-bar__item">
+            <p className="bold text-xxs">FREE SL SHIPPING ON ORDERS OVER RS.10,000</p>
+            <span className="shape-circle shape--sm"></span>
+            <p className="bold text-xxs">ISLANDWIDE SHIPPING AVAILABLE</p>
+            <span className="shape-circle shape--sm"></span>
+            <p className="bold text-xxs">NEW ARRIVALS</p>
+            <span className="shape-circle shape--sm"></span>
+          </span>
+          <span className="announcement-bar__item">
+            <p className="bold text-xxs">FREE SL SHIPPING ON ORDERS OVER RS.10,000</p>
+            <span className="shape-circle shape--sm"></span>
+            <p className="bold text-xxs">ISLANDWIDE SHIPPING AVAILABLE</p>
+            <span className="shape-circle shape--sm"></span>
+            <p className="bold text-xxs">NEW ARRIVALS</p>
+            <span className="shape-circle shape--sm"></span>
+          </span>
+          <span className="announcement-bar__item">
+            <p className="bold text-xxs">FREE SL SHIPPING ON ORDERS OVER RS.10,000</p>
+            <span className="shape-circle shape--sm"></span>
+            <p className="bold text-xxs">ISLANDWIDE SHIPPING AVAILABLE</p>
+            <span className="shape-circle shape--sm"></span>
+            <p className="bold text-xxs">NEW ARRIVALS</p>
+            <span className="shape-circle shape--sm"></span>
+          </span>
+        </marquee-text>
+      </div>
+
       <Navbar2 />
 
       <div className="hero-section">
@@ -249,7 +299,7 @@ const CustomerDashboard = () => {
                   <line x1="12" y1="22.08" x2="12" y2="12"></line>
                 </svg>
                 <h3>Free Shipping</h3>
-                <p>On orders over Rs.1000</p>
+                <p>On orders over Rs.10,000</p>
               </div>
             </div>
             <div className="col-md-3 col-6">
@@ -264,7 +314,7 @@ const CustomerDashboard = () => {
             </div>
             <div className="col-md-3 col-6">
               <div className="feature-item">
-                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24  Агентство по страхованию вкладов24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                   <rect x="1" y="3" width="15" height="13"></rect>
                   <polygon points="16 8 20 8 23 11 23 16 16 16 16 8"></polygon>
                   <circle cx="5.5" cy="18.5" r="2.5"></circle>
@@ -447,6 +497,61 @@ const CustomerDashboard = () => {
           font-size: 0.9rem;
           color: #666;
           margin-bottom: 0;
+        }
+
+        /* Announcement Bar */
+        .announcement-bar {
+          background-color: #f8f9fa;
+          color: #333;
+          padding: 6px 0; /* Reduced padding to decrease height */
+          border-bottom: 1px solid #ddd;
+          font-family: 'Poppins', sans-serif;
+          width: 100%;
+          overflow: hidden;
+        }
+
+        .announcement-bar__scrolling-list {
+          display: flex;
+          align-items: center;
+          white-space: nowrap;
+          animation: marquee 30s linear infinite; /* Slower animation duration */
+          width: 100%;
+        }
+
+        .announcement-bar__item {
+          display: inline-flex;
+          align-items: center;
+          margin-right: 30px; /* Equal spacing between items */
+        }
+
+        .bold {
+          font-weight: 600;
+          margin: 0 20px; /* Equal spacing between messages */
+          font-size: 0.85rem; /* Reduced font size */
+          white-space: nowrap; /* Prevent text wrapping */
+        }
+
+        .text-xxs {
+          font-size: 0.75rem; /* Reduced font size */
+        }
+
+        .shape-circle {
+          width: 5px; /* Slightly smaller circle */
+          height: 5px;
+          background-color: #0066cc;
+          border-radius: 50%;
+          display: inline-block;
+          margin: 0 20px; /* Equal spacing around circles */
+        }
+
+        .shape--sm {
+          width: 3px; /* Smaller circle */
+          height: 3px;
+        }
+
+        @keyframes marquee {
+          0% { transform: translateX(100%); }
+          100% { transform: translateX(-100%); }
         }
 
         /* Category Section */
@@ -783,6 +888,13 @@ const CustomerDashboard = () => {
           .category-section {
             padding: 40px 0;
           }
+          .announcement-bar__item {
+            margin-right: 20px; /* Adjust spacing for smaller screens */
+          }
+          .bold {
+            font-size: 0.75rem; /* Further reduced font size */
+            margin: 0 15px; /* Adjusted spacing */
+          }
         }
 
         @media (max-width: 576px) {
@@ -797,6 +909,16 @@ const CustomerDashboard = () => {
           }
           .feature-item p {
             font-size: 0.8rem;
+          }
+          .announcement-bar__item {
+            margin-right: 15px; /* Further reduce spacing on very small screens */
+          }
+          .bold {
+            font-size: 0.7rem; /* Further reduce font size on very small screens */
+            margin: 0 10px;
+          }
+          .shape-circle {
+            margin: 0 15px; /* Adjust spacing for smaller screens */
           }
         }
       `}</style>
