@@ -4,6 +4,7 @@ import axios from "axios";
 import { useNavigate } from "react-router-dom";
 import "bootstrap/dist/css/bootstrap.min.css";
 import { FaUser, FaLock, FaSignInAlt, FaArrowLeft, FaUserShield } from "react-icons/fa";
+import Header from "../components/Header";
 
 const AdminLogin = () => {
   const [username, setUsername] = useState("");
@@ -34,10 +35,12 @@ const AdminLogin = () => {
   };
 
   return (
+    <div className="bg-light min-vh-100">
+      <Header />
     <div
       className="min-vh-100 d-flex justify-content-center align-items-center"
       style={{
-        backgroundImage: "linear-gradient(rgba(0, 0, 0, 0), rgba(0, 0, 0, 0)), url('https://wallpapercave.com/wp/wp9118796.jpg')",
+        backgroundImage: "linear-gradient(rgba(0, 0, 0, 0), rgba(0, 0, 0, 0)), url('https://static.vecteezy.com/ti/vecteur-libre/p3/22891537-plat-minimaliste-conception-panorama-de-une-montagne-paysage-facile-a-changement-couleurs-vectoriel.jpg')",
         backgroundSize: "cover",
         backgroundPosition: "center",
       }}
@@ -137,6 +140,7 @@ const AdminLogin = () => {
           </div>
         </div>
       </div>
+    </div>
     </div>
   );
 };

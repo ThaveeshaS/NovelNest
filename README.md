@@ -40,8 +40,6 @@ NovelNest is a modern, voice-enabled online bookstore with a comprehensive admin
 - MongoDB with Mongoose ODM
 - JWT Authentication
 - RESTful API design
-- Docker for containerization
-- Jest + Supertest for testing
 
 ## Installation
 
@@ -49,21 +47,31 @@ NovelNest is a modern, voice-enabled online bookstore with a comprehensive admin
 - Node.js v16+
 - MongoDB (local or Atlas)
 
+### Project Setup
+```bash
+git clone https://github.com/ThaveeshaS/NovelNest.git
+```
+
 ### Frontend Setup
 ```bash
-git clone https://github.com/yourusername/novelnest-frontend.git
-cd novelnest-frontend
+cd frontend
 npm install
-cp .env.example .env
-# Configure your environment variables
 npm start
 ```
 ### Backend Setup
 ```bash
-git clone https://github.com/yourusername/novelnest-backend.git
 cd novelnest-backend
 npm install
-cp .env.example .env
-# Configure your environment variables
-npm run dev
+npm start
 ```
+### Configure your environment variables
+- Add database credential and Port number etc.
+
+## Contributors
+- Pasindu W.G.V (IT22273512) 
+
+- Sanjana K.G.T.S (IT22224170)
+
+- Viduranga S.P.S (IT22215192)
+
+- Chandraguptha H.A.T (IT22091970)
