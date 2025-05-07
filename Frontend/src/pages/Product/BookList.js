@@ -194,7 +194,7 @@ const BookList = () => {
             <h3 className="book-title">{product.bookTitle}</h3>
             <p className="book-author">{product.authorName}</p>
             <div className="book-price-row">
-              <span className="book-price">RS. {product.price}</span>
+              <span className="book-price" style={{ color: '#0066cc' }}>RS. {product.price}</span>
               <span className="stock-status" style={{ backgroundColor: status.bgColor, color: status.color }}>
                 {status.text}
               </span>
@@ -724,7 +724,7 @@ const BookList = () => {
         .book-price {
           font-size: 1.1rem;
           font-weight: 700;
-          color: #e53935;
+          color: #0066cc; /* Changed to blue */
         }
         
         .stock-status {
