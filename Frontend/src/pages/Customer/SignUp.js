@@ -3,6 +3,7 @@ import React, { useState } from "react";
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
 import "bootstrap/dist/css/bootstrap.min.css";
+import Header from "../../components/Header";
 
 export default function CustomerSignUp() {
   const navigate = useNavigate();
@@ -134,6 +135,8 @@ export default function CustomerSignUp() {
   const maxDateString = maxDate.toISOString().split("T")[0];
 
   return (
+    <div className="bg-light min-vh-100">
+      <Header />
     <div
       className="d-flex justify-content-center align-items-center vh-100"
       style={{
@@ -374,6 +377,7 @@ export default function CustomerSignUp() {
           </div>
         </div>
       </div>
+    </div>
     </div>
   );
 }
