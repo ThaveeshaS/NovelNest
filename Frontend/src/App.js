@@ -64,6 +64,9 @@ function App() {
     "/admin/DeliveryDetails",
     "/trackdelivery",
     "/analysis",
+    "/adminlogin",
+    "/login",
+    "/signup",
   ];
 
   // Check if the current path is in the exclude list or matches dynamic routes
