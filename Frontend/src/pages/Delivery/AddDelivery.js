@@ -562,7 +562,26 @@ const AddDelivery = () => {
                 )}
               </MotionBox>
               
-              <Box display="flex" justifyContent="flex-end" mt={3}>
+              <Box display="flex" justifyContent="space-between" mt={3}>
+                <Button
+                  variant="contained"
+                  color="secondary"
+                  onClick={() => navigate('/trackdelivery')}
+                  startIcon={<GpsFixedIcon />}
+                  sx={{ 
+                    borderRadius: '8px',
+                    padding: '10px 24px',
+                    boxShadow: '0 4px 12px rgba(0, 0, 0, 0.1)',
+                    '&:hover': {
+                      boxShadow: '0 6px 16px rgba(0, 0, 0, 0.2)',
+                      transform: 'translateY(-2px)'
+                    },
+                    transition: 'all 0.3s ease',
+                    background: 'linear-gradient(45deg, #ff6b6b, #ff8e53)',
+                  }}
+                >
+                  Track Deliveries
+                </Button>
                 <Button
                   variant="contained"
                   color="primary"
