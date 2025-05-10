@@ -171,9 +171,9 @@ const CustomerDashboard = () => {
             <h5 className="book-title">{product.bookTitle}</h5>
             <p className="author-name">{product.authorName}</p>
             <div className="price-container">
-              <span className="current-price">Rs. {product.price}</span>
+              <span className="current-price">Rs. {Number(product.price).toFixed(2)}</span>
               {product.originalPrice && product.originalPrice > product.price && (
-                <span className="original-price">Rs. {product.originalPrice}</span>
+                <span className="original-price">Rs. {Number(product.originalPrice).toFixed(2)}</span>
               )}
             </div>
           </div>
@@ -314,7 +314,7 @@ const CustomerDashboard = () => {
             </div>
             <div className="col-md-3 col-6">
               <div className="feature-item">
-                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24  Агентство по страхованию вкладов24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                   <rect x="1" y="3" width="15" height="13"></rect>
                   <polygon points="16 8 20 8 23 11 23 16 16 16 16 8"></polygon>
                   <circle cx="5.5" cy="18.5" r="2.5"></circle>

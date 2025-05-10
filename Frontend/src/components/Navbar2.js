@@ -16,7 +16,6 @@ const Navbar2 = () => {
         <div className="d-flex justify-content-center w-100">
           <Link to="/customerdashboard" className="nav-link text-white mx-3">Home</Link>
           <Link to="/bookslist" className="nav-link text-white mx-3">Books</Link>
-          <Link to="/author" className="nav-link text-white mx-3">Author</Link>
           
           {/* Voice Mic Icon */}
           <Link to="/home1" className="nav-link text-white mx-3">

@@ -60,7 +60,7 @@ npm start
 ```
 ### Backend Setup
 ```bash
-cd novelnest-backend
+cd backend
 npm install
 npm start
 ```
@@ -75,3 +75,12 @@ npm start
 - Viduranga S.P.S (IT22215192)
 
 - Chandraguptha H.A.T (IT22091970)
+
+## Project Screenshot's 
+![Image](https://github.com/user-attachments/assets/7193ef9a-9994-4ce6-baed-0632a3acf945)
+![Image](https://github.com/user-attachments/assets/25d2e362-85c7-49fc-931a-1c1fe8d78b33)
+![Image](https://github.com/user-attachments/assets/ca437650-14e9-4b92-9601-61c89216c459)
+![Image](https://github.com/user-attachments/assets/1fdf909f-67dc-4fb2-9614-d730b4d03da0)
+![Image](https://github.com/user-attachments/assets/ae7df91c-30a0-4c54-be01-ddff24056b96)
+![Image](https://github.com/user-attachments/assets/2e6cd779-8d61-4918-81e2-cbcfb629c8d2)
+![Image](https://github.com/user-attachments/assets/4342de5f-da73-43b4-8a1b-78f8850a4a4f)

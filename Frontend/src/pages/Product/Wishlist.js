@@ -72,9 +72,9 @@ const WishlistPage = () => {
                     </td>
                     <td className="price-column">
                       {product.originalPrice && (
-                        <div className="original-price">LKR {product.originalPrice}</div>
+                        <div className="original-price">LKR {Number(product.originalPrice).toFixed(2)}</div>
                       )}
-                      <div className="current-price">LKR {product.price}</div>
+                      <div className="current-price">LKR {Number(product.price).toFixed(2)}</div>
                     </td>
                     <td className="stock-column">
                       <span className="in-stock">In Stock</span>
