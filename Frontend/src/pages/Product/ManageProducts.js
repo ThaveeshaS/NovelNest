@@ -2,7 +2,7 @@ import React, { useEffect, useState } from "react";
 import axios from "axios";
 import { jsPDF } from "jspdf";
 import autoTable from "jspdf-autotable";
-import { useNavigate } from "react-router-dom"; // Import useNavigate
+import { useNavigate } from "react-router-dom";
 import "bootstrap/dist/css/bootstrap.min.css";
 import logo from "../../components/images/logo.jpg";
 import Header2 from "../../components/Header2";
@@ -13,7 +13,7 @@ export default function ManageProducts() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
   const [selectedCategory, setSelectedCategory] = useState("All");
-  const navigate = useNavigate(); // Initialize useNavigate
+  const navigate = useNavigate();
 
   useEffect(() => {
     const fetchProducts = async () => {
@@ -54,11 +54,11 @@ export default function ManageProducts() {
     const margin = 15;
 
     // Set background color
-    doc.setFillColor(255, 252, 255); // Light background
+    doc.setFillColor(255, 252, 255);
     doc.rect(0, 0, pageWidth, pageHeight, "F");
 
     // Add borders to the entire page
-    doc.setDrawColor(0, 71, 171); // Company blue color
+    doc.setDrawColor(0, 71, 171);
     doc.setLineWidth(1);
     doc.rect(margin, margin, pageWidth - 2 * margin, pageHeight - 2 * margin);
 
@@ -136,7 +136,7 @@ export default function ManageProducts() {
         product.bookTitle,
         product.authorName,
         product.category,
-        `RS ${product.price}`, // Changed from $ to RS
+        `RS ${Number(product.price).toFixed(2)}`,
         product.bookQuantity,
         product.isbnNumber,
         product.language,
@@ -162,7 +162,7 @@ export default function ManageProducts() {
         lineWidth: 0.1,
       },
       columnStyles: {
-        0: { cellWidth: "auto" }, // Give book title more space
+        0: { cellWidth: "auto" },
       },
     });
 
@@ -182,24 +182,24 @@ export default function ManageProducts() {
     );
 
     // Add signature section with dotted lines
-    const signY = pageHeight - margin - 22; // Position near the bottom
-    doc.setDrawColor(0); // Black color
+    const signY = pageHeight - margin - 22;
+    doc.setDrawColor(0);
     doc.setLineWidth(0.5);
 
     // Draw dotted lines for signatures
-    doc.setLineDash([1, 1]); // Dotted line pattern
-    doc.line(margin + 10, signY, margin + 60, signY); // Left dotted line
-    doc.line(pageWidth - margin - 60, signY, pageWidth - margin - 10, signY); // Right dotted line
-    doc.setLineDash([]); // Reset to solid line
+    doc.setLineDash([1, 1]);
+    doc.line(margin + 10, signY, margin + 60, signY);
+    doc.line(pageWidth - margin - 60, signY, pageWidth - margin - 10, signY);
+    doc.setLineDash([]);
 
     // Add labels for the signature section
     doc.setFontSize(9);
-    doc.text("Prepared By", margin + 10, signY + 5); // Left label
+    doc.text("Prepared By", margin + 10, signY + 5);
     doc.text(
       "Inventory Manager Signature",
       pageWidth - margin - 60,
       signY + 5
-    ); // Right label
+    );
 
     // Add footer
     doc.setFontSize(8);
@@ -370,7 +370,7 @@ export default function ManageProducts() {
                               </span>
                             </td>
                             <td className="text-primary fw-bold">
-                              RS.{product.price}
+                              RS. {Number(product.price).toFixed(2)}
                             </td>
                             <td>
                               <span

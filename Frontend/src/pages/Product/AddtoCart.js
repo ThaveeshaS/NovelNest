@@ -15,11 +15,10 @@ const AddToCartPage = () => {
     const item = cartItems.find(i => i._id === itemId);
     const newQuantity = item.quantity + delta;
 
-    if (newQuantity < 1) return; // Prevent quantity from going below 1
+    if (newQuantity < 1) return;
 
     await updateQuantity(itemId, newQuantity);
 
-    // Check if the updated quantity matches the requested quantity
     const updatedItem = cartItems.find(i => i._id === itemId);
     if (newQuantity > updatedItem?.bookQuantity) {
       setQuantityErrors(prev => ({
@@ -109,7 +108,7 @@ const AddToCartPage = () => {
                         </div>
                       </td>
                       <td className="price-column">
-                        <div className="current-price">Rs. {item.price.toLocaleString('en-US', { minimumFractionDigits: 2 })}</div>
+                        <div className="current-price">Rs. {Number(item.price).toFixed(2)}</div>
                       </td>
                       <td className="quantity-column">
                         <div className="quantity-controls">
@@ -134,7 +133,7 @@ const AddToCartPage = () => {
                         )}
                       </td>
                       <td className="subtotal-column">
-                        <div className="current-price">Rs. {(item.price * item.quantity).toLocaleString('en-US', { minimumFractionDigits: 2 })}</div>
+                        <div className="current-price">Rs. {(item.price * item.quantity).toFixed(2)}</div>
                       </td>
                       <td className="action-column">
                         <button
@@ -175,11 +174,11 @@ const AddToCartPage = () => {
               <h3 className="summary-title">CART DETAILS</h3>
               <div className="summary-item">
                 <span>Subtotal</span>
-                <span>Rs. {subtotal.toLocaleString('en-US', { minimumFractionDigits: 2 })}</span>
+                <span>Rs. {subtotal.toFixed(2)}</span>
               </div>
               <div className="summary-item">
                 <span>Courier</span>
-                <span>Rs. {deliveryFee.toLocaleString('en-US', { minimumFractionDigits: 2 })}</span>
+                <span>Rs. {deliveryFee.toFixed(2)}</span>
               </div>
               <div className="summary-item">
                 <span>Delivery within 2-5 days</span>
@@ -187,7 +186,7 @@ const AddToCartPage = () => {
               </div>
               <div className="summary-item total">
                 <span>TOTAL</span>
-                <span>Rs. {totalPrice.toLocaleString('en-US', { minimumFractionDigits: 2 })}</span>
+                <span>Rs. {totalPrice.toFixed(2)}</span>
               </div>
               <button
                 className="checkout-btn"

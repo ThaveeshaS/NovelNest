@@ -194,9 +194,9 @@ const BookDetails = () => {
                 </div>
                 
                 <div className="price-section">
-                  <div className="price">RS. {book.price || 'N/A'}</div>
+                  <div className="price">Rs. {book.price ? Number(book.price).toFixed(2) : 'N/A'}</div>
                   {book.originalPrice && book.originalPrice > book.price && (
-                    <span className="original-price">Rs. {book.originalPrice}</span>
+                    <span className="original-price">Rs. {Number(book.originalPrice).toFixed(2)}</span>
                   )}
                   <div className={`stock-badge ${stockStatus.text.toLowerCase().replace(/\s+/g, '-')}`} style={{ backgroundColor: stockStatus.bgColor, color: stockStatus.color }}>
                     {stockStatus.text}
