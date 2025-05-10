@@ -15,6 +15,7 @@ const BookList = () => {
   const [error, setError] = useState(null);
   const [activeCategory, setActiveCategory] = useState('all');
   const [addedToCart, setAddedToCart] = useState(null);
+  const [searchQuery, setSearchQuery] = useState('');
   const navigate = useNavigate();
   const { addToWishlist, removeFromWishlist, isInWishlist } = useWishlist();
   const { addToCart, isInCart } = useCart();
@@ -65,13 +66,27 @@ const BookList = () => {
 
   const handleCategoryChange = (category) => {
     setActiveCategory(category);
-    // Smooth scroll to the category section if not viewing 'all'
+    setSearchQuery(''); // Reset search query when changing category
     if (category !== 'all') {
       const element = document.getElementById(`${category}-section`);
       if (element) {
         element.scrollIntoView({ behavior: 'smooth', block: 'start' });
       }
     }
+  };
+
+  const handleSearchChange = (e) => {
+    setSearchQuery(e.target.value);
+  };
+
+  const filterBooks = (books) => {
+    if (!searchQuery) return books;
+    const query = searchQuery.toLowerCase();
+    return books.filter(
+      (book) =>
+        book.bookTitle.toLowerCase().includes(query) ||
+        book.authorName.toLowerCase().includes(query)
+    );
   };
 
   const ProductCard = ({ product }) => {
@@ -194,7 +209,10 @@ const BookList = () => {
             <h3 className="book-title">{product.bookTitle}</h3>
             <p className="book-author">{product.authorName}</p>
             <div className="book-price-row">
-              <span className="book-price" style={{ color: '#0066cc' }}>RS. {product.price}</span>
+              <span className="book-price" style={{ color: '#0066cc' }}>Rs. {Number(product.price).toFixed(2)}</span>
+              {product.originalPrice && product.originalPrice > product.price && (
+                <span className="original-price">Rs. {Number(product.originalPrice).toFixed(2)}</span>
+              )}
               <span className="stock-status" style={{ backgroundColor: status.bgColor, color: status.color }}>
                 {status.text}
               </span>
@@ -206,18 +224,22 @@ const BookList = () => {
   };
 
   const getVisibleBooks = () => {
+    const filteredFiction = filterBooks(fictionBooks);
+    const filteredNonFiction = filterBooks(nonFictionBooks);
+    const filteredChildren = filterBooks(childrenBooks);
+
     if (activeCategory === 'all') {
       return {
-        fiction: fictionBooks,
-        nonFiction: nonFictionBooks,
-        children: childrenBooks
+        fiction: filteredFiction,
+        nonFiction: filteredNonFiction,
+        children: filteredChildren
       };
     } else if (activeCategory === 'fiction') {
-      return { fiction: fictionBooks, nonFiction: [], children: [] };
-    } else if (activeCategory === 'nonFiction') {
-      return { fiction: [], nonFiction: nonFictionBooks, children: [] };
+      return { fiction: filteredFiction, nonFiction: [], children: [] };
+    } else if (activeCategory == 'nonFiction') {
+      return { fiction: [], nonFiction: filteredNonFiction, children: [] };
     } else if (activeCategory === 'children') {
-      return { fiction: [], nonFiction: [], children: childrenBooks };
+      return { fiction: [], nonFiction: [], children: filteredChildren };
     }
   };
 
@@ -234,6 +256,17 @@ const BookList = () => {
             <div className="col-md-8 mx-auto text-center">
               <h1 className="hero-title">Discover Your Next Favorite Book</h1>
               <p className="hero-subtitle">Explore our curated collection of books across various genres</p>
+              
+              <div className="search-bar mb-4">
+                <input
+                  type="text"
+                  className="search-input"
+                  placeholder="Search by title or author..."
+                  value={searchQuery}
+                  onChange={handleSearchChange}
+                />
+                <i className="bi bi-search search-icon"></i>
+              </div>
               
               <div className="category-tabs">
                 <button 
@@ -349,7 +382,7 @@ const BookList = () => {
                 <div className="no-books-found">
                   <i className="bi bi-book"></i>
                   <h3>No books found</h3>
-                  <p>We couldn't find any books in the selected category.</p>
+                  <p>We couldn't find any books matching your search or in the selected category.</p>
                   <button className="btn btn-primary" onClick={() => handleCategoryChange('all')}>
                     View All Categories
                   </button>
@@ -387,6 +420,52 @@ const BookList = () => {
           font-size: 1.2rem;
           opacity: 0.9;
           margin-bottom: 30px;
+        }
+        
+        /* Search Bar */
+        .search-bar {
+          position: relative;
+          max-width: 500px;
+          margin: 0 auto 20px;
+        }
+        
+        .search-input {
+          width: 100%;
+          padding: 10px 40px 10px 15px;
+          border: 2px solid rgba(255, 255, 255, 0.3);
+          border-radius: 25px;
+          background-color: rgba(255, 255, 255, 0.2);
+          color: white;
+          font-size: 1rem;
+          transition: all 0.3s ease;
+        }
+        
+        .search-input::placeholder {
+          color: rgba(255, 255, 255, 0.7);
+        }
+        
+        .search-input:focus {
+          outline: none;
+          border-color: white;
+          background-color: white;
+          color: #333;
+        }
+        
+        .search-input:focus::placeholder {
+          color: #6c757d;
+        }
+        
+        .search-icon {
+          position: absolute;
+          right: 15px;
+          top: 50%;
+          transform: translateY(-50%);
+          color: white;
+          font-size: 1.2rem;
+        }
+        
+        .search-input:focus + .search-icon {
+          color: #333;
         }
         
         /* Category Tabs */
@@ -725,6 +804,13 @@ const BookList = () => {
           font-size: 1.1rem;
           font-weight: 700;
           color: #0066cc; /* Changed to blue */
+        }
+        
+        .original-price {
+          font-size: 0.9rem;
+          color: #999;
+          text-decoration: line-through;
+          margin-right: 5px;
         }
         
         .stock-status {
