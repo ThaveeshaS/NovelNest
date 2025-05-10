@@ -60,7 +60,7 @@ npm start
 ```
 ### Backend Setup
 ```bash
-cd novelnest-backend
+cd backend
 npm install
 npm start
 ```
