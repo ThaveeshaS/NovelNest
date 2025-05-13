@@ -271,7 +271,7 @@ const Home = () => {
                   <line x1="12" y1="22.08" x2="12" y2="12"></line>
                 </svg>
                 <h3>Free Shipping</h3>
-                <p>On orders over Rs.1000</p>
+                <p>On orders over Rs.10,000</p>
               </div>
             </div>
             <div className="col-md-3 col-6">
