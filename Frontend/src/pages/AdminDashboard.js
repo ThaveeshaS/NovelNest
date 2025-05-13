@@ -6,18 +6,11 @@ import { Container, Row, Col, Card, Button, Alert, Badge } from "react-bootstrap
 import "bootstrap/dist/css/bootstrap.min.css";
 import Header2 from "../components/Header2";
 import { motion } from "framer-motion";
-import io from "socket.io-client";
 
 const AdminDashboard = () => {
   const [admin, setAdmin] = useState(null);
   const [error, setError] = useState("");
-  const [stats, setStats] = useState({
-    totalCustomers: 0,
-    averageRating: 0,
-    lowStockBooks: 0,
-  });
   const navigate = useNavigate();
-  const socket = io("http://localhost:5000"); // Connect to WebSocket server
 
   useEffect(() => {
     const fetchAdminData = async () => {
@@ -37,6 +30,7 @@ const AdminDashboard = () => {
             },
           }
         );
+
         setAdmin(response.data.admin);
       } catch (err) {
         setError("Failed to fetch admin data");
@@ -46,73 +40,8 @@ const AdminDashboard = () => {
       }
     };
 
-    const fetchStats = async () => {
-      try {
-        const token = localStorage.getItem("adminToken");
-        // Fetch total customers
-        const customersResponse = await axios.get(
-          "http://localhost:5000/api/customer/all",
-          {
-            headers: { Authorization: `Bearer ${token}` },
-          }
-        );
-        // Fetch feedback stats
-        const feedbackResponse = await axios.get(
-          "http://localhost:5000/api/feedback/stats"
-        );
-        // Fetch low stock books
-        const productsResponse = await axios.get(
-          "http://localhost:5000/api/product/all",
-          {
-            headers: { Authorization: `Bearer ${token}` },
-          }
-        );
-
-        const lowStockBooks = productsResponse.data.filter(
-          (product) => product.bookQuantity < 10
-        ).length;
-
-        setStats({
-          totalCustomers: customersResponse.data.length,
-          averageRating: feedbackResponse.data.averageRating || 0,
-          lowStockBooks,
-        });
-      } catch (err) {
-        setError("Failed to fetch dashboard stats");
-        console.error(err);
-      }
-    };
-
     fetchAdminData();
-    fetchStats();
-
-    // WebSocket event listeners
-    socket.on("connect", () => {
-      console.log("Connected to WebSocket server");
-    });
-
-    socket.on("dataUpdate", (data) => {
-      if (data.type === "ratings") {
-        // Calculate average rating from ratings distribution
-        const totalRatings = data.data.reduce(
-          (sum, count, index) => sum + count * (index + 1),
-          0
-        );
-        const totalCount = data.data.reduce((sum, count) => sum + count, 0);
-        const averageRating = totalCount ? (totalRatings / totalCount).toFixed(1) : 0;
-        setStats((prev) => ({ ...prev, averageRating }));
-      }
-    });
-
-    socket.on("disconnect", () => {
-      console.log("Disconnected from WebSocket server");
-    });
-
-    // Cleanup WebSocket on component unmount
-    return () => {
-      socket.disconnect();
-    };
-  }, [navigate, socket]);
+  }, [navigate]);
 
   const handleLogout = () => {
     localStorage.removeItem("adminToken");
@@ -122,15 +51,15 @@ const AdminDashboard = () => {
   // Animation variants for cards
   const cardVariants = {
     hidden: { opacity: 0, y: 20 },
-    visible: (i) => ({
-      opacity: 1,
+    visible: i => ({ 
+      opacity: 1, 
       y: 0,
-      transition: {
+      transition: { 
         delay: i * 0.1,
         duration: 0.5,
-        ease: "easeOut",
-      },
-    }),
+        ease: "easeOut"
+      }
+    })
   };
 
   if (!admin) {
@@ -140,11 +69,7 @@ const AdminDashboard = () => {
         style={{ height: "100vh" }}
       >
         <div className="text-center">
-          <div
-            className="spinner-grow text-primary mb-3"
-            role="status"
-            style={{ width: "3rem", height: "3rem" }}
-          >
+          <div className="spinner-grow text-primary mb-3" role="status" style={{ width: "3rem", height: "3rem" }}>
             <span className="visually-hidden">Loading...</span>
           </div>
           <p className="text-muted">Loading dashboard...</p>
@@ -157,8 +82,7 @@ const AdminDashboard = () => {
     {
       id: 1,
       title: "Customer Management",
-      description:
-        "View and manage customer accounts, review reading habits, and handle customer inquiries.",
+      description: "View and manage customer accounts, review reading habits, and handle customer inquiries.",
       icon: "fa-users",
       color: "primary",
       bgColor: "customer-management",
@@ -168,8 +92,7 @@ const AdminDashboard = () => {
     {
       id: 2,
       title: "Customer Feedback",
-      description:
-        "View and manage customer feedbacks to improve your bookstore service.",
+      description: "View and manage customer feedbacks to improve your bookstore service.",
       icon: "fa-comments",
       color: "info",
       bgColor: "feedback-management",
@@ -179,8 +102,7 @@ const AdminDashboard = () => {
     {
       id: 3,
       title: "Book Management",
-      description:
-        "Update inventory, manage book details, categories, and handle book availability.",
+      description: "Update inventory, manage book details, categories, and handle book availability.",
       icon: "fa-book",
       color: "success",
       bgColor: "book-management",
@@ -190,8 +112,7 @@ const AdminDashboard = () => {
     {
       id: 4,
       title: "Payment Gateway",
-      description:
-        "Track book sales, process refunds, and review payment analytics for your bookstore.",
+      description: "Track book sales, process refunds, and review payment analytics for your bookstore.",
       icon: "fa-credit-card",
       color: "indigo",
       bgColor: "payment-gateway",
@@ -201,8 +122,7 @@ const AdminDashboard = () => {
     {
       id: 5,
       title: "Delivery Management",
-      description:
-        "Track book shipments, manage delivery partners, and monitor delivery statuses.",
+      description: "Track book shipments, manage delivery partners, and monitor delivery statuses.",
       icon: "fa-truck",
       color: "warning",
       bgColor: "delivery-management",
@@ -212,8 +132,7 @@ const AdminDashboard = () => {
     {
       id: 6,
       title: "Add New Book",
-      description:
-        "Add new books to your inventory, upload cover images, and set pricing details.",
+      description: "Add new books to your inventory, upload cover images, and set pricing details.",
       icon: "fa-plus-circle",
       color: "danger",
       bgColor: "add-book",
@@ -223,21 +142,20 @@ const AdminDashboard = () => {
     {
       id: 7,
       title: "Novel Nest Analytics",
-      description:
-        "View customer reports, book sales, popular genres, bestsellers, and key performance metrics.",
+      description: "View customer reports, book sales, popular genres, bestsellers, and key performance metrics.",
       icon: "fa-chart-line",
       color: "dark",
       bgColor: "analytics",
       buttonText: "View Analytics",
       path: "/analysis",
-    },
+    }
   ];
 
-  const currentDate = new Date().toLocaleDateString("en-US", {
-    weekday: "long",
-    year: "numeric",
-    month: "long",
-    day: "numeric",
+  const currentDate = new Date().toLocaleDateString('en-US', { 
+    weekday: 'long', 
+    year: 'numeric', 
+    month: 'long', 
+    day: 'numeric' 
   });
 
   return (
@@ -247,13 +165,8 @@ const AdminDashboard = () => {
 
       {/* Dashboard Content */}
       <Container fluid className="dashboard-container py-4">
-        {error && (
-          <Alert variant="danger" onClose={() => setError("")} dismissible>
-            {error}
-          </Alert>
-        )}
         {/* Top Status Bar */}
-        <motion.div
+        <motion.div 
           initial={{ opacity: 0, y: -20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.5 }}
@@ -295,25 +208,22 @@ const AdminDashboard = () => {
             <div className="banner-content position-relative p-5">
               <Row className="align-items-center">
                 <Col md={7}>
-                  <h1 className="display-5 fw-bold mb-3 text-white">
-                    Novel Nest Admin Hub
-                  </h1>
+                  <h1 className="display-5 fw-bold mb-3 text-white">Novel Nest Admin Hub</h1>
                   <p className="lead text-white mb-4">
-                    Manage your bookstore operations with ease. Everything you need in
-                    one place.
+                    Manage your bookstore operations with ease. Everything you need in one place.
                   </p>
                   <div className="dashboard-stats d-flex flex-wrap">
                     <div className="stat-box me-4 mb-3">
-                      <h3 className="mb-0 text-white">{stats.totalCustomers}</h3>
-                      <small className="text-white-50">Total Customers</small>
+                      <h3 className="mb-0 text-white">1,245</h3>
+                      <small className="text-white-50">Monthly Sales</small>
                     </div>
                     <div className="stat-box me-4 mb-3">
-                      <h3 className="mb-0 text-white">{stats.averageRating}/5</h3>
-                      <small className="text-white-50">Customer Satisfaction</small>
+                      <h3 className="mb-0 text-white">$24.5k</h3>
+                      <small className="text-white-50">Revenue</small>
                     </div>
                     <div className="stat-box mb-3">
-                      <h3 className="mb-0 text-white">{stats.lowStockBooks}</h3>
-                      <small className="text-white-50">Low Stock Books</small>
+                      <h3 className="mb-0 text-white">87%</h3>
+                      <small className="text-white-50">Customer Satisfaction</small>
                     </div>
                   </div>
                 </Col>
@@ -340,28 +250,16 @@ const AdminDashboard = () => {
           </h5>
           <div className="quick-actions-wrapper">
             <Row className="g-3">
-              {["Add Book", "New Order", "Process Return", "Customer Support"].map(
-                (action, index) => (
-                  <Col key={index} md={3} sm={6}>
-                    <div className="quick-action-card text-center p-3 rounded shadow-sm">
-                      <div
-                        className={`action-icon bg-light-${
-                          ["danger", "success", "warning", "info"][index]
-                        } mb-3`}
-                      >
-                        <i
-                          className={`fas ${
-                            ["fa-plus", "fa-shopping-bag", "fa-exchange-alt", "fa-headset"][
-                              index
-                            ]
-                          }`}
-                        ></i>
-                      </div>
-                      <h6>{action}</h6>
+              {['Add Book', 'New Order', 'Process Return', 'Customer Support'].map((action, index) => (
+                <Col key={index} md={3} sm={6}>
+                  <div className="quick-action-card text-center p-3 rounded shadow-sm">
+                    <div className={`action-icon bg-light-${['danger', 'success', 'warning', 'info'][index]} mb-3`}>
+                      <i className={`fas ${['fa-plus', 'fa-shopping-bag', 'fa-exchange-alt', 'fa-headset'][index]}`}></i>
                     </div>
-                  </Col>
-                )
-              )}
+                    <h6>{action}</h6>
+                  </div>
+                </Col>
+              ))}
             </Row>
           </div>
         </motion.div>
@@ -400,15 +298,11 @@ const AdminDashboard = () => {
                         {card.description}
                       </Card.Text>
                       <Button
-                        variant={card.color === "indigo" ? "primary" : card.color}
-                        className={`mt-auto btn-${card.color === "indigo" ? "purple" : ""}`}
+                        variant={card.color === 'indigo' ? 'primary' : card.color}
+                        className={`mt-auto btn-${card.color === 'indigo' ? 'purple' : ''}`}
                         onClick={() => navigate(card.path)}
                       >
-                        <i
-                          className={`fas ${
-                            card.icon === "fa-book" ? "fa-bookmark" : card.icon
-                          } me-2`}
-                        ></i>
+                        <i className={`fas ${card.icon === 'fa-book' ? 'fa-bookmark' : card.icon} me-2`}></i>
                         {card.buttonText}
                       </Button>
                     </Card.Body>
@@ -436,34 +330,10 @@ const AdminDashboard = () => {
                 <Card.Body>
                   <div className="timeline">
                     {[
-                      {
-                        time: "2 hours ago",
-                        action: "New book added",
-                        details: "The Silent Patient by Alex Michaelides",
-                        icon: "fa-book",
-                        color: "success",
-                      },
-                      {
-                        time: "5 hours ago",
-                        action: "Order fulfilled",
-                        details: "Order #38274 shipped via Express Delivery",
-                        icon: "fa-box",
-                        color: "primary",
-                      },
-                      {
-                        time: "Yesterday",
-                        action: "Customer feedback",
-                        details: "Jane Doe gave a 5-star review for The Midnight Library",
-                        icon: "fa-star",
-                        color: "warning",
-                      },
-                      {
-                        time: "2 days ago",
-                        action: "Inventory alert",
-                        details: "Harry Potter series (5 titles) is running low on stock",
-                        icon: "fa-exclamation-triangle",
-                        color: "danger",
-                      },
+                      { time: '2 hours ago', action: 'New book added', details: 'The Silent Patient by Alex Michaelides', icon: 'fa-book', color: 'success' },
+                      { time: '5 hours ago', action: 'Order fulfilled', details: 'Order #38274 shipped via Express Delivery', icon: 'fa-box', color: 'primary' },
+                      { time: 'Yesterday', action: 'Customer feedback', details: 'Jane Doe gave a 5-star review for The Midnight Library', icon: 'fa-star', color: 'warning' },
+                      { time: '2 days ago', action: 'Inventory alert', details: 'Harry Potter series (5 titles) is running low on stock', icon: 'fa-exclamation-triangle', color: 'danger' }
                     ].map((item, index) => (
                       <div className="timeline-item" key={index}>
                         <div className={`timeline-icon bg-${item.color}`}>
@@ -489,8 +359,7 @@ const AdminDashboard = () => {
         .admin-dashboard {
           background-color: #f9fafc;
           min-height: 100vh;
-          font-family: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
-            Oxygen, Ubuntu, Cantarell, sans-serif;
+          font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
         }
 
         .dashboard-container {
@@ -555,7 +424,6 @@ const AdminDashboard = () => {
           backdrop-filter: blur(5px);
           padding: 15px;
           border-radius: 8px;
-          min-width: 120px;
         }
 
         .section-title {
@@ -587,22 +455,10 @@ const AdminDashboard = () => {
           margin: 0 auto;
         }
 
-        .bg-light-danger {
-          background-color: #fee2e2;
-          color: #ef4444;
-        }
-        .bg-light-success {
-          background-color: #dcfce7;
-          color: #22c55e;
-        }
-        .bg-light-warning {
-          background-color: #fef3c7;
-          color: #f59e0b;
-        }
-        .bg-light-info {
-          background-color: #e0f2fe;
-          color: #0ea5e9;
-        }
+        .bg-light-danger { background-color: #fee2e2; color: #ef4444; }
+        .bg-light-success { background-color: #dcfce7; color: #22c55e; }
+        .bg-light-warning { background-color: #fef3c7; color: #f59e0b; }
+        .bg-light-info { background-color: #e0f2fe; color: #0ea5e9; }
 
         .dashboard-card {
           border: none;
@@ -626,7 +482,7 @@ const AdminDashboard = () => {
           left: 0;
           right: 0;
           bottom: 0;
-          background: linear-gradient(180deg, rgba(0, 0, 0, 0) 0%, rgba(0, 0, 0, 0.4) 100%);
+          background: linear-gradient(180deg, rgba(0,0,0,0) 0%, rgba(0,0,0,0.4) 100%);
           display: flex;
           justify-content: flex-end; /* Align content to the right */
           align-items: flex-start; /* Align content to the top */
@@ -776,11 +632,11 @@ const AdminDashboard = () => {
           .hero-banner {
             height: auto;
           }
-
+          
           .dashboard-stats {
             flex-direction: column;
           }
-
+          
           .dashboard-stats .stat-box {
             width: 100%;
           }
