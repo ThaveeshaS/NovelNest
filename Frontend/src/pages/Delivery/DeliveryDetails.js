@@ -184,7 +184,7 @@ export default function DeliveryDetails() {
     doc.setTextColor(100, 100, 100);
     doc.text(`Generated on: ${new Date().toLocaleString()}`, 10, 25);
     doc.text(`Total Deliveries: ${filteredDeliveries.length}`, 10, 30);
-    doc.text(`Total Revenue: $${analytics.totalFee}`, 10, 35);
+    doc.text(`Total Revenue: Rs.${analytics.totalFee}`, 10, 35);
 
     // Add table with filtered deliveries
     autoTable(doc, {
@@ -209,7 +209,7 @@ export default function DeliveryDetails() {
         delivery.contactNumber,
         delivery.estimatedDeliveryDate,
         getDeliveryStatusText(delivery.estimatedDeliveryDate),
-        `$${delivery.deliveryFee}`,
+        `Rs.${delivery.deliveryFee}`,
       ]),
       styles: {
         fontSize: 8,
@@ -377,7 +377,7 @@ export default function DeliveryDetails() {
                   <div className="d-flex justify-content-between align-items-center">
                     <div>
                       <h6 className="text-muted mb-1">Total Revenue</h6>
-                      <h3 className="mb-0">${analytics.totalFee}</h3>
+                      <h3 className="mb-0">Rs.{analytics.totalFee}</h3>
                       <small className="text-success">+12% from last month</small>
                     </div>
                     <div className="stat-icon bg-primary bg-opacity-10 p-3 rounded-circle">
@@ -616,7 +616,7 @@ export default function DeliveryDetails() {
                             />
                           </td>
                           <td className="py-3 fw-bold text-success">
-                            ${delivery.deliveryFee}
+                            Rs.{delivery.deliveryFee}
                           </td>
                           <td className="text-center py-3">
                             <div className="d-flex justify-content-center gap-2">
@@ -734,7 +734,7 @@ export default function DeliveryDetails() {
                             <div className="d-flex justify-content-between align-items-center">
                               <div>
                                 <small className="text-muted d-block">Delivery Fee</small>
-                                <h4 className="mb-0 text-success">${delivery.deliveryFee}</h4>
+                                <h4 className="mb-0 text-success">Rs.{delivery.deliveryFee}</h4>
                               </div>
                               <div className="d-flex gap-2">
                                 <Button 
@@ -888,7 +888,7 @@ export default function DeliveryDetails() {
                 </Col>
                 <Col md={6}>
                   <Form.Group className="mb-3">
-                    <Form.Label>Delivery Fee ($)</Form.Label>
+                    <Form.Label>Delivery Fee (Rs.)</Form.Label>
                     <Form.Control
                       type="number"
                       name="deliveryFee"
