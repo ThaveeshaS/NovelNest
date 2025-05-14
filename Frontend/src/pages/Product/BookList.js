@@ -294,15 +294,6 @@ const BookList = () => {
                   Children
                 </button>
               </div>
-              
-              <button
-                className="refresh-button"
-                onClick={fetchBooks}
-                disabled={loading}
-              >
-                <i className={`bi bi-arrow-repeat ${loading ? 'spinning' : ''}`}></i>
-                {loading ? 'Refreshing...' : 'Refresh Books'}
-              </button>
             </div>
           </div>
         </div>
@@ -497,43 +488,6 @@ const BookList = () => {
           background-color: white;
           color: #0d6efd;
           box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-        }
-        
-        /* Refresh Button */
-        .refresh-button {
-          background-color: rgba(255, 255, 255, 0.2);
-          color: white;
-          border: 2px solid white;
-          border-radius: 30px;
-          padding: 10px 25px;
-          font-weight: 600;
-          transition: all 0.3s ease;
-          display: inline-flex;
-          align-items: center;
-          gap: 8px;
-        }
-        
-        .refresh-button:hover {
-          background-color: white;
-          color: #0d6efd;
-        }
-        
-        .refresh-button:disabled {
-          opacity: 0.7;
-          cursor: not-allowed;
-        }
-        
-        .refresh-button i {
-          font-size: 1.1rem;
-        }
-        
-        .spinning {
-          animation: spin 1s linear infinite;
-        }
-        
-        @keyframes spin {
-          from { transform: rotate(0deg); }
-          to { transform: rotate(360deg); }
         }
         
         /* Error Alert */
