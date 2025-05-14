@@ -37,7 +37,6 @@ import { CartProvider } from './pages/Product/CartContext';
 import AddDelivery from './pages/Delivery/AddDelivery';
 import DeliveryDetails from './pages/Delivery/DeliveryDetails'; 
 import TrackDelivery from './pages/Delivery/TrackDelivery';
-import TrackDeliveryDetails from './pages/Delivery/TrackDeliveryDetails';
 
 import AdminBooksPanel from './pages/voicepayment/AdminBooksPanel';
 import AdminTransactionsPanel from './pages/voicepayment/AdminTransactionsPanel';
@@ -118,7 +117,6 @@ function App() {
         <Route path="/admin/AddDelivery" element={<AddDelivery />} />
         <Route path="/admin/DeliveryDetails" element={<DeliveryDetails />} />
         <Route path="/trackdelivery" element={<TrackDelivery />} />
-        <Route path="/trackdeliverydetails/:id" element={<TrackDeliveryDetails />} />
 
         <Route path="/TermsAndConditions" element={<TermsAndConditions />} />
         <Route path="/PrivacyPolicy" element={<PrivacyPolicy />} />

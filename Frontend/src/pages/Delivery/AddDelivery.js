@@ -1088,28 +1088,7 @@ const AddDelivery = () => {
                   </Button>
                 </Grid>
                 <Grid item xs={12}>
-                  <Button
-                    fullWidth
-                    variant="contained"
-                    color="secondary"
-                    onClick={handleTrackDelivery}
-                    startIcon={<GpsFixedIcon />}
-                    sx={{ 
-                      borderRadius: '8px',
-                      padding: '10px 24px',
-                      boxShadow: '0 4px 12px rgba(0, 0, 0, 0.1)',
-                      '&:hover': {
-                        boxShadow: '0 6px 16px rgba(0, 0, 0, 0.2)',
-                        transform: 'translateY(-2px)'
-                      },
-                      transition: 'all 0.3s ease',
-                      height: '48px',
-                      mt: 1,
-                      background: 'linear-gradient(45deg, #ff6b6b, #ff8e53)',
-                    }}
-                  >
-                    Track This Delivery
-                  </Button>
+                  
                 </Grid>
               </Grid>
             </Box>
