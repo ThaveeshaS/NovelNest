@@ -15,7 +15,6 @@ import { RiCouponLine } from "react-icons/ri";
 import { BsGraphUp, BsCalendarCheck } from "react-icons/bs";
 import "./DeliveryDetails.css"; // Custom CSS file for additional styling
 
-
 export default function DeliveryDetails() {
   const [deliveries, setDeliveries] = useState([]);
   const [searchTerm, setSearchTerm] = useState("");
@@ -170,63 +169,101 @@ export default function DeliveryDetails() {
   // Handle PDF generation
   const generateReport = () => {
     const doc = new jsPDF({
-      orientation: "landscape",
+      orientation: "portrait",
       unit: "mm"
     });
 
-    // Add company logo
-    doc.setFontSize(20);
-    doc.setTextColor(40, 103, 178);
-    doc.text("BookWorm Delivery Report", 105, 15, { align: "center" });
+    // Placeholder for the logo (Replace with actual base64 string or URL of the logo)
+    // Example: const logoData = "data:image/png;base64,..."; // Replace with your logo's base64 string
+    // For now, we'll simulate the logo with a placeholder text or rectangle
+    const logoWidth = 50; // Width of the logo in mm
+    const logoHeight = 20; // Height of the logo in mm
+    const pageWidth = doc.internal.pageSize.getWidth();
+    const logoX = (pageWidth - logoWidth) / 2; // Center the logo
+    const logoY = 10; // Position from top
 
-    // Add report details
+    // Placeholder: Draw a rectangle as a logo placeholder (commented out actual image addition)
+    doc.setFillColor(200, 200, 200);
+    doc.rect(logoX, logoY, logoWidth, logoHeight, 'F');
     doc.setFontSize(10);
     doc.setTextColor(100, 100, 100);
-    doc.text(`Generated on: ${new Date().toLocaleString()}`, 10, 25);
-    doc.text(`Total Deliveries: ${filteredDeliveries.length}`, 10, 30);
-    doc.text(`Total Revenue: Rs.${analytics.totalFee}`, 10, 35);
+    doc.text("Logo Placeholder", logoX + logoWidth / 2, logoY + logoHeight / 2, { align: "center" });
+
+    // To add the actual logo, uncomment and replace with your logo data:
+    /*
+    const logoData = "data:image/png;base64,YOUR_BASE64_STRING_HERE"; // Replace with your logo's base64 string
+    doc.addImage(logoData, 'PNG', logoX, logoY, logoWidth, logoHeight);
+    */
+
+    // Add header (title and address) below the logo
+    const titleY = logoY + logoHeight + 10; // Adjust spacing after logo
+    doc.setFontSize(16);
+    doc.setTextColor(0, 0, 0);
+    doc.text("NOVEL NEST BOOK STORE", 105, titleY, { align: "center" });
+
+    // Add address and contact details
+    doc.setFontSize(10);
+    doc.setTextColor(100, 100, 100);
+    doc.text("123 Book Street, Colombo, Sri Lanka", 105, titleY + 7, { align: "center" });
+    doc.text("Phone: +94 123456789 | Email: info@bookstore.com", 105, titleY + 13, { align: "center" });
+    doc.text("www.novelnest.com", 105, titleY + 19, { align: "center" });
+
+    // Add report title
+    doc.setFontSize(14);
+    doc.setTextColor(0, 0, 0);
+    doc.text("DELIVERY REPORT", 105, titleY + 30, { align: "center" });
+
+    // Add report generation details
+    doc.setFontSize(10);
+    doc.setTextColor(100, 100, 100);
+    doc.text(`Report Generated: ${new Date().toLocaleString('en-US', { timeZone: 'Asia/Colombo' })}`, 10, titleY + 40);
 
     // Add table with filtered deliveries
     autoTable(doc, {
-      startY: 40,
+      startY: titleY + 50,
       head: [
-        [
-          "Delivery ID",
-          "Order ID",
-          "Customer",
-          "Address",
-          "Contact",
-          "Delivery Date",
-          "Status",
-          "Fee"
-        ],
+        ["Delivery ID", "Customer Name", "Address", "Contact Info", "Delivery Date", "Status", "Fee"]
       ],
       body: filteredDeliveries.map((delivery) => [
         delivery.deliveryId,
-        delivery.orderId,
         delivery.customerName,
         delivery.deliveryAddress,
         delivery.contactNumber,
-        delivery.estimatedDeliveryDate,
-        getDeliveryStatusText(delivery.estimatedDeliveryDate),
-        `Rs.${delivery.deliveryFee}`,
+        new Date(delivery.estimatedDeliveryDate).toLocaleDateString('en-US'),
+        delivery.status || getDeliveryStatusText(delivery.estimatedDeliveryDate),
+        `Rs.${delivery.deliveryFee}`
       ]),
       styles: {
-        fontSize: 8,
+        fontSize: 10,
         cellPadding: 2,
         valign: "middle"
       },
       headStyles: {
-        fillColor: [40, 103, 178],
+        fillColor: [0, 0, 0],
         textColor: 255,
-        fontSize: 9,
+        fontSize: 11,
         fontStyle: "bold"
       },
       alternateRowStyles: {
-        fillColor: [240, 240, 240]
+        fillColor: [245, 245, 245]
       },
-      margin: { top: 40 }
+      margin: { top: titleY + 50 }
     });
+
+    // Add summary
+    const finalY = doc.lastAutoTable.finalY + 10;
+    doc.setFontSize(12);
+    doc.setTextColor(0, 0, 0);
+    doc.text("Summary:", 10, finalY);
+    doc.setFontSize(10);
+    doc.setTextColor(100, 100, 100);
+    doc.text(`- Total Deliveries: ${filteredDeliveries.length}`, 10, finalY + 6);
+    doc.text(`- Filtered Deliveries: ${filteredDeliveries.length}`, 10, finalY + 12);
+
+    // Add prepared by and signature
+    doc.setFontSize(10);
+    doc.text("Prepared By", 150, finalY + 6);
+    doc.text("Customer Manager Signature", 150, finalY + 12);
 
     // Add footer
     const pageCount = doc.internal.getNumberOfPages();
@@ -234,8 +271,7 @@ export default function DeliveryDetails() {
       doc.setPage(i);
       doc.setFontSize(8);
       doc.setTextColor(150);
-      doc.text(`Page ${i} of ${pageCount}`, 200, 200, { align: "right" });
-      doc.text("Confidential - BookWorm Delivery Services", 10, 200);
+      doc.text(`© 2025 Novel Nest Book Store. All Rights Reserved. Page ${i} of ${pageCount}`, 105, 290, { align: "center" });
     }
 
     doc.save(`DeliveryReport_${new Date().toISOString().slice(0, 10)}.pdf`);
