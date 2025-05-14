@@ -83,9 +83,9 @@ export default function AddProducts() {
         } else if (value.length < 10) {
           fieldErrors.bookDescription =
             "Description must be at least 10 characters";
-        } else if (value.length > 1000) {
+        } else if (value.length > 10000) {
           fieldErrors.bookDescription =
-            "Description cannot exceed 500 characters";
+            "Description cannot exceed 10000 characters";
         } else {
           fieldErrors.bookDescription = "";
         }
