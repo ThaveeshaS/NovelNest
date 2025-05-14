@@ -316,9 +316,9 @@ const AddDelivery = () => {
         severity: 'success'
       });
       
-      // Navigate after a short delay
+      // Navigate to home page after a short delay
       setTimeout(() => {
-        navigate('/admin/DeliveryDetails');
+        navigate('/'); // Changed from '/admin/DeliveryDetails' to '/' for home page
       }, 2500);
       
     } catch (error) {
@@ -1280,7 +1280,7 @@ const AddDelivery = () => {
               Your delivery has been successfully added to the system.
             </Typography>
             <Typography variant="body2" color="primary" sx={{ fontWeight: 500 }}>
-              Redirecting to delivery list...
+              Redirecting to home page...
             </Typography>
             <CircularProgress size={20} sx={{ mt: 2 }} />
           </MotionBox>
