@@ -201,7 +201,7 @@ const AdminDashboard = () => {
       color: "warning",
       bgColor: "delivery-management",
       buttonText: "Manage Deliveries",
-      path: "/admin/AddDelivery",
+      path: "/admin/DeliveryDetails",
     },
     {
       id: 6,
