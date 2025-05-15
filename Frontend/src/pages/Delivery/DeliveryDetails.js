@@ -1,5 +1,6 @@
 /* eslint-disable no-unused-vars */
 import React, { useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom"; // Added for navigation
 import axios from "axios";
 import { jsPDF } from "jspdf";
 import autoTable from "jspdf-autotable";
@@ -31,6 +32,7 @@ export default function DeliveryDetails() {
   const [showQuickStats, setShowQuickStats] = useState(true);
   const [activeFilter, setActiveFilter] = useState("all");
   const [sortConfig, setSortConfig] = useState({ key: "estimatedDeliveryDate", direction: "ascending" });
+  const navigate = useNavigate(); // Added for navigation
 
   // Animation variants
   const containerVariants = {
@@ -173,52 +175,40 @@ export default function DeliveryDetails() {
       unit: "mm"
     });
 
-    // Placeholder for the logo (Replace with actual base64 string or URL of the logo)
-    // Example: const logoData = "data:image/png;base64,..."; // Replace with your logo's base64 string
-    // For now, we'll simulate the logo with a placeholder text or rectangle
-    const logoWidth = 50; // Width of the logo in mm
-    const logoHeight = 20; // Height of the logo in mm
+    // Placeholder for the logo
+    const logoWidth = 50;
+    const logoHeight = 20;
     const pageWidth = doc.internal.pageSize.getWidth();
-    const logoX = (pageWidth - logoWidth) / 2; // Center the logo
-    const logoY = 10; // Position from top
+    const logoX = (pageWidth - logoWidth) / 2;
+    const logoY = 10;
 
-    // Placeholder: Draw a rectangle as a logo placeholder (commented out actual image addition)
     doc.setFillColor(200, 200, 200);
     doc.rect(logoX, logoY, logoWidth, logoHeight, 'F');
     doc.setFontSize(10);
     doc.setTextColor(100, 100, 100);
     doc.text("Logo Placeholder", logoX + logoWidth / 2, logoY + logoHeight / 2, { align: "center" });
 
-    // To add the actual logo, uncomment and replace with your logo data:
-    /*
-    const logoData = "data:image/png;base64,YOUR_BASE64_STRING_HERE"; // Replace with your logo's base64 string
-    doc.addImage(logoData, 'PNG', logoX, logoY, logoWidth, logoHeight);
-    */
-
-    // Add header (title and address) below the logo
-    const titleY = logoY + logoHeight + 10; // Adjust spacing after logo
+    // Add header
+    const titleY = logoY + logoHeight + 10;
     doc.setFontSize(16);
     doc.setTextColor(0, 0, 0);
     doc.text("NOVEL NEST BOOK STORE", 105, titleY, { align: "center" });
 
-    // Add address and contact details
     doc.setFontSize(10);
     doc.setTextColor(100, 100, 100);
     doc.text("123 Book Street, Colombo, Sri Lanka", 105, titleY + 7, { align: "center" });
     doc.text("Phone: +94 123456789 | Email: info@bookstore.com", 105, titleY + 13, { align: "center" });
     doc.text("www.novelnest.com", 105, titleY + 19, { align: "center" });
 
-    // Add report title
     doc.setFontSize(14);
     doc.setTextColor(0, 0, 0);
     doc.text("DELIVERY REPORT", 105, titleY + 30, { align: "center" });
 
-    // Add report generation details
     doc.setFontSize(10);
     doc.setTextColor(100, 100, 100);
     doc.text(`Report Generated: ${new Date().toLocaleString('en-US', { timeZone: 'Asia/Colombo' })}`, 10, titleY + 40);
 
-    // Add table with filtered deliveries
+    // Add table
     autoTable(doc, {
       startY: titleY + 50,
       head: [
@@ -260,7 +250,6 @@ export default function DeliveryDetails() {
     doc.text(`- Total Deliveries: ${filteredDeliveries.length}`, 10, finalY + 6);
     doc.text(`- Filtered Deliveries: ${filteredDeliveries.length}`, 10, finalY + 12);
 
-    // Add prepared by and signature
     doc.setFontSize(10);
     doc.text("Prepared By", 150, finalY + 6);
     doc.text("Customer Manager Signature", 150, finalY + 12);
@@ -333,9 +322,9 @@ export default function DeliveryDetails() {
     const today = new Date();
     const difference = Math.ceil((deliveryDate - today) / (1000 * 60 * 60 * 24));
     
-    if (difference < 0) return "danger"; // Past due
-    if (difference <= 2) return "warning"; // Due soon
-    return "success"; // On track
+    if (difference < 0) return "danger";
+    if (difference <= 2) return "warning";
+    return "success";
   };
 
   // Get delivery status text
@@ -351,7 +340,7 @@ export default function DeliveryDetails() {
     return "On Track";
   };
 
-  // Calculate delivery progress (for progress bar)
+  // Calculate delivery progress
   const calculateDeliveryProgress = (createdDate, estimatedDate) => {
     const created = new Date(createdDate);
     const estimated = new Date(estimatedDate);
@@ -362,6 +351,11 @@ export default function DeliveryDetails() {
     
     const progress = Math.min(100, Math.max(0, (elapsedDuration / totalDuration) * 100));
     return progress;
+  };
+
+  // Handle back to dashboard
+  const handleBackToDashboard = () => {
+    navigate("/admin/dashboard");
   };
 
   return (
@@ -385,6 +379,13 @@ export default function DeliveryDetails() {
               >
                 <FaTruck className="me-1" /> Table View
               </Button>
+                <Button 
+                  variant="outline-primary" 
+                   onClick={() => navigate("/admindashboard")} // Directly use navigate with path
+                    className="d-flex align-items-center"
+  >
+                  <FaTruck className="me-1" /> Back to Dashboard
+               </Button>
               <Button 
                 variant={viewMode === "cards" ? "primary" : "outline-primary"} 
                 onClick={() => setViewMode("cards")}
