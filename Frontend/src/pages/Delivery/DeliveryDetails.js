@@ -1,5 +1,6 @@
 /* eslint-disable no-unused-vars */
 import React, { useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom"; // Added for navigation
 import axios from "axios";
 import { jsPDF } from "jspdf";
 import autoTable from "jspdf-autotable";
@@ -14,7 +15,6 @@ import { GiDeliveryDrone } from "react-icons/gi";
 import { RiCouponLine } from "react-icons/ri";
 import { BsGraphUp, BsCalendarCheck } from "react-icons/bs";
 import "./DeliveryDetails.css"; // Custom CSS file for additional styling
-
 
 export default function DeliveryDetails() {
   const [deliveries, setDeliveries] = useState([]);
@@ -32,6 +32,7 @@ export default function DeliveryDetails() {
   const [showQuickStats, setShowQuickStats] = useState(true);
   const [activeFilter, setActiveFilter] = useState("all");
   const [sortConfig, setSortConfig] = useState({ key: "estimatedDeliveryDate", direction: "ascending" });
+  const navigate = useNavigate(); // Added for navigation
 
   // Animation variants
   const containerVariants = {
@@ -170,63 +171,88 @@ export default function DeliveryDetails() {
   // Handle PDF generation
   const generateReport = () => {
     const doc = new jsPDF({
-      orientation: "landscape",
+      orientation: "portrait",
       unit: "mm"
     });
 
-    // Add company logo
-    doc.setFontSize(20);
-    doc.setTextColor(40, 103, 178);
-    doc.text("BookWorm Delivery Report", 105, 15, { align: "center" });
+    // Placeholder for the logo
+    const logoWidth = 50;
+    const logoHeight = 20;
+    const pageWidth = doc.internal.pageSize.getWidth();
+    const logoX = (pageWidth - logoWidth) / 2;
+    const logoY = 10;
 
-    // Add report details
+    doc.setFillColor(200, 200, 200);
+    doc.rect(logoX, logoY, logoWidth, logoHeight, 'F');
     doc.setFontSize(10);
     doc.setTextColor(100, 100, 100);
-    doc.text(`Generated on: ${new Date().toLocaleString()}`, 10, 25);
-    doc.text(`Total Deliveries: ${filteredDeliveries.length}`, 10, 30);
-    doc.text(`Total Revenue: $${analytics.totalFee}`, 10, 35);
+    doc.text("Logo Placeholder", logoX + logoWidth / 2, logoY + logoHeight / 2, { align: "center" });
 
-    // Add table with filtered deliveries
+    // Add header
+    const titleY = logoY + logoHeight + 10;
+    doc.setFontSize(16);
+    doc.setTextColor(0, 0, 0);
+    doc.text("NOVEL NEST BOOK STORE", 105, titleY, { align: "center" });
+
+    doc.setFontSize(10);
+    doc.setTextColor(100, 100, 100);
+    doc.text("123 Book Street, Colombo, Sri Lanka", 105, titleY + 7, { align: "center" });
+    doc.text("Phone: +94 123456789 | Email: info@bookstore.com", 105, titleY + 13, { align: "center" });
+    doc.text("www.novelnest.com", 105, titleY + 19, { align: "center" });
+
+    doc.setFontSize(14);
+    doc.setTextColor(0, 0, 0);
+    doc.text("DELIVERY REPORT", 105, titleY + 30, { align: "center" });
+
+    doc.setFontSize(10);
+    doc.setTextColor(100, 100, 100);
+    doc.text(`Report Generated: ${new Date().toLocaleString('en-US', { timeZone: 'Asia/Colombo' })}`, 10, titleY + 40);
+
+    // Add table
     autoTable(doc, {
-      startY: 40,
+      startY: titleY + 50,
       head: [
-        [
-          "Delivery ID",
-          "Order ID",
-          "Customer",
-          "Address",
-          "Contact",
-          "Delivery Date",
-          "Status",
-          "Fee"
-        ],
+        ["Delivery ID", "Customer Name", "Address", "Contact Info", "Delivery Date", "Status", "Fee"]
       ],
       body: filteredDeliveries.map((delivery) => [
         delivery.deliveryId,
-        delivery.orderId,
         delivery.customerName,
         delivery.deliveryAddress,
         delivery.contactNumber,
-        delivery.estimatedDeliveryDate,
-        getDeliveryStatusText(delivery.estimatedDeliveryDate),
-        `$${delivery.deliveryFee}`,
+        new Date(delivery.estimatedDeliveryDate).toLocaleDateString('en-US'),
+        delivery.status || getDeliveryStatusText(delivery.estimatedDeliveryDate),
+        `Rs.${delivery.deliveryFee}`
       ]),
       styles: {
-        fontSize: 8,
+        fontSize: 10,
         cellPadding: 2,
         valign: "middle"
       },
       headStyles: {
-        fillColor: [40, 103, 178],
+        fillColor: [0, 0, 0],
         textColor: 255,
-        fontSize: 9,
+        fontSize: 11,
         fontStyle: "bold"
       },
       alternateRowStyles: {
-        fillColor: [240, 240, 240]
+        fillColor: [245, 245, 245]
       },
-      margin: { top: 40 }
+      margin: { top: titleY + 50 }
     });
+
+    // Add summary
+    const finalY = doc.lastAutoTable.finalY + 10;
+    doc.setFontSize(12);
+    doc.setTextColor(0, 0, 0);
+    doc.text("Summary:", 10, finalY);
+    doc.setFontSize(10);
+    doc.setTextColor(100, 100, 100);
+    doc.text(`- Total Deliveries: ${filteredDeliveries.length}`, 10, finalY + 6);
+    doc.text(`- Filtered Deliveries: ${filteredDeliveries.length}`, 10, finalY + 12);
+
+    doc.setFontSize(10);
+    doc.text("Prepared By", 150, finalY + 6);
+    doc.text("Customer Manager Signature", 150, finalY + 12);
 
     // Add footer
     const pageCount = doc.internal.getNumberOfPages();
@@ -234,8 +260,7 @@ export default function DeliveryDetails() {
       doc.setPage(i);
       doc.setFontSize(8);
       doc.setTextColor(150);
-      doc.text(`Page ${i} of ${pageCount}`, 200, 200, { align: "right" });
-      doc.text("Confidential - BookWorm Delivery Services", 10, 200);
+      doc.text(`© 2025 Novel Nest Book Store. All Rights Reserved. Page ${i} of ${pageCount}`, 105, 290, { align: "center" });
     }
 
     doc.save(`DeliveryReport_${new Date().toISOString().slice(0, 10)}.pdf`);
@@ -297,9 +322,9 @@ export default function DeliveryDetails() {
     const today = new Date();
     const difference = Math.ceil((deliveryDate - today) / (1000 * 60 * 60 * 24));
     
-    if (difference < 0) return "danger"; // Past due
-    if (difference <= 2) return "warning"; // Due soon
-    return "success"; // On track
+    if (difference < 0) return "danger";
+    if (difference <= 2) return "warning";
+    return "success";
   };
 
   // Get delivery status text
@@ -315,7 +340,7 @@ export default function DeliveryDetails() {
     return "On Track";
   };
 
-  // Calculate delivery progress (for progress bar)
+  // Calculate delivery progress
   const calculateDeliveryProgress = (createdDate, estimatedDate) => {
     const created = new Date(createdDate);
     const estimated = new Date(estimatedDate);
@@ -326,6 +351,11 @@ export default function DeliveryDetails() {
     
     const progress = Math.min(100, Math.max(0, (elapsedDuration / totalDuration) * 100));
     return progress;
+  };
+
+  // Handle back to dashboard
+  const handleBackToDashboard = () => {
+    navigate("/admin/dashboard");
   };
 
   return (
@@ -349,6 +379,13 @@ export default function DeliveryDetails() {
               >
                 <FaTruck className="me-1" /> Table View
               </Button>
+                <Button 
+                  variant="outline-primary" 
+                   onClick={() => navigate("/admindashboard")} // Directly use navigate with path
+                    className="d-flex align-items-center"
+  >
+                  <FaTruck className="me-1" /> Back to Dashboard
+               </Button>
               <Button 
                 variant={viewMode === "cards" ? "primary" : "outline-primary"} 
                 onClick={() => setViewMode("cards")}
@@ -377,7 +414,7 @@ export default function DeliveryDetails() {
                   <div className="d-flex justify-content-between align-items-center">
                     <div>
                       <h6 className="text-muted mb-1">Total Revenue</h6>
-                      <h3 className="mb-0">${analytics.totalFee}</h3>
+                      <h3 className="mb-0">Rs.{analytics.totalFee}</h3>
                       <small className="text-success">+12% from last month</small>
                     </div>
                     <div className="stat-icon bg-primary bg-opacity-10 p-3 rounded-circle">
@@ -616,7 +653,7 @@ export default function DeliveryDetails() {
                             />
                           </td>
                           <td className="py-3 fw-bold text-success">
-                            ${delivery.deliveryFee}
+                            Rs.{delivery.deliveryFee}
                           </td>
                           <td className="text-center py-3">
                             <div className="d-flex justify-content-center gap-2">
@@ -734,7 +771,7 @@ export default function DeliveryDetails() {
                             <div className="d-flex justify-content-between align-items-center">
                               <div>
                                 <small className="text-muted d-block">Delivery Fee</small>
-                                <h4 className="mb-0 text-success">${delivery.deliveryFee}</h4>
+                                <h4 className="mb-0 text-success">Rs.{delivery.deliveryFee}</h4>
                               </div>
                               <div className="d-flex gap-2">
                                 <Button 
@@ -888,7 +925,7 @@ export default function DeliveryDetails() {
                 </Col>
                 <Col md={6}>
                   <Form.Group className="mb-3">
-                    <Form.Label>Delivery Fee ($)</Form.Label>
+                    <Form.Label>Delivery Fee (Rs.)</Form.Label>
                     <Form.Control
                       type="number"
                       name="deliveryFee"
